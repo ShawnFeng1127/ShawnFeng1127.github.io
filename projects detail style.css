@@ -1,0 +1,398 @@
+/* ==========================================================================
+   Minimalist Projects Detail Styles — Figma Node 12-2 (projects detail style.css)
+   Infinite Ring Exhibition Gallery + Dual (A/B) Photo Toggle + Silky Scroll
+   ========================================================================== */
+
+body.work-page {
+  background: linear-gradient(241deg, #162533 25.48%, #596470 100%);
+  background-attachment: fixed;
+}
+
+.work-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 28px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-x: hidden;
+}
+
+/* Full-screen Dimming Overlay when Hovering a Gallery Photo */
+.gallery-dim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.64);
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.is-gallery-dimmed .gallery-dim-overlay {
+  opacity: 1;
+}
+
+body.is-gallery-dimmed .glass-nav,
+body.is-gallery-dimmed .work-header,
+body.is-gallery-dimmed .project-editorial-box,
+body.is-gallery-dimmed .guidance-bar-container,
+body.is-gallery-dimmed .page-footer {
+  filter: brightness(0.42);
+}
+
+/* Minimalist Header Section */
+.work-header {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1240px;
+  margin: 18px auto 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  transition: filter 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.work-header .eyebrow-wrapper {
+  margin-bottom: 8px;
+}
+
+.work-header-title {
+  font-size: clamp(38px, 4.4vw, 62px);
+  font-weight: 600;
+  color: var(--ink-primary);
+  line-height: 1.04;
+  letter-spacing: -1px;
+}
+
+/* Minimalist Liquid Glass Slide Controls */
+.gallery-slide-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gallery-count-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--ink-muted);
+  margin-right: 6px;
+}
+
+.gallery-slide-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(23, 25, 27, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  color: var(--ink-primary);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.gallery-slide-btn:hover {
+  background: rgba(196, 122, 69, 0.28);
+  border-color: var(--accent-copper);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Infinite Ring Gallery Viewport & GPU-Accelerated Track
+   ========================================================================== */
+.projects-gallery-section {
+  position: relative;
+  z-index: 25; /* Above .gallery-dim-overlay (15) so hovered card stays bright */
+  margin: 0 -40px;
+}
+
+.projects-gallery-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding: 28px 0 34px;
+  cursor: grab;
+  user-select: none;
+}
+
+.projects-gallery-viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.projects-gallery-track {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: max-content;
+  padding-left: 60px;
+  will-change: transform;
+}
+
+/* Each Card adapts its width to the exact native aspect ratio of its photo */
+.project-card {
+  flex: 0 0 auto;
+  width: max-content;
+  height: 356px;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 206, 204, 0.28);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.34);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transform-origin: center center;
+  transition:
+    transform 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.4s ease;
+}
+
+/* Custom Editorial Bottom Strip Palette for All 10 Series */
+.project-card.card-1   { background: #5D354F; }
+.project-card.card-2   { background: #4D3829; }
+.project-card.card-3   { background: #1A2430; }
+.project-card.card-4a  { background: #263445; }
+.project-card.card-4b  { background: #3D2B1E; }
+.project-card.card-5   { background: #14363D; }
+.project-card.card-6   { background: #293142; }
+.project-card.card-7   { background: #4A3932; }
+.project-card.card-8   { background: #3E2921; }
+.project-card.card-9   { background: #3D2E35; }
+.project-card.card-10a { background: #233140; }
+.project-card.card-10b { background: #463529; }
+
+/* Hovered Card Enlarges (被选中的照片放大) */
+.project-card.is-active-hover {
+  transform: scale(1.085) translateY(-6px);
+  z-index: 30;
+  filter: brightness(1.06);
+  border-color: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.74),
+    0 0 32px rgba(196, 122, 69, 0.34);
+}
+
+/* Non-Hovered Sibling Cards Shrink & Dim (两边照片缩小) */
+.project-card.is-sibling-shrunk {
+  transform: scale(0.89);
+  filter: brightness(0.45) saturate(0.82);
+  opacity: 0.70;
+}
+
+/* Top 300px Photo Frame — Preserves 100% Uncropped Native Aspect Ratio */
+.project-card-media {
+  position: relative;
+  height: 300px;
+  width: auto;
+  overflow: hidden;
+  background: #090B0D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-card-image {
+  height: 300px;
+  width: auto;
+  display: block;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card.is-swapping .project-card-image {
+  opacity: 0.2;
+  transform: scale(0.97);
+}
+
+/* Liquid Glass Dual-Photo Indicator Pill (for Project 4 & Project 10 with A/B photos) */
+.dual-photo-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(16, 19, 23, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 4px 14px rgba(0, 0, 0, 0.35);
+  color: #F1F0EB;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dual-photo-badge::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-copper);
+  box-shadow: 0 0 8px var(--accent-copper);
+}
+
+.project-card.is-active-hover .dual-photo-badge {
+  background: rgba(196, 122, 69, 0.35);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Optional Quick Lightbox Expand Button on Dual A/B Cards */
+.dual-expand-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 6;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(16, 19, 23, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #F1F0EB;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.project-card.is-active-hover .dual-expand-btn {
+  opacity: 1;
+}
+
+.dual-expand-btn:hover {
+  background: var(--accent-copper);
+}
+
+/* Bottom 56px Caption Strip (Same Format as Original Design) */
+.project-card-content {
+  height: 56px;
+  width: 100%;
+  padding: 12px 18px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.project-indicator {
+  width: 32px;
+  height: 2px;
+  background: var(--accent-copper);
+  margin-bottom: 6px;
+  transition: width var(--transition-fast);
+}
+
+.project-card.is-active-hover .project-indicator {
+  width: 50px;
+}
+
+.project-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.45px;
+  color: #F2F0EB;
+  line-height: 17px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.project-subtitle {
+  font-size: 8.5px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: #919999;
+  line-height: 12px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Minimalist 3-Column Liquid Glass Editorial Box
+   ========================================================================== */
+.project-editorial-box {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto 18px;
+  padding: 26px 40px;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(23, 25, 27, 0.22) 50%,
+    rgba(23, 25, 27, 0.28) 100%
+  );
+  backdrop-filter: url(#liquid-glass-refract) blur(16px) saturate(145%);
+  -webkit-backdrop-filter: url(#liquid-glass-refract) blur(16px) saturate(145%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.38),
+    inset 2px 0 4px rgba(225, 165, 120, 0.18),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.14),
+    0 14px 36px rgba(0, 0, 0, 0.30);
+  transition: filter 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-columns {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 44px;
+}
+
+.editorial-col-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  color: var(--accent-copper);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.editorial-col-desc {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.58;
+  color: var(--ink-primary);
+}
+
+@media (max-width: 1080px) {
+  .work-stage {
+    padding: 20px;
+  }
+  .editorial-columns {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .project-editorial-box {
+    padding: 24px;
+  }
+}

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photography — Shawn Feng (冯靖翔)</title>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="projects detail style.css">
+</head>
+<body class="work-page fade-in" data-page="work" data-next-page="home page.html" data-prev-page="about.html">
+  <!-- SVG Optical Refraction Filter for Authentic Liquid Glass -->
+  <svg class="liquid-glass-svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="smoothNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="liquid-glow-orb"></div>
+
+  <!-- Interactive Flying Drone (Orbits Mouse with Realistic Flight Attitude & Spinning Rotors) -->
+  <div id="interactive-drone" class="interactive-drone-layer is-airborne" aria-hidden="true">
+    <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="Interactive DJI Drone">
+  </div>
+
+  <!-- Full-Screen Dimming Backdrop when Hovering a Gallery Photo -->
+  <div class="gallery-dim-overlay" aria-hidden="true"></div>
+
+  <div class="work-stage">
+    <!-- Top Minimalist Liquid Glass Navigation Bar -->
+    <header class="glass-nav">
+      <a href="home page.html" class="nav-brand">SHAWN FENG</a>
+      <nav class="nav-links">
+        <a href="home page.html" class="nav-link">HOME</a>
+        <a href="about.html" class="nav-link">ABOUT</a>
+        <a href="projects detail.html" class="nav-link active">WORK</a>
+      </nav>
+    </header>
+
+    <!-- Minimalist Work Header -->
+    <section class="work-header">
+      <div>
+        <div class="eyebrow-wrapper">
+          <div class="eyebrow-line"></div>
+          <span class="eyebrow-text">2024 — 2026 / PERSONAL PROJECT</span>
+        </div>
+        <h1 class="work-header-title">PHOTOGRAPHY</h1>
+      </div>
+      <div class="gallery-slide-controls" aria-label="Slide Gallery">
+        <span class="gallery-count-label">10 SERIES · INFINITE RING</span>
+        <button class="gallery-slide-btn gallery-prev-btn" type="button" aria-label="Slide Left" title="Slide Left">←</button>
+        <button class="gallery-slide-btn gallery-next-btn" type="button" aria-label="Slide Right" title="Slide Right">→</button>
+      </div>
+    </section>
+
+    <!-- Infinite Ring Photography Gallery Exhibition (10 Series; 04 & 10 Toggle A/B on First Click, Open Modal on Next Click) -->
+    <section class="projects-gallery-section" aria-label="Photography Exhibition Gallery">
+      <div class="projects-gallery-viewport" id="projects-gallery-viewport">
+        <div class="projects-gallery-track" id="projects-gallery-track">
+          <!-- 01: Project 1.png (郑州黑川纪章纪念馆 — 横版) -->
+          <article class="project-card card-1" data-series="1" data-photo-id="1" tabindex="0" role="button" aria-label="郑州 · 黑川纪章纪念馆">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/Project 1.png" alt="郑州 · 黑川纪章纪念馆">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">郑州 · 黑川纪章纪念馆</h2>
+              <p class="project-subtitle">ARCHITECTURE · SYMBIOSIS · DUSK</p>
+            </div>
+          </article>
+
+          <!-- 02: Project 2.jpg (甘肃苦水丹霞 — 横版) -->
+          <article class="project-card card-2" data-series="2" data-photo-id="2" tabindex="0" role="button" aria-label="甘肃 · 苦水丹霞">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/Project 2.jpg" alt="甘肃 · 苦水丹霞">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">甘肃 · 苦水丹霞</h2>
+              <p class="project-subtitle">GEOLOGY · AERIAL · TEXTURE</p>
+            </div>
+          </article>
+
+          <!-- 03: Project 3.png (北京CBD — 横版) -->
+          <article class="project-card card-3" data-series="3" data-photo-id="3" tabindex="0" role="button" aria-label="北京 · CBD">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/Project 3.png" alt="北京 · CBD">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">北京 · CBD</h2>
+              <p class="project-subtitle">METROPOLIS · LIGHT · AXIS</p>
+            </div>
+          </article>
+
+          <!-- 04: project 4a.jpg (西安中轴线航拍 / 详情内可切换 4b 西安永宁门航拍) -->
+          <article class="project-card card-4a" data-series="4" data-photo-id="4a" tabindex="0" role="button" aria-label="西安 · 中轴线航拍">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 4a.jpg" alt="西安 · 中轴线航拍">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">西安 · 中轴线航拍</h2>
+              <p class="project-subtitle">HERITAGE · CENTRAL AXIS · BLUE HOUR</p>
+            </div>
+          </article>
+
+          <!-- 05: project 5.jpg (九寨沟航拍 — 横版) -->
+          <article class="project-card card-5" data-series="5" data-photo-id="5" tabindex="0" role="button" aria-label="川西 · 九寨沟航拍">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 5.jpg" alt="川西 · 九寨沟航拍">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">川西 · 九寨沟航拍</h2>
+              <p class="project-subtitle">EMERALD · SHORELINE · WILDERNESS</p>
+            </div>
+          </article>
+
+          <!-- 06: project 6.jpg (上海陆家嘴CBD — 竖版) -->
+          <article class="project-card card-6" data-series="6" data-photo-id="6" tabindex="0" role="button" aria-label="上海 · 陆家嘴 CBD">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 6.jpg" alt="上海 · 陆家嘴 CBD">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">上海 · 陆家嘴 CBD</h2>
+              <p class="project-subtitle">VERTICAL · SKYLINE · TWILIGHT</p>
+            </div>
+          </article>
+
+          <!-- 07: project 7.jpg (郑州龙湖湿地公园 — 横版宽幅) -->
+          <article class="project-card card-7" data-series="7" data-photo-id="7" tabindex="0" role="button" aria-label="郑州 · 龙湖湿地公园">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 7.jpg" alt="郑州 · 龙湖湿地公园">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">郑州 · 龙湖湿地公园</h2>
+              <p class="project-subtitle">PANORAMA · SYMMETRY · STILLNESS</p>
+            </div>
+          </article>
+
+          <!-- 08: project 8.jpg (重庆朝天门和千佛寺 — 竖版) -->
+          <article class="project-card card-8" data-series="8" data-photo-id="8" tabindex="0" role="button" aria-label="重庆 · 朝天门与千佛寺">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 8.jpg" alt="重庆 · 朝天门与千佛寺">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">重庆 · 朝天门与千佛寺</h2>
+              <p class="project-subtitle">CONTRAST · EAVES · CYBERPUNK</p>
+            </div>
+          </article>
+
+          <!-- 09: project 9.jpg (北京CBD晚霞 — 横版) -->
+          <article class="project-card card-9" data-series="9" data-photo-id="9" tabindex="0" role="button" aria-label="北京 · CBD 晚霞">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 9.jpg" alt="北京 · CBD 晚霞">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">北京 · CBD 晚霞</h2>
+              <p class="project-subtitle">AFTERGLOW · HORIZON · SILHOUETTE</p>
+            </div>
+          </article>
+
+          <!-- 10: project 10a.jpg (郑州二七塔与大玉米·蓝调 / 详情内可切换 10b 黄昏) -->
+          <article class="project-card card-10a" data-series="10" data-photo-id="10a" tabindex="0" role="button" aria-label="郑州 · 二七塔与大玉米">
+            <div class="project-card-media">
+              <img class="project-card-image" src="Project pictures/project 10a.jpg" alt="郑州 · 二七塔与大玉米">
+            </div>
+            <div class="project-card-content">
+              <div class="project-indicator"></div>
+              <h2 class="project-title">郑州 · 二七塔与大玉米</h2>
+              <p class="project-subtitle">ZHENGZHOU · BLUE HOUR &amp; DUSK</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Minimalist 3-Column Liquid Glass Editorial Box -->
+    <section class="project-editorial-box">
+      <div class="editorial-columns">
+        <div class="editorial-col">
+          <h3 class="editorial-col-title">WHAT IS THIS PROJECT?</h3>
+          <p class="editorial-col-desc">
+            A personal photography project focused on observing the world carefully and turning everyday scenes into visual stories.
+          </p>
+        </div>
+
+        <div class="editorial-col">
+          <h3 class="editorial-col-title">WHY I MADE IT</h3>
+          <p class="editorial-col-desc">
+            I want to explore how framing and perspective can change the way a familiar place feels.
+          </p>
+        </div>
+
+        <div class="editorial-col">
+          <h3 class="editorial-col-title">OUTCOME</h3>
+          <p class="editorial-col-desc">
+            A growing visual archive of photographs, experiments, and observations.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Liquid Glass Guidance Bar to Return Home -->
+    <div class="guidance-bar-container">
+      <a href="home page.html" class="guidance-bar" aria-label="Return to Home Page">
+        <span class="guidance-arrow">↑</span>
+        <span class="guidance-hint">00 / BACK TO HOME</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <span>SHWN / 2026</span>
+      <a href="about.html">← ABOUT</a>
+      <span>PORTFOLIO / 2026</span>
+    </footer>
+  </div>
+
+  <!-- Adaptive Photo Detail Window:
+       - Vertical Photo (.is-vertical): Left = Photo, Right = Introduction (Same Height)
+       - Horizontal Photo (.is-horizontal): Top = Photo, Bottom = Introduction (Same Width) -->
+  <div id="project-lightbox" class="lightbox-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox-content is-horizontal" id="lightbox-content">
+      <div class="lightbox-img-wrap">
+        <img class="lightbox-img" src="" alt="Expanded Photography View">
+      </div>
+      <div class="lightbox-details">
+        <div class="lightbox-meta-header">
+          <div class="lightbox-header-left">
+            <span class="lightbox-series-tag" id="lightbox-series-tag">SERIES 01 / HORIZONTAL</span>
+            <div class="lightbox-dual-switcher" id="lightbox-dual-switcher" hidden>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="a" id="lightbox-variant-a">A</button>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="b" id="lightbox-variant-b">B</button>
+            </div>
+          </div>
+          <div class="lightbox-header-right">
+            <span class="lightbox-location-meta" id="lightbox-location-meta">SHAWN FENG PHOTOGRAPHY</span>
+            <div class="lightbox-controls">
+              <button class="lightbox-btn lightbox-prev" type="button" aria-label="上一张作品" title="上一张 (←)">←</button>
+              <button class="lightbox-btn lightbox-next" type="button" aria-label="下一张作品" title="下一张 (→)">→</button>
+              <button class="lightbox-btn lightbox-close" type="button" aria-label="关闭窗口" title="关闭 (Esc)">&times;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lightbox-bio-scroll" id="lightbox-bio-scroll" tabindex="0" aria-label="作品中英文简介（滚轮可上下滚动查看）">
+          <h3 class="lightbox-title"></h3>
+          <p class="lightbox-subtitle"></p>
+          <div class="lightbox-divider"></div>
+          <p class="lightbox-bio lightbox-bio-cn" id="lightbox-bio"></p>
+          <p class="lightbox-bio lightbox-bio-en" id="lightbox-bio-en"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="site.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — Shawn Feng (冯靖翔)</title>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="about style.css">
+</head>
+<body class="about-page fade-in" data-page="about" data-next-page="projects detail.html" data-prev-page="home page.html">
+  <!-- SVG Optical Refraction Filter for Authentic Liquid Glass -->
+  <svg class="liquid-glass-svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="smoothNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="liquid-glow-orb"></div>
+
+  <div class="about-stage">
+    <!-- Invisible Perch Target at Original Top-Left Position (left: 0, top: 0) -->
+    <div id="drone-perch-target" class="drone-perch-target" aria-hidden="true"></div>
+
+    <!-- Interactive Drone (Flies back to original top-left perch on arrival; flies away when leaving) -->
+    <div id="interactive-drone" class="interactive-drone-layer is-airborne" title="Click to toggle drone flight / perch">
+      <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="DJI Drone">
+    </div>
+
+    <!-- Top Minimalist Liquid Glass Navigation Bar -->
+    <header class="glass-nav">
+      <a href="home page.html" class="nav-brand">SHAWN FENG</a>
+      <nav class="nav-links">
+        <a href="home page.html" class="nav-link">HOME</a>
+        <a href="about.html" class="nav-link active">ABOUT</a>
+        <a href="projects detail.html" class="nav-link">WORK</a>
+      </nav>
+    </header>
+
+    <!-- Main About Content (Minimalist Editorial Layout) -->
+    <main class="about-hero-grid">
+      <!-- Left Editorial Column -->
+      <section class="about-editorial">
+        <div class="eyebrow-wrapper">
+          <div class="eyebrow-line"></div>
+          <span class="eyebrow-text">ABOUT / PROFILE</span>
+        </div>
+
+        <h1 class="about-headline">
+          EXPLORE WITH<br>
+          CURIOSITY.<br>
+          CREATE WITH<br>
+          <span class="perspective-glass-wrap" data-text="PERSPECTIVE.">
+            <span class="perspective-text">PERSPECTIVE.</span>
+          </span>
+        </h1>
+
+        <p class="about-bio">
+          My name is Shawn Feng. I am 14, from Beijing, and a 9th grade student at Moonshot Academy. I am interested in digital and visual creation.
+        </p>
+      </section>
+
+      <!-- Right Portrait Card & Overlapping Liquid Glass Badge -->
+      <aside class="profile-card-wrapper">
+        <div class="profile-visual-card">
+          <div class="profile-photo-frame">
+            <img class="profile-photo" src="Project pictures/About Page（个人照片）.png" alt="Shawn Feng Portrait">
+          </div>
+
+          <div class="profile-glass-badge">
+            <div class="badge-top-row">
+              <span class="badge-age">14</span>
+              <span class="badge-city">BEIJING, CHINA</span>
+            </div>
+            <div class="badge-school">MOONSHOT ACADEMY · GRADE 9</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Bottom Liquid Glass Guidance Bar to Projects Detail Page -->
+    <div class="guidance-bar-container">
+      <a href="projects detail.html" class="guidance-bar" aria-label="Continue to Photography Work">
+        <span class="guidance-arrow">↓</span>
+        <span class="guidance-hint">02 / PHOTOGRAPHY WORK</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <span>SHAWN FENG</span>
+      <a href="home page.html">← HOME</a>
+      <span>PORTFOLIO / 2026</span>
+    </footer>
+  </div>
+
+  <script src="site.js"></script>
+</body>
+</html>

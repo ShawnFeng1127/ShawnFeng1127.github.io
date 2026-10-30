@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shawn Feng (冯靖翔) — Portfolio Website</title>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="home style.css">
+</head>
+<body class="home-page fade-in" data-page="home" data-next-page="about.html">
+  <!-- SVG Optical Refraction Filter for Authentic Liquid Glass -->
+  <svg class="liquid-glass-svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="smoothNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="liquid-glow-orb"></div>
+
+  <!-- Interactive Flying Drone (Orbits Mouse with Realistic Flight Attitude) -->
+  <div id="interactive-drone" class="interactive-drone-layer is-airborne" aria-hidden="true">
+    <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="Interactive DJI Drone">
+  </div>
+
+  <div class="home-stage">
+    <!-- Layer 1: Background Pavilion Photo -->
+    <img class="home-bg-photo" src="Project pictures/home page背景.png" alt="Pavilion Background">
+
+    <!-- Layer 4 (Top): Minimalist Liquid Glass Navigation Bar -->
+    <header class="glass-nav">
+      <a href="home page.html" class="nav-brand">SHAWN FENG</a>
+      <nav class="nav-links">
+        <a href="home page.html" class="nav-link active">HOME</a>
+        <a href="about.html" class="nav-link">ABOUT</a>
+        <a href="projects detail.html" class="nav-link">WORK</a>
+      </nav>
+    </header>
+
+    <!-- Layer 2 (Middle): Minimalist Editorial Typography & Copper Line -->
+    <main class="home-editorial-layer">
+      <div class="home-vertical-rule" aria-hidden="true"></div>
+
+      <div class="eyebrow-wrapper">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">PERSONAL PORTFOLIO / 2026</span>
+      </div>
+
+      <div class="home-main-block">
+        <div class="hero-titles">
+          <h1 class="hero-title-cn">冯靖翔</h1>
+          <h1 class="hero-title-en">SHAWN</h1>
+        </div>
+
+        <div class="hero-divider"></div>
+
+        <p class="hero-tagline">
+          SEEING THE WORLD<br>
+          THROUGH A VISUAL<br>
+          LENS.
+        </p>
+      </div>
+    </main>
+
+    <!-- Layer 3 (Foreground Subject): Transparent Cutout Portrait of Shawn Feng -->
+    <img class="home-subject-photo" src="Project pictures/home page人物.png" alt="Shawn Feng">
+
+    <!-- Layer 4 (Bottom): Liquid Glass Guidance Bar (Refracts Subject Underneath) -->
+    <div class="guidance-bar-container">
+      <a href="about.html" class="guidance-bar" aria-label="Continue to About Page">
+        <span class="guidance-arrow">↓</span>
+        <span class="guidance-hint">01 / ABOUT</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <span>SHAWN FENG</span>
+      <span>PORTFOLIO / 2026</span>
+    </footer>
+  </div>
+
+  <script src="site.js"></script>
+</body>
+</html>
