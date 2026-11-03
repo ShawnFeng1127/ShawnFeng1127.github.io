@@ -1327,10 +1327,10 @@ function initScrollAndKeyGuidance() {
 }
 
 /**
- * 6. Interactive Operations on "How Can I Help / Learn With Me" Page (help.html)
- *    - Expand / collapse activity detail drawers (.help-expand-btn -> .help-detail-drawer)
+ * 6. Interactive Operations on "How Can I Help / Ask Me Anything" Page (help.html)
+ *    - Expand / collapse detail & Q&A drawers (.help-expand-btn -> .help-detail-drawer)
  *    - Filter / highlight proposal cards by topic (.help-filter-btn -> [data-help-category])
- *    - One-click copy starter invitation message (.help-copy-btn -> #help-copy-toast)
+ *    - One-click copy email address (shawnfeng@moonshotacademy.cn) + open mailto (.help-copy-btn -> #help-copy-toast)
  */
 function initHelpPageInteractions() {
   const expandBtns = document.querySelectorAll('.help-expand-btn');
@@ -1340,10 +1340,10 @@ function initHelpPageInteractions() {
   const toastEl = document.getElementById('help-copy-toast');
   let toastTimer = null;
 
-  // 1. Expand / Collapse Activity Detail Drawers
+  // 1. Expand / Collapse Details & Questions Drawers
   expandBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target');
+      const targetId = btn.getAttribute('data-target-drawer') || btn.getAttribute('data-target');
       const drawer = targetId ? document.getElementById(targetId) : null;
       if (!drawer) return;
 
@@ -1356,8 +1356,8 @@ function initHelpPageInteractions() {
       const labelSpan = btn.querySelector('.expand-btn-text');
       if (labelSpan) {
         labelSpan.textContent = nextState
-          ? '收起活动详情 / Collapse Details'
-          : '展开活动详情与准备清单 / Activity Details';
+          ? '收起详情 / Collapse'
+          : '展开详情与可问问题 / Details';
       }
     });
   });
@@ -1365,7 +1365,8 @@ function initHelpPageInteractions() {
   // 2. Category Filter Tabs
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const selectedFilter = btn.getAttribute('data-filter') || 'all';
+      const selectedFilter =
+        btn.getAttribute('data-help-filter') || btn.getAttribute('data-filter') || 'all';
       filterBtns.forEach((b) => {
         const active = b === btn;
         b.classList.toggle('is-active', active);
@@ -1378,7 +1379,6 @@ function initHelpPageInteractions() {
           item.classList.remove('is-dimmed');
           item.classList.toggle('is-highlighted', selectedFilter !== 'all');
           if (selectedFilter !== 'all' && cat === selectedFilter) {
-            // Auto-expand the drawer of the selected proposal for quick viewing
             const expandBtn = item.querySelector('.help-expand-btn');
             if (expandBtn && expandBtn.getAttribute('aria-expanded') === 'false') {
               expandBtn.click();
@@ -1392,7 +1392,7 @@ function initHelpPageInteractions() {
     });
   });
 
-  // 3. One-Click Copy Starter Message + Toast Notification
+  // 3. One-Click Copy Email (shawnfeng@moonshotacademy.cn) + Toast Notification
   function showCopyToast(message) {
     if (!toastEl) return;
     toastEl.textContent = message;
@@ -1400,13 +1400,13 @@ function initHelpPageInteractions() {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastEl.classList.remove('is-visible');
-    }, 2800);
+    }, 3200);
   }
 
   copyBtns.forEach((btn) => {
     btn.addEventListener('click', async () => {
-      const textToCopy = btn.getAttribute('data-copy-text') || '';
-      if (!textToCopy) return;
+      const textToCopy = btn.getAttribute('data-copy-text') || 'shawnfeng@moonshotacademy.cn';
+      const mailtoUrl = btn.getAttribute('data-mailto') || '';
 
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1425,13 +1425,17 @@ function initHelpPageInteractions() {
 
       const originalText = btn.textContent;
       btn.classList.add('is-copied');
-      btn.textContent = '✓ 已复制！可直接发给我 / Copied';
-      showCopyToast('✓ 已复制开场白到剪贴板！在学校或微信直接粘贴发给 Shawn 即可开始。');
+      btn.textContent = '✓ 已复制邮箱：shawnfeng@moonshotacademy.cn';
+      showCopyToast('✓ 已复制邮箱 shawnfeng@moonshotacademy.cn 到剪贴板！欢迎随时发邮件向我提问。');
+
+      if (mailtoUrl) {
+        window.location.href = mailtoUrl;
+      }
 
       setTimeout(() => {
         btn.classList.remove('is-copied');
         btn.textContent = originalText;
-      }, 2400);
+      }, 2600);
     });
   });
 }
