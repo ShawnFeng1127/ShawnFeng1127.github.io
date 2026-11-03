@@ -154,23 +154,24 @@ body.help-page {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px;
+  padding: 6px;
   border-radius: 999px;
-  background: rgba(18, 22, 28, 0.42);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(18, 22, 28, 0.52);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
 }
 
 .help-filter-btn {
   border: none;
   background: transparent;
   color: var(--ink-secondary);
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 1.2px;
-  padding: 6px 14px;
+  font-family: 'Noto Sans SC', 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  padding: 8px 18px;
   border-radius: 999px;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -178,12 +179,13 @@ body.help-page {
 
 .help-filter-btn:hover {
   color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .help-filter-btn.is-active {
   background: var(--accent-copper);
   color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(196, 122, 69, 0.42);
+  box-shadow: 0 4px 14px rgba(196, 122, 69, 0.45);
 }
 
 .help-availability-pill {
@@ -209,7 +211,7 @@ body.help-page {
 }
 
 /* ==========================================================================
-   Main Two Featured Proposals Grid (Liquid Glass Cards)
+   Single-Proposal Stage (Only 1 Proposal Displayed at a Time via Top Bar)
    ========================================================================== */
 .help-proposals-grid {
   position: relative;
@@ -218,14 +220,13 @@ body.help-page {
   max-width: 1240px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  grid-template-columns: 1fr;
   align-items: start;
 }
 
 .help-card {
   position: relative;
-  border-radius: 24px;
+  border-radius: 26px;
   overflow: hidden;
   background: linear-gradient(
     135deg,
@@ -242,20 +243,53 @@ body.help-page {
     inset 2px 0 8px rgba(225, 165, 120, 0.20),
     inset 0 -1.5px 4px rgba(255, 255, 255, 0.14),
     0 22px 54px rgba(0, 0, 0, 0.40);
-  padding: 26px 28px;
+  padding: 28px 32px;
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+  transition:
+    border-color 0.42s ease,
+    box-shadow 0.42s ease;
+}
+
+.help-card.is-active-panel {
+  display: flex;
+  animation: helpPanelSwitchIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes helpPanelSwitchIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.help-card-top-split {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.help-card-left-col {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  transition:
-    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.42s ease,
-    box-shadow 0.42s ease,
-    opacity 0.35s ease,
-    filter 0.35s ease;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.help-card-right-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .help-card:hover {
-  transform: translateY(-4px);
   border-color: rgba(255, 255, 255, 0.44);
   box-shadow:
     inset 0 1.5px 2.5px rgba(255, 255, 255, 0.56),
@@ -263,17 +297,13 @@ body.help-page {
     0 28px 64px rgba(0, 0, 0, 0.52);
 }
 
-.help-card.is-dimmed-filter {
-  opacity: 0.38;
-  filter: grayscale(0.45);
-  transform: scale(0.985);
-}
-
 /* Visual Banner Strip inside each Proposal Card */
 .help-card-banner {
   position: relative;
   width: 100%;
-  height: 186px;
+  flex: 1 1 auto;
+  min-height: 220px;
+  max-height: 260px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.20);
@@ -643,6 +673,7 @@ body.help-page {
   }
   .help-hero,
   .help-proposals-grid,
+  .help-card-top-split,
   .help-secondary-box {
     grid-template-columns: 1fr;
   }

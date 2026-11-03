@@ -1362,11 +1362,11 @@ function initHelpPageInteractions() {
     });
   });
 
-  // 2. Category Filter Tabs
+  // 2. Top Horizontal Switcher Bar: Only Show 1 Help Proposal at a Time
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const selectedFilter =
-        btn.getAttribute('data-help-filter') || btn.getAttribute('data-filter') || 'all';
+        btn.getAttribute('data-help-filter') || btn.getAttribute('data-filter') || 'photo';
       filterBtns.forEach((b) => {
         const active = b === btn;
         b.classList.toggle('is-active', active);
@@ -1375,19 +1375,9 @@ function initHelpPageInteractions() {
 
       helpItems.forEach((item) => {
         const cat = item.getAttribute('data-help-category');
-        if (selectedFilter === 'all' || cat === selectedFilter) {
-          item.classList.remove('is-dimmed');
-          item.classList.toggle('is-highlighted', selectedFilter !== 'all');
-          if (selectedFilter !== 'all' && cat === selectedFilter) {
-            const expandBtn = item.querySelector('.help-expand-btn');
-            if (expandBtn && expandBtn.getAttribute('aria-expanded') === 'false') {
-              expandBtn.click();
-            }
-          }
-        } else {
-          item.classList.add('is-dimmed');
-          item.classList.remove('is-highlighted');
-        }
+        const isMatch = cat === selectedFilter;
+        item.classList.toggle('is-active-panel', isMatch);
+        item.hidden = !isMatch;
       });
     });
   });
