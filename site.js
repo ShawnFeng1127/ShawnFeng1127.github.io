@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDepthParallax();
   initInteractiveDrone();
   initInfiniteRingGallery();
+  initHelpPageInteractions();
   initScrollAndKeyGuidance();
 });
 
@@ -1322,5 +1323,115 @@ function initScrollAndKeyGuidance() {
       e.preventDefault();
       navigateToPage(prevPage, null, 'up');
     }
+  });
+}
+
+/**
+ * 6. Interactive Operations on "How Can I Help / Learn With Me" Page (help.html)
+ *    - Expand / collapse activity detail drawers (.help-expand-btn -> .help-detail-drawer)
+ *    - Filter / highlight proposal cards by topic (.help-filter-btn -> [data-help-category])
+ *    - One-click copy starter invitation message (.help-copy-btn -> #help-copy-toast)
+ */
+function initHelpPageInteractions() {
+  const expandBtns = document.querySelectorAll('.help-expand-btn');
+  const filterBtns = document.querySelectorAll('.help-filter-btn');
+  const copyBtns = document.querySelectorAll('.help-copy-btn');
+  const helpItems = document.querySelectorAll('[data-help-category]');
+  const toastEl = document.getElementById('help-copy-toast');
+  let toastTimer = null;
+
+  // 1. Expand / Collapse Activity Detail Drawers
+  expandBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const drawer = targetId ? document.getElementById(targetId) : null;
+      if (!drawer) return;
+
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      const nextState = !isExpanded;
+      btn.setAttribute('aria-expanded', String(nextState));
+      drawer.classList.toggle('is-open', nextState);
+      drawer.setAttribute('aria-hidden', String(!nextState));
+
+      const labelSpan = btn.querySelector('.expand-btn-text');
+      if (labelSpan) {
+        labelSpan.textContent = nextState
+          ? '收起活动详情 / Collapse Details'
+          : '展开活动详情与准备清单 / Activity Details';
+      }
+    });
+  });
+
+  // 2. Category Filter Tabs
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const selectedFilter = btn.getAttribute('data-filter') || 'all';
+      filterBtns.forEach((b) => {
+        const active = b === btn;
+        b.classList.toggle('is-active', active);
+        b.setAttribute('aria-selected', String(active));
+      });
+
+      helpItems.forEach((item) => {
+        const cat = item.getAttribute('data-help-category');
+        if (selectedFilter === 'all' || cat === selectedFilter) {
+          item.classList.remove('is-dimmed');
+          item.classList.toggle('is-highlighted', selectedFilter !== 'all');
+          if (selectedFilter !== 'all' && cat === selectedFilter) {
+            // Auto-expand the drawer of the selected proposal for quick viewing
+            const expandBtn = item.querySelector('.help-expand-btn');
+            if (expandBtn && expandBtn.getAttribute('aria-expanded') === 'false') {
+              expandBtn.click();
+            }
+          }
+        } else {
+          item.classList.add('is-dimmed');
+          item.classList.remove('is-highlighted');
+        }
+      });
+    });
+  });
+
+  // 3. One-Click Copy Starter Message + Toast Notification
+  function showCopyToast(message) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('is-visible');
+    }, 2800);
+  }
+
+  copyBtns.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const textToCopy = btn.getAttribute('data-copy-text') || '';
+      if (!textToCopy) return;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(textToCopy);
+        } else {
+          const tempArea = document.createElement('textarea');
+          tempArea.value = textToCopy;
+          tempArea.style.position = 'fixed';
+          tempArea.style.opacity = '0';
+          document.body.appendChild(tempArea);
+          tempArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempArea);
+        }
+      } catch (_) {}
+
+      const originalText = btn.textContent;
+      btn.classList.add('is-copied');
+      btn.textContent = '✓ 已复制！可直接发给我 / Copied';
+      showCopyToast('✓ 已复制开场白到剪贴板！在学校或微信直接粘贴发给 Shawn 即可开始。');
+
+      setTimeout(() => {
+        btn.classList.remove('is-copied');
+        btn.textContent = originalText;
+      }, 2400);
+    });
   });
 }

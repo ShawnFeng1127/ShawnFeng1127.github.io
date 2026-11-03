@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Can I Help — Shawn Feng (冯靖翔)</title>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="help style.css">
+</head>
+<body class="help-page fade-in" data-page="help" data-next-page="home page.html" data-prev-page="projects detail.html">
+  <!-- SVG Optical Refraction Filter for Authentic Liquid Glass -->
+  <svg class="liquid-glass-svg-defs" aria-hidden="true">
+    <defs>
+      <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="3" result="smoothNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="liquid-glow-orb"></div>
+
+  <!-- Interactive Flying Drone (Orbits Mouse with Realistic Flight Attitude & Spinning Rotors) -->
+  <div id="interactive-drone" class="interactive-drone-layer is-airborne" aria-hidden="true">
+    <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="Interactive DJI Drone">
+  </div>
+
+  <div class="help-stage">
+    <!-- Top Minimalist Liquid Glass Navigation Bar -->
+    <header class="glass-nav">
+      <a href="home page.html" class="nav-brand">SHAWN FENG</a>
+      <nav class="nav-links">
+        <a href="home page.html" class="nav-link">HOME</a>
+        <a href="about.html" class="nav-link">ABOUT</a>
+        <a href="projects detail.html" class="nav-link">WORK</a>
+        <a href="help.html" class="nav-link active">HELP</a>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="help-hero">
+      <div class="help-hero-left">
+        <div class="eyebrow-wrapper">
+          <div class="eyebrow-line"></div>
+          <span class="eyebrow-text">03 / HOW CAN I HELP · LEARN WITH ME</span>
+        </div>
+        <h1 class="help-headline">
+          OBSERVE, SHOOT &amp;<br>
+          LEARN
+          <span class="help-glass-capsule" data-text="TOGETHER.">
+            <span class="help-capsule-text">TOGETHER.</span>
+          </span>
+        </h1>
+      </div>
+
+      <div class="help-hero-right">
+        <p class="help-intro-cn">
+          个人网站不仅是为了展示“我是谁”，更是为了连接我们可以一起完成的事。如果你也对<strong>城市建筑摄影、日落与蓝调时刻调色、无人机航拍视角</strong>或<strong>数字视觉创作</strong>感兴趣，欢迎随时找我一起练习、陪拍或交流经验。
+        </p>
+        <p class="help-intro-en">
+          Beyond showing who I am, this page is an open invitation to practice, shoot, and create together. Whether you are a total beginner with a phone camera or exploring drone aerials and digital creation, here is how I can help.
+        </p>
+      </div>
+    </section>
+
+    <!-- Interactive Category Filter & Availability Bar -->
+    <section class="help-Controls-bar" aria-label="Filter Help Topics">
+      <div class="help-filter-group" role="tablist">
+        <button type="button" class="help-filter-btn is-active" data-help-filter="all">全部提议 ALL (3)</button>
+        <button type="button" class="help-filter-btn" data-help-filter="photo">01 · 摄影陪拍与调色</button>
+        <button type="button" class="help-filter-btn" data-help-filter="drone">02 · 无人机航拍陪练</button>
+        <button type="button" class="help-filter-btn" data-help-filter="digital">03 · 短片与 AI 建站</button>
+      </div>
+      <div class="help-availability-pill">
+        <span class="help-status-dot"></span>
+        <span>周末 / 课后可约 · 零基础无需专业设备 (Phone / Camera Friendly)</span>
+      </div>
+    </section>
+
+    <!-- Main 2 Detailed Proposals (Required: 呈现两项具体提议 + 展开活动详情交互) -->
+    <main class="help-proposals-grid">
+      <!-- Proposal 01: Urban & Twilight Photography Walk + Color Grading -->
+      <article class="help-card" data-help-category="photo">
+        <div class="help-card-banner">
+          <img src="Project pictures/project 9.jpg" alt="北京 CBD 漫天晚霞与建筑摄影">
+          <div class="help-banner-badges">
+            <span class="help-tag-pill">PROPOSAL 01 · PHOTOGRAPHY</span>
+            <span class="help-beginner-pill">📱 手机 / 相机均可参与</span>
+          </div>
+        </div>
+
+        <div class="help-card-header">
+          <span class="help-card-title-en">URBAN PHOTO WALK &amp; RAW COLOR GRADING</span>
+          <h2 class="help-card-title-cn">城市建筑与黄昏/蓝调摄影陪拍 &amp; 后期调色</h2>
+        </div>
+
+        <div class="help-meta-list">
+          <div class="help-meta-row">
+            <span class="help-meta-label">帮谁 WHO</span>
+            <span class="help-meta-value">想提升拍照构图、想拍出电影感城市风光或个人照片，或拍完不知道如何用 Lightroom / PS 调出干净冷暖色调的同学与摄影新手。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">做什么 WHAT</span>
+            <span class="help-meta-value">一起在日落至蓝调时刻（16:30–18:30）去北京城市机位或校园实景陪拍，现场练习几何构图与光线捕捉；拍完后一起选片，手把手演示 RAW 格式高光阴影还原与冷暖调色。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">相关经历 EXP</span>
+            <span class="help-meta-value">持续 2 年个人摄影项目，走过北京、郑州、西安、上海、重庆、甘肃、九寨沟等地，独立完成建筑、风光与人文纪实的拍摄、选片与后期调色。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">投入时间 TIME</span>
+            <span class="help-meta-value">每周末下午 <strong>1.5 – 2 小时</strong>（线下外拍 + 选片），或课后线上 <strong>45 分钟</strong> 1对1调色交流。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">怎样开始 START</span>
+            <span class="help-meta-value">无需单反相机（手机同样适用）！点击下方「展开活动详情」查看流程，或点击「复制约拍邀请」发给我，告诉我你想去拍建筑还是改照片即可。</span>
+          </div>
+        </div>
+
+        <div class="help-card-actions">
+          <button type="button" class="help-expand-btn" aria-expanded="false" data-target-drawer="drawer-photo">
+            <span>展开活动详情与准备清单 / Details</span>
+            <span class="help-expand-icon">↓</span>
+          </button>
+          <button type="button" class="help-copy-btn" data-copy-text="Hi Shawn！我看了你的个人网站 How Can I Help 页面，想找你一起约【01 城市黄昏/蓝调摄影陪拍 & 后期调色】，这周末或课后有空一起交流吗？">
+            复制约拍邀请 ↗
+          </button>
+        </div>
+
+        <!-- Expandable Activity Details Drawer 01 -->
+        <div class="help-detail-drawer" id="drawer-photo">
+          <div class="drawer-section-title">SESSION ROADMAP · 活动三步流程 (约 90–120 MIN)</div>
+          <div class="drawer-steps">
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 01 · 20 MIN</div>
+              <div class="drawer-step-text">确定拍摄主题（现代建筑/胡同古建/夕阳剪影），查看日落与蓝调时刻时间表。</div>
+            </div>
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 02 · 50 MIN</div>
+              <div class="drawer-step-text">现场同行实拍：练习三分法、引导线、前景框架与长焦空间压缩构图，互拍或共创。</div>
+            </div>
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 03 · 30 MIN</div>
+              <div class="drawer-step-text">挑出 3–5 张最佳原片，演示色温校准、暗部细节提亮与冷暖色调分离。</div>
+            </div>
+          </div>
+
+          <div class="drawer-section-title">INTERACTIVE CHECKLIST · 出发前准备自查（可点击勾选）</div>
+          <div class="drawer-checklist">
+            <label class="drawer-check-item">
+              <input type="checkbox" checked>
+              <span>一台能拍照的设备（手机开启网格线 / 微单或单反相机均可）</span>
+            </label>
+            <label class="drawer-check-item">
+              <input type="checkbox">
+              <span>如果有想一起调色的旧照片，提前挑出 2–3 张原片（RAW 或 JPG）</span>
+            </label>
+            <label class="drawer-check-item">
+              <input type="checkbox">
+              <span>选一个晴朗或多云的傍晚（16:30 左右光线最柔和出片）</span>
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <!-- Proposal 02: Drone Aerial Practice, Composition & Safe Flight Guide -->
+      <article class="help-card" data-help-category="drone">
+        <div class="help-card-banner">
+          <img src="Project pictures/project 4a.jpg" alt="西安中轴线无人机航拍视角">
+          <div class="help-banner-badges">
+            <span class="help-tag-pill">PROPOSAL 02 · DRONE AERIAL</span>
+            <span class="help-beginner-pill">🛸 无无人机也可先体验我的设备</span>
+          </div>
+        </div>
+
+        <div class="help-card-header">
+          <span class="help-card-title-en">DRONE AERIAL PRACTICE, COMPOSITION &amp; SAFE FLIGHT</span>
+          <h2 class="help-card-title-cn">无人机航拍新手陪练、高空构图与合规飞行指导</h2>
+        </div>
+
+        <div class="help-meta-list">
+          <div class="help-meta-row">
+            <span class="help-meta-label">帮谁 WHO</span>
+            <span class="help-meta-value">刚买大疆（DJI）无人机不敢独自起飞、不清楚 2025 空域政策与实名申报流程，或想学习高空俯拍（Top-Down）构图与全景接片的同学。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">做什么 WHAT</span>
+            <span class="help-meta-value">手把手带你完成起飞前安全检查（UOM 登记、适飞空域查询、返航高度与避障设置），在合规空域 1对1 陪练八字悬停、环绕刷锅与上帝视角构图，或一起处理航拍接片。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">相关经历 EXP</span>
+            <span class="help-meta-value">4 年无人机航拍经验，曾赴甘肃苦水丹霞、川西九寨沟、西安城墙等地航拍创作，熟悉北京 2025 新规下的合规飞行路线规划与安全操作。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">投入时间 TIME</span>
+            <span class="help-meta-value">每周末 <strong>1 – 1.5 小时</strong>（外场合规空域实操陪练），或平时线上 <strong>30 分钟</strong> 解答选购/申报/航拍后期问题。</span>
+          </div>
+          <div class="help-meta-row">
+            <span class="help-meta-label">怎样开始 START</span>
+            <span class="help-meta-value">哪怕你还没有买无人机，也可以先约我一起试飞体验！点击下方「展开活动详情」勾选你想学的模块，再点击「复制陪练邀请」发给我即可。</span>
+          </div>
+        </div>
+
+        <div class="help-card-actions">
+          <button type="button" class="help-expand-btn" aria-expanded="false" data-target-drawer="drawer-drone">
+            <span>展开活动详情与准备清单 / Details</span>
+            <span class="help-expand-icon">↓</span>
+          </button>
+          <button type="button" class="help-copy-btn" data-copy-text="Hi Shawn！我看了你的个人网站 How Can I Help 页面，想找你请教/约【02 无人机航拍新手陪练与构图指导】，有空一起交流或试飞吗？">
+            复制陪练邀请 ↗
+          </button>
+        </div>
+
+        <!-- Expandable Activity Details Drawer 02 -->
+        <div class="help-detail-drawer" id="drawer-drone">
+          <div class="drawer-section-title">SESSION ROADMAP · 航拍陪练三步流程 (约 60–90 MIN)</div>
+          <div class="drawer-steps">
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 01 · 15 MIN</div>
+              <div class="drawer-step-text">飞行前安全检查：查询适飞空域、GPS 搜星、指南针/IMU 状态与失联返航高度设定。</div>
+            </div>
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 02 · 45 MIN</div>
+              <div class="drawer-step-text">实操陪练：起降悬停、平顺推拉摇移运镜、垂直 90° 上帝视角构图与广角全景拍摄。</div>
+            </div>
+            <div class="drawer-step-box">
+              <div class="drawer-step-num">STEP 03 · 20 MIN</div>
+              <div class="drawer-step-text">素材导出与航拍后期：演示 D-Log M 色彩还原、广角畸变校正与全景高清合成。</div>
+            </div>
+          </div>
+
+          <div class="drawer-section-title">INTERACTIVE CHECKLIST · 你最想体验哪部分？（可点击勾选）</div>
+          <div class="drawer-checklist">
+            <label class="drawer-check-item">
+              <input type="checkbox" checked>
+              <span>了解北京及出游目的地如何查询合法适飞空域与 UOM 实名登记</span>
+            </label>
+            <label class="drawer-check-item">
+              <input type="checkbox">
+              <span>零基础第一次上手操控摇杆，克服“炸机”紧张感（可用我的设备试飞）</span>
+            </label>
+            <label class="drawer-check-item">
+              <input type="checkbox">
+              <span>学习如何利用地面道路、河流与建筑线条拍出有秩序感的航拍大图</span>
+            </label>
+          </div>
+        </div>
+      </article>
+    </main>
+
+    <!-- 3rd Idea & Family Feedback Reflection Box -->
+    <section class="help-secondary-box" data-help-category="digital">
+      <div>
+        <div class="help-secondary-tag">IDEA 03 · BONUS COLLABORATION &amp; FAMILY FEEDBACK ITERATION</div>
+        <h3 class="help-secondary-title">03 · 定格动画 / 视频短片拍摄剪辑 &amp; Figma + AI 个人建站分享</h3>
+        <p class="help-secondary-desc">
+          除了平面摄影与无人机航拍，我曾在 2026 年 4 月担任<strong>定格动画悬疑短片项目（Stop-Motion Thriller）组长与摄影记录</strong>，并独立使用 <strong>Figma + AI 编程</strong> 完成了这个液态玻璃风格作品集网站。如果你正在做学校视频作业需要分镜拍摄建议，或者也想把自己的 Figma 设计稿变成可交互的个人网站，我可以投入 <strong>45–60 分钟</strong> 陪你一起看代码、调样式或剪片子！
+        </p>
+      </div>
+
+      <div class="help-contact-card">
+        <div class="help-secondary-tag">HOW TO REACH ME · 联系与开始方式</div>
+        <div class="help-contact-row">
+          <span>👤 姓名 / 学校</span>
+          <strong>冯靖翔 Shawn Feng · Moonshot Academy G9</strong>
+        </div>
+        <div class="help-contact-row">
+          <span>📍 地点 / 形式</span>
+          <strong>北京线下陪拍陪练 / 线上屏幕共享交流</strong>
+        </div>
+        <div class="help-card-actions" style="margin-top: 6px;">
+          <button type="button" class="help-copy-btn" style="width: 100%;" data-copy-text="Hi Shawn！我看了你的个人网站 How Can I Help 页面，想找你交流【03 定格动画视频剪辑 / Figma + AI 个人网站制作】，方便抽空一起看看吗？">
+            一键复制「视频 / AI 建站交流」邀请 ↗
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Liquid Glass Guidance Bar back to Home Page -->
+    <div class="guidance-bar-container">
+      <a href="home page.html" class="guidance-bar" aria-label="Back to Home Page">
+        <span class="guidance-arrow">↑</span>
+        <span class="guidance-hint">00 / BACK TO HOME</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <span>SHAWN FENG</span>
+      <a href="projects detail.html">← PHOTOGRAPHY WORK</a>
+      <span>PORTFOLIO / 2026</span>
+    </footer>
+  </div>
+
+  <!-- Copy Success Toast -->
+  <div id="help-copy-toast" class="help-toast" role="status" aria-live="polite">
+    ✓ 已复制开始邀请！可直接粘贴发送给 Shawn (冯靖翔)
+  </div>
+
+  <script src="site.js"></script>
+</body>
+</html>
