@@ -31,375 +31,192 @@
     <header class="glass-nav">
       <a href="home page.html" class="nav-brand">SHAWN FENG</a>
       <nav class="nav-links">
-        <a href="home page.html" class="nav-link">HOME</a>
-        <a href="about.html" class="nav-link">ABOUT</a>
-        <a href="projects detail.html" class="nav-link">WORK</a>
-        <a href="help.html" class="nav-link active">HELP</a>
+        <a href="home page.html" class="nav-link" data-i18n-zh="首页" data-i18n-en="HOME">HOME</a>
+        <a href="about.html" class="nav-link" data-i18n-zh="关于" data-i18n-en="ABOUT">ABOUT</a>
+        <a href="projects detail.html" class="nav-link" data-i18n-zh="作品" data-i18n-en="WORK">WORK</a>
+        <a href="help.html" class="nav-link active" data-i18n-zh="帮助" data-i18n-en="HELP">HELP</a>
+        <button type="button" class="nav-lang-btn" aria-label="Switch Language / 切换语言">
+          <span class="lang-opt" data-lang="zh">中</span><span class="lang-sep">/</span><span class="lang-opt" data-lang="en">EN</span>
+        </button>
       </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section class="help-hero">
-      <div class="help-hero-left">
+    <!-- Level 1: Minimalist Header & Top Horizontal Switcher Bar (Matches projects detail.html) -->
+    <section class="help-header">
+      <div>
         <div class="eyebrow-wrapper">
           <div class="eyebrow-line"></div>
-          <span class="eyebrow-text">03 / HOW CAN I HELP · ONLINE GUIDANCE &amp; Q&amp;A</span>
+          <span class="eyebrow-text" data-i18n-zh="03 / 线上指导与邮件提问" data-i18n-en="03 / ONLINE GUIDANCE &amp; Q&amp;A">03 / ONLINE GUIDANCE &amp; Q&amp;A</span>
         </div>
-        <h1 class="help-headline">
-          OBSERVE, SHOOT &amp;<br>
-          LEARN
-          <span class="help-glass-capsule" data-text="TOGETHER.">
-            <span class="help-capsule-text">TOGETHER.</span>
-          </span>
-        </h1>
+        <h1 class="help-header-title">HOW CAN I HELP</h1>
       </div>
 
-      <div class="help-hero-right">
-        <p class="help-intro-cn">
-          个人网站不仅是为了展示“我是谁”，更是为了分享经验、为大家提供支持。请点击下方<strong>顶部横条切换查看我能提供的三项线上指导</strong>；如果你遇到任何疑问，欢迎随时发邮件到 <strong>shawnfeng@moonshotacademy.cn</strong> 问我问题。
-        </p>
-        <p class="help-intro-en">
-          Use the horizontal switcher bar below to explore the three areas where I provide online guidance and Q&amp;A. Whenever you have questions about photography, drone aerials, or digital creation, feel free to email me at <strong>shawnfeng@moonshotacademy.cn</strong>.
-        </p>
+      <!-- Horizontal Bar to Switch Which Single Help Proposal Is Displayed -->
+      <div class="help-filter-group" role="tablist" aria-label="Switch Help Topic">
+        <button type="button" class="help-filter-btn is-active" role="tab" aria-selected="true" data-help-filter="photo" data-i18n-zh="01 · 摄影与调色" data-i18n-en="01 · PHOTO &amp; GRADING">
+          01 · 摄影与调色
+        </button>
+        <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="drone" data-i18n-zh="02 · 无人机航拍" data-i18n-en="02 · DRONE AERIAL">
+          02 · 无人机航拍
+        </button>
+        <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="digital" data-i18n-zh="03 · 短片与建站" data-i18n-en="03 · VIDEO &amp; WEB">
+          03 · 短片与建站
+        </button>
       </div>
     </section>
 
-    <!-- Top Switcher Bar (Switches Which Single Proposal Is Displayed) -->
-    <section class="help-Controls-bar" aria-label="Switch Help Proposal">
-      <div class="help-filter-group" role="tablist" aria-label="切换三项线上指导内容">
-        <button type="button" class="help-filter-btn is-active" role="tab" aria-selected="true" data-help-filter="photo">
-          01 · 摄影与后期调色线上指导
-        </button>
-        <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="drone">
-          02 · 无人机航拍与安全线上指导
-        </button>
-        <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="digital">
-          03 · 短片剪辑与 AI 建站线上指导
-        </button>
-      </div>
-      <div class="help-availability-pill">
-        <span class="help-status-dot"></span>
-        <span>✉️ 线上指导提问邮箱：<a href="mailto:shawnfeng@moonshotacademy.cn" style="color: #FFFFFF; text-decoration: underline; text-underline-offset: 3px;"><strong>shawnfeng@moonshotacademy.cn</strong></a></span>
-      </div>
-    </section>
-
-    <!-- Single-View Proposals Stage (Only 1 Proposal Displayed at a Time, Controlled by Top Bar) -->
+    <!-- Single-Proposal Stage (Visual Hierarchy: 1. 标题 Title > 2. 图片 Image > 3. 展示出的内容 Summary > 4. 了解更多 Learn More) -->
     <main class="help-proposals-grid">
-      <!-- ==================== PROPOSAL 01: PHOTOGRAPHY ONLINE GUIDANCE (Default Active) ==================== -->
+      <!-- ==================== 01: 摄影与后期调色 (Default Active) ==================== -->
       <article class="help-card is-active-panel" data-help-category="photo" role="tabpanel">
-        <div class="help-card-top-split">
-          <div class="help-card-left-col">
-            <div class="help-card-banner">
-              <img src="Project pictures/project 9.jpg" alt="北京 CBD 漫天晚霞与建筑摄影">
-              <div class="help-banner-badges">
-                <span class="help-tag-pill">PROPOSAL 01 / 03 · PHOTOGRAPHY</span>
-                <span class="help-beginner-pill">📱 手机 / 相机问题均可线上指导</span>
-              </div>
-            </div>
+        <!-- 1. 标题 (Title) -->
+        <div class="help-card-header">
+          <div class="help-card-title-group">
+            <span class="help-card-eyebrow">PROPOSAL 01 / PHOTOGRAPHY &amp; COLOR GRADING</span>
+            <h2 class="help-card-title" data-i18n-zh="摄影与后期调色" data-i18n-en="PHOTOGRAPHY &amp; COLOR GRADING">摄影与后期调色</h2>
+          </div>
+          <span class="help-badge-pill" data-i18n-zh="📱 手机 / 相机均可提问" data-i18n-en="📱 PHONE &amp; CAMERA FRIENDLY">📱 手机 / 相机均可提问</span>
+        </div>
 
-            <div class="help-contact-card">
-              <div class="help-secondary-tag">ONLINE GUIDANCE · 邮件联系我获取线上指导</div>
-              <div class="help-contact-row">
-                <span>👤 姓名 / 年级</span>
-                <strong>冯靖翔 Shawn Feng · Moonshot Academy G9</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>✉️ 我的邮箱</span>
-                <strong>shawnfeng@moonshotacademy.cn</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>💻 指导形式</span>
-                <strong>提供线上指导（邮件看片评析 / 调色步骤演示）</strong>
-              </div>
-            </div>
+        <!-- 2. 图片 (Image) -->
+        <div class="help-card-media" data-open-help-modal="photo" role="button" tabindex="0" aria-label="点击查看摄影与后期调色完整详情">
+          <img src="Project pictures/project 9.jpg" alt="摄影与后期调色">
+        </div>
+
+        <!-- 3. 展示出的内容 (Concise 3-Column Core Summary — Matches projects detail.html Density) -->
+        <div class="help-summary-columns">
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。" data-i18n-en="Students and beginners looking to improve framing, exposure, or Lightroom color grading.">
+              想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。
+            </p>
           </div>
 
-          <div class="help-card-right-col">
-            <div class="help-card-header">
-              <span class="help-card-title-en">01 / URBAN PHOTOGRAPHY &amp; RAW COLOR GRADING ONLINE GUIDANCE</span>
-              <h2 class="help-card-title-cn">城市建筑与黄昏/蓝调摄影 &amp; 后期调色线上指导</h2>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。" data-i18n-en="Online photo critique, exposure parameter Q&amp;A, and RAW color grading walkthroughs.">
+              提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。
+            </p>
+          </div>
 
-            <div class="help-meta-list">
-              <div class="help-meta-row">
-                <span class="help-meta-label">帮谁 WHO</span>
-                <span class="help-meta-value">想提升拍照构图、想拍出有氛围感的城市风光或人像，或拍完照片不知道如何用 Lightroom / Camera Raw 调出干净冷暖色调的同学与摄影新手。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">做什么 WHAT</span>
-                <span class="help-meta-value">提供线上摄影与修图指导：解答你在拍摄构图、曝光参数（ISO/快门/光圈）与后期修图上的疑问；你可以把原片发到我邮箱，我在线上为你分析取景构图并做调色修改示范。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">相关经历 EXP</span>
-                <span class="help-meta-value">持续 2 年个人摄影项目，走过北京、郑州、西安、上海、重庆、甘肃、九寨沟等地，独立完成建筑、风光与人文纪实的拍摄、选片与后期调色。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">投入时间 TIME</span>
-                <span class="help-meta-value">每周末可投入 <strong>1.5 – 2 小时</strong> 提供线上看片与调色指导，平时收到提问邮件后也会利用课余时间<strong>当天或次日详细回复</strong>。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">怎样开始 START</span>
-                <span class="help-meta-value">无需单反相机（手机拍照同样适用）！点击下方「展开详情与可问问题」，或直接发邮件到 <strong>shawnfeng@moonshotacademy.cn</strong> 问我问题、附上你想探讨的照片即可获取线上指导。</span>
-              </div>
-            </div>
-
-            <div class="help-card-actions">
-              <button type="button" class="help-expand-btn" aria-expanded="false" data-target-drawer="drawer-photo">
-                <span class="expand-btn-text">展开详情与可问问题 / Details</span>
-                <span class="help-expand-icon">↓</span>
-              </button>
-              <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%91%84%E5%BD%B1%E4%B8%8E%E8%B0%83%E8%89%B2%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81&body=Hi%20Shawn%EF%BC%8C%0A%0A%E6%88%91%E7%9C%8B%E4%BA%86%E4%BD%A0%E7%9A%84%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%AB%99%20How%20Can%20I%20Help%20%E9%A1%B5%E9%9D%A2%EF%BC%8C%E6%83%B3%E8%AF%B7%E6%95%99%E4%BD%A0%E5%85%B3%E4%BA%8E%E3%80%90%E5%9F%8E%E5%B8%82%E6%91%84%E5%BD%B1%E6%9E%84%E5%9B%BE%20%2F%20%E5%90%8E%E6%9C%9F%E8%B0%83%E8%89%B2%E3%80%91%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A%0A">
-                ✉ 发邮件问我 / 复制邮箱 ↗
-              </button>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。" data-i18n-en="1.5–2h every weekend. Email your photos or questions to shawnfeng@moonshotacademy.cn.">
+              每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。
+            </p>
           </div>
         </div>
 
-        <!-- Expandable Activity Details Drawer 01 -->
-        <div class="help-detail-drawer" id="drawer-photo">
-          <div class="drawer-section-title">ONLINE GUIDANCE TOPICS · 我能在线上为你指导与解答的 3 件事</div>
-          <div class="drawer-steps">
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 01 · FRAMING</div>
-              <div class="drawer-step-text">线上构图与机位建议：把你拍的照片发给我，我帮你在线分析三分法、引导线、裁剪比例与长焦空间压缩。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 02 · EXPOSURE</div>
-              <div class="drawer-step-text">光线与参数答疑：线上解答日落与蓝调时刻怎么避免晚霞高光过曝、暗部死黑，手机和相机怎么设置参数。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 03 · GRADING</div>
-              <div class="drawer-step-text">后期调色线上示范：把原片发到我邮箱，我为你演示如何校准色温、提亮暗部细节并调出通透的冷暖对比。</div>
-            </div>
-          </div>
-
-          <div class="drawer-section-title">INTERACTIVE CHECKLIST · 发邮件获取线上指导时可以附上（可点击勾选）</div>
-          <div class="drawer-checklist">
-            <label class="drawer-check-item">
-              <input type="checkbox" checked>
-              <span>你想请教的具体问题（例如：怎么构图更有层次 / 夜景怎么去噪点 / 怎么调出蓝调冷暖对比）</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>1–3 张你拍的原片（RAW 或 JPG 均可）或你想参考的摄影风格图片，直接作为邮件附件发送</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>你目前使用的拍摄设备（手机型号 / 微单或单反相机均可），方便我给你针对性的线上指导</span>
-            </label>
-          </div>
+        <!-- 4. 了解更多 (Learn More Action Bar) -->
+        <div class="help-card-footer">
+          <button type="button" class="help-learn-more-btn" data-open-help-modal="photo" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+            了解更多 / 查看完整详情 →
+          </button>
+          <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%91%84%E5%BD%B1%E4%B8%8E%E8%B0%83%E8%89%B2%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+            ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+          </button>
         </div>
       </article>
 
-      <!-- ==================== PROPOSAL 02: DRONE AERIAL ONLINE GUIDANCE ==================== -->
+      <!-- ==================== 02: 无人机航拍与安全飞行 ==================== -->
       <article class="help-card" data-help-category="drone" role="tabpanel" hidden>
-        <div class="help-card-top-split">
-          <div class="help-card-left-col">
-            <div class="help-card-banner">
-              <img src="Project pictures/project 4a.jpg" alt="西安中轴线无人机航拍视角">
-              <div class="help-banner-badges">
-                <span class="help-tag-pill">PROPOSAL 02 / 03 · DRONE AERIAL</span>
-                <span class="help-beginner-pill">🛸 选购 / 申报 / 航拍均可线上指导</span>
-              </div>
-            </div>
+        <!-- 1. 标题 (Title) -->
+        <div class="help-card-header">
+          <div class="help-card-title-group">
+            <span class="help-card-eyebrow">PROPOSAL 02 / DRONE AERIAL &amp; SAFE FLIGHT</span>
+            <h2 class="help-card-title" data-i18n-zh="无人机航拍与安全飞行" data-i18n-en="DRONE AERIAL &amp; SAFE FLIGHT">无人机航拍与安全飞行</h2>
+          </div>
+          <span class="help-badge-pill" data-i18n-zh="🛸 选购 / 申报 / 航拍均可提问" data-i18n-en="🛸 GEAR, AIRSPACE &amp; AERIAL Q&amp;A">🛸 选购 / 申报 / 航拍均可提问</span>
+        </div>
 
-            <div class="help-contact-card">
-              <div class="help-secondary-tag">ONLINE GUIDANCE · 邮件联系我获取线上指导</div>
-              <div class="help-contact-row">
-                <span>👤 姓名 / 年级</span>
-                <strong>冯靖翔 Shawn Feng · Moonshot Academy G9</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>✉️ 我的邮箱</span>
-                <strong>shawnfeng@moonshotacademy.cn</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>💻 指导形式</span>
-                <strong>提供线上指导（选购与空域申报答疑 / 航拍构图评析）</strong>
-              </div>
-            </div>
+        <!-- 2. 图片 (Image) -->
+        <div class="help-card-media" data-open-help-modal="drone" role="button" tabindex="0" aria-label="点击查看无人机航拍与安全飞行完整详情">
+          <img src="Project pictures/project 4a.jpg" alt="无人机航拍与安全飞行">
+        </div>
+
+        <!-- 3. 展示出的内容 (Concise 3-Column Core Summary) -->
+        <div class="help-summary-columns">
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。" data-i18n-en="Beginners curious about DJI drones, airspace rules, or top-down aerial composition.">
+              想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。
+            </p>
           </div>
 
-          <div class="help-card-right-col">
-            <div class="help-card-header">
-              <span class="help-card-title-en">02 / DRONE AERIAL ONLINE GUIDANCE, COMPOSITION &amp; SAFE FLIGHT</span>
-              <h2 class="help-card-title-cn">无人机航拍新手指导、高空构图与合规安全飞行线上答疑</h2>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。" data-i18n-en="Online guidance on UOM airspace checks, pre-flight safety, and aerial panorama editing.">
+              提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。
+            </p>
+          </div>
 
-            <div class="help-meta-list">
-              <div class="help-meta-row">
-                <span class="help-meta-label">帮谁 WHO</span>
-                <span class="help-meta-value">对大疆（DJI）无人机感兴趣想咨询选购、刚买无人机不敢独自起飞、不清楚 2025 空域政策与实名登记流程，或想学习高空俯拍（Top-Down）构图的同学。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">做什么 WHAT</span>
-                <span class="help-meta-value">提供无人机航拍全流程线上指导：为你解答 UOM 实名登记、适飞空域查询、返航高度与避障设置等安全问题，并在线上指导航拍运镜方法、高空俯视构图与全景接片后期。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">相关经历 EXP</span>
-                <span class="help-meta-value">4 年无人机航拍经验，曾赴甘肃苦水丹霞、川西九寨沟、西安城墙等地航拍创作，熟悉北京 2025 新规下的合规飞行路线规划与安全操作。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">投入时间 TIME</span>
-                <span class="help-meta-value">每周末可投入 <strong>1 – 1.5 小时</strong> 提供线上航拍构图与后期指导，平时随时通过邮件解答机型选购、空域申报与飞行安全设置问题。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">怎样开始 START</span>
-                <span class="help-meta-value">哪怕你还没有买无人机，也可以随时发邮件到 <strong>shawnfeng@moonshotacademy.cn</strong> 问我任何关于无人机与航拍的问题，获取线上指导与解答！</span>
-              </div>
-            </div>
-
-            <div class="help-card-actions">
-              <button type="button" class="help-expand-btn" aria-expanded="false" data-target-drawer="drawer-drone">
-                <span class="expand-btn-text">展开详情与可问问题 / Details</span>
-                <span class="help-expand-icon">↓</span>
-              </button>
-              <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%88%AA%E6%8B%8D%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81&body=Hi%20Shawn%EF%BC%8C%0A%0A%E6%88%91%E7%9C%8B%E4%BA%86%E4%BD%A0%E7%9A%84%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%AB%99%20How%20Can%20I%20Help%20%E9%A1%B5%E9%9D%A2%EF%BC%8C%E6%83%B3%E8%AF%B7%E6%95%99%E4%BD%A0%E5%85%B3%E4%BA%8E%E3%80%90%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%88%AA%E6%8B%8D%20%2F%20%E7%A9%BA%E5%9F%9F%E7%94%B3%E6%8A%A5%E3%80%91%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A%0A">
-                ✉ 发邮件问我 / 复制邮箱 ↗
-              </button>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。" data-i18n-en="1–1.5h every weekend. Email your drone or aerial questions to shawnfeng@moonshotacademy.cn.">
+              每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。
+            </p>
           </div>
         </div>
 
-        <!-- Expandable Activity Details Drawer 02 -->
-        <div class="help-detail-drawer" id="drawer-drone">
-          <div class="drawer-section-title">ONLINE GUIDANCE TOPICS · 我能在线上为你指导与解答的 3 件事</div>
-          <div class="drawer-steps">
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 01 · SAFE &amp; LEGAL</div>
-              <div class="drawer-step-text">空域与合规线上指导：教你如何查询适飞空域、完成 UOM 实名登记，以及起飞前 GPS、指南针与返航高度设置。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 02 · COMPOSITION</div>
-              <div class="drawer-step-text">航拍运镜与构图指导：线上解答新手如何设置平稳运镜参数，掌握环绕镜头与垂直 90° 上帝视角构图技巧。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 03 · AERIAL EDIT</div>
-              <div class="drawer-step-text">航拍后期与接片指导：在线解答 D-Log M 色彩还原、广角畸变校正与高空全景照片高清合成方法。</div>
-            </div>
-          </div>
-
-          <div class="drawer-section-title">INTERACTIVE CHECKLIST · 你最想提问或了解哪部分？（可点击勾选）</div>
-          <div class="drawer-checklist">
-            <label class="drawer-check-item">
-              <input type="checkbox" checked>
-              <span>了解北京及出游目的地如何查询合法适飞空域与 UOM 实名登记流程</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>新手选购哪款大疆无人机更合适，或第一次起飞前需要做哪些安全参数设置</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>如何利用地面道路、河流与建筑线条拍出有秩序感的航拍大图与后期调色</span>
-            </label>
-          </div>
+        <!-- 4. 了解更多 (Learn More Action Bar) -->
+        <div class="help-card-footer">
+          <button type="button" class="help-learn-more-btn" data-open-help-modal="drone" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+            了解更多 / 查看完整详情 →
+          </button>
+          <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%88%AA%E6%8B%8D%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+            ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+          </button>
         </div>
       </article>
 
-      <!-- ==================== PROPOSAL 03: STOP-MOTION VIDEO & AI WEB ONLINE GUIDANCE ==================== -->
+      <!-- ==================== 03: 短片剪辑与个人建站 ==================== -->
       <article class="help-card" data-help-category="digital" role="tabpanel" hidden>
-        <div class="help-card-top-split">
-          <div class="help-card-left-col">
-            <div class="help-card-banner">
-              <img src="Project pictures/Project 1.png" alt="定格动画短片与数字视觉建站创作">
-              <div class="help-banner-badges">
-                <span class="help-tag-pill">PROPOSAL 03 / 03 · DIGITAL CREATION</span>
-                <span class="help-beginner-pill">🎬 短片分镜 / AI 建站均可线上指导</span>
-              </div>
-            </div>
+        <!-- 1. 标题 (Title) -->
+        <div class="help-card-header">
+          <div class="help-card-title-group">
+            <span class="help-card-eyebrow">PROPOSAL 03 / VIDEO EDITING &amp; WEB CREATION</span>
+            <h2 class="help-card-title" data-i18n-zh="短片剪辑与个人建站" data-i18n-en="VIDEO EDITING &amp; WEB CREATION">短片剪辑与个人建站</h2>
+          </div>
+          <span class="help-badge-pill" data-i18n-zh="🎬 定格动画 / AI 建站均可提问" data-i18n-en="🎬 STOP-MOTION &amp; AI WEB Q&amp;A">🎬 定格动画 / AI 建站均可提问</span>
+        </div>
 
-            <div class="help-contact-card">
-              <div class="help-secondary-tag">ONLINE GUIDANCE · 邮件联系我获取线上指导</div>
-              <div class="help-contact-row">
-                <span>👤 姓名 / 年级</span>
-                <strong>冯靖翔 Shawn Feng · Moonshot Academy G9</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>✉️ 我的邮箱</span>
-                <strong>shawnfeng@moonshotacademy.cn</strong>
-              </div>
-              <div class="help-contact-row">
-                <span>💻 指导形式</span>
-                <strong>提供线上指导（邮件发我设计稿、代码或视频片段）</strong>
-              </div>
-            </div>
+        <!-- 2. 图片 (Image) -->
+        <div class="help-card-media" data-open-help-modal="digital" role="button" tabindex="0" aria-label="点击查看短片剪辑与个人建站完整详情">
+          <img src="Project pictures/Project 1.png" alt="短片剪辑与个人建站">
+        </div>
+
+        <!-- 3. 展示出的内容 (Concise 3-Column Core Summary) -->
+        <div class="help-summary-columns">
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="正在制作学校项目视频/定格动画，或想用 Figma + AI 搭建个人网站的同学。" data-i18n-en="Students making school video projects or building a personal website with Figma + AI.">
+              正在制作学校项目视频/定格动画，或想用 Figma + AI 搭建个人网站的同学。
+            </p>
           </div>
 
-          <div class="help-card-right-col">
-            <div class="help-card-header">
-              <span class="help-card-title-en">03 / STOP-MOTION VIDEO EDITING &amp; FIGMA + AI WEB ONLINE GUIDANCE</span>
-              <h2 class="help-card-title-cn">定格动画 / 视频短片拍摄剪辑 &amp; Figma + AI 个人建站线上指导</h2>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="提供短片分镜剪辑建议，或线上指导 AI 建站提示词（Prompt）编写与 GitHub 部署。" data-i18n-en="Online feedback on video pacing, AI prompting for web design, and GitHub Pages deployment.">
+              提供短片分镜剪辑建议，或线上指导 AI 建站提示词（Prompt）编写与 GitHub 部署。
+            </p>
+          </div>
 
-            <div class="help-meta-list">
-              <div class="help-meta-row">
-                <span class="help-meta-label">帮谁 WHO</span>
-                <span class="help-meta-value">正在制作学校项目视频或定格动画短片需要分镜与剪辑建议的同学，或者想用 Figma + AI 把自己的设计稿变成可交互个人网站并部署到 GitHub Pages 的朋友。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">做什么 WHAT</span>
-                <span class="help-meta-value">提供线上指导：解答定格动画固定机位、分镜节奏与音效卡点问题；或在线上指导如何给 AI 写结构化提示词（Prompt）、调整 HTML/CSS 排版样式，帮你排查网页显示与 GitHub 部署问题。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">相关经历 EXP</span>
-                <span class="help-meta-value">2026 年 4 月担任校园定格动画悬疑短片项目（Stop-Motion Thriller）组长与摄影记录，并独立使用 Figma + AI 编程完成了当前这个液态玻璃风格个人作品集网站。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">投入时间 TIME</span>
-                <span class="help-meta-value">每周可投入 <strong>45 – 60 分钟</strong> 在线上帮你看代码、调样式或交流视频剪辑思路，平时收到邮件问题后也会及时回复。</span>
-              </div>
-              <div class="help-meta-row">
-                <span class="help-meta-label">怎样开始 START</span>
-                <span class="help-meta-value">点击下方「展开详情与可问问题」，或直接发邮件到 <strong>shawnfeng@moonshotacademy.cn</strong> 把你的 Figma 截图、网页问题或视频想法发给我，即可获取线上指导！</span>
-              </div>
-            </div>
-
-            <div class="help-card-actions">
-              <button type="button" class="help-expand-btn" aria-expanded="false" data-target-drawer="drawer-digital">
-                <span class="expand-btn-text">展开详情与可问问题 / Details</span>
-                <span class="help-expand-icon">↓</span>
-              </button>
-              <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E7%9F%AD%E7%89%87%E5%89%AA%E8%BE%91%E4%B8%8EAI%E5%BB%BA%E7%AB%99%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81&body=Hi%20Shawn%EF%BC%8C%0A%0A%E6%88%91%E7%9C%8B%E4%BA%86%E4%BD%A0%E7%9A%84%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%AB%99%20How%20Can%20I%20Help%20%E9%A1%B5%E9%9D%A2%EF%BC%8C%E6%83%B3%E8%AF%B7%E6%95%99%E4%BD%A0%E5%85%B3%E4%BA%8E%E3%80%90%E5%AE%9A%E6%A0%BC%E5%8A%A8%E7%94%BB%E7%9F%AD%E7%89%87%20%2F%20Figma%2BAI%E4%B8%AA%E4%BA%BA%E5%BB%BA%E7%AB%99%E3%80%91%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A%0A">
-                ✉ 发邮件问我 / 复制邮箱 ↗
-              </button>
-            </div>
+          <div class="help-summary-col">
+            <h3 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h3>
+            <p class="help-summary-col-desc" data-i18n-zh="每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或问题即可。" data-i18n-en="45–60 min weekly. Email your design screenshot or question to shawnfeng@moonshotacademy.cn.">
+              每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或问题即可。
+            </p>
           </div>
         </div>
 
-        <!-- Expandable Activity Details Drawer 03 -->
-        <div class="help-detail-drawer" id="drawer-digital">
-          <div class="drawer-section-title">ONLINE GUIDANCE TOPICS · 我能在线上为你指导与解答的 3 件事</div>
-          <div class="drawer-steps">
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 01 · STOP-MOTION</div>
-              <div class="drawer-step-text">定格动画与短片线上指导：如何设计悬疑或叙事分镜、保持逐帧光线稳定，以及通过音效增强节奏感。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 02 · AI PROMPTING</div>
-              <div class="drawer-step-text">Figma 转网页提示词指导：如何向 AI 清晰描述页面布局、保留原有内容并一步步修改调试网页细节。</div>
-            </div>
-            <div class="drawer-step-box">
-              <div class="drawer-step-num">TOPIC 03 · GITHUB PAGES</div>
-              <div class="drawer-step-text">个人网站发布上线指导：如何把本地做好的 HTML/CSS/JS 文件夹上传到 GitHub 仓库并生成公开链接。</div>
-            </div>
-          </div>
-
-          <div class="drawer-section-title">INTERACTIVE CHECKLIST · 发邮件获取线上指导时可以附上（可点击勾选）</div>
-          <div class="drawer-checklist">
-            <label class="drawer-check-item">
-              <input type="checkbox" checked>
-              <span>你正在做的短片主题/分镜草图，或你想实现的个人网站页面截图</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>你在网页制作或剪辑时遇到的具体卡点（例如：图片比例不对 / 弹窗不显示 / GitHub 链接打不开）</span>
-            </label>
-            <label class="drawer-check-item">
-              <input type="checkbox">
-              <span>直接发邮件至 shawnfeng@moonshotacademy.cn，我通过邮件或线上屏幕共享为你提供指导</span>
-            </label>
-          </div>
+        <!-- 4. 了解更多 (Learn More Action Bar) -->
+        <div class="help-card-footer">
+          <button type="button" class="help-learn-more-btn" data-open-help-modal="digital" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+            了解更多 / 查看完整详情 →
+          </button>
+          <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E7%9F%AD%E7%89%87%E4%B8%8E%E5%BB%BA%E7%AB%99%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+            ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+          </button>
         </div>
       </article>
     </main>
@@ -408,16 +225,43 @@
     <div class="guidance-bar-container">
       <a href="home page.html" class="guidance-bar" aria-label="Back to Home Page">
         <span class="guidance-arrow">↑</span>
-        <span class="guidance-hint">00 / BACK TO HOME</span>
+        <span class="guidance-hint" data-i18n-zh="00 / 返回首页" data-i18n-en="00 / BACK TO HOME">00 / BACK TO HOME</span>
       </a>
     </div>
 
     <!-- Footer -->
     <footer class="page-footer">
       <span>SHAWN FENG</span>
-      <a href="projects detail.html">← PHOTOGRAPHY WORK</a>
+      <a href="projects detail.html" data-i18n-zh="← 摄影作品" data-i18n-en="← PHOTOGRAPHY WORK">← PHOTOGRAPHY WORK</a>
       <span>PORTFOLIO / 2026</span>
     </footer>
+  </div>
+
+  <!-- ==========================================================================
+       Liquid Glass Full Details Modal (Opens When Clicking "了解更多 / Learn More")
+       Contains All 5 Required Assignment Dimensions + Interactive Checklist
+       ========================================================================== -->
+  <div id="help-detail-modal" class="help-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="help-modal-card" id="help-modal-card">
+      <div class="help-modal-header">
+        <div>
+          <span class="help-modal-tag" id="help-modal-tag">PROPOSAL 01 / ONLINE GUIDANCE</span>
+          <h3 class="help-modal-title" id="help-modal-title">摄影与后期调色</h3>
+        </div>
+        <button type="button" class="help-modal-close" id="help-modal-close" aria-label="关闭详情窗口">&times;</button>
+      </div>
+
+      <div class="help-modal-body" id="help-modal-body">
+        <!-- Populated dynamically by site.js according to selected proposal & current language -->
+      </div>
+
+      <div class="help-modal-footer">
+        <span class="help-modal-email-label">✉️ shawnfeng@moonshotacademy.cn</span>
+        <button type="button" class="help-copy-btn" id="help-modal-email-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=Hi%20Shawn%EF%BC%81">
+          ✉ 发邮件向我提问 / 复制邮箱 ↗
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Copy Success Toast -->

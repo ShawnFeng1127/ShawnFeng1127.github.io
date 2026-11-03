@@ -394,6 +394,40 @@ body {
   width: 100%;
 }
 
+/* Global Language Toggle Button in Top Glass Navbar */
+.nav-lang-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink-primary);
+  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.nav-lang-btn:hover {
+  border-color: var(--accent-copper);
+  background: rgba(196, 122, 69, 0.22);
+  color: #FFFFFF;
+}
+
+.nav-lang-btn .lang-opt.is-active {
+  color: #FFB984;
+  font-weight: 700;
+}
+
+.nav-lang-btn .lang-sep {
+  opacity: 0.45;
+}
+
 /* ==========================================================================
    Minimalist Eyebrow Component
    ========================================================================== */

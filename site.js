@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initGlobalLanguageSwitcher();
   initSiteEntranceAnimation();
   initAmbientGlow();
   initDepthParallax();
@@ -1263,6 +1264,8 @@ function initScrollAndKeyGuidance() {
       // Cooldown right after page load so leftover wheel inertia doesn't skip a page
       if (performance.now() - pageLoadTime < 650 || isNavigatingPage) return;
       if (modal && modal.classList.contains('is-active')) return;
+      const helpModal = document.getElementById('help-detail-modal');
+      if (helpModal && helpModal.classList.contains('is-active')) return;
       if (document.getElementById('site-intro-overlay')) return;
       // Ignore if cursor is inside the horizontal gallery viewport
       if (galleryViewport && galleryViewport.contains(e.target)) return;
@@ -1327,42 +1330,398 @@ function initScrollAndKeyGuidance() {
 }
 
 /**
- * 6. Interactive Operations on "How Can I Help / Ask Me Anything" Page (help.html)
- *    - Expand / collapse detail & Q&A drawers (.help-expand-btn -> .help-detail-drawer)
- *    - Filter / highlight proposal cards by topic (.help-filter-btn -> [data-help-category])
- *    - One-click copy email address (shawnfeng@moonshotacademy.cn) + open mailto (.help-copy-btn -> #help-copy-toast)
+ * 6. Global Language Switcher (中文 / EN) Across All Pages
+ *    - Persists selection in localStorage ('shawn_site_lang')
+ *    - Updates all elements with data-i18n-zh / data-i18n-en & data-i18n-html-zh / data-i18n-html-en
+ */
+function getSiteLanguage() {
+  try {
+    return localStorage.getItem('shawn_site_lang') || 'zh';
+  } catch (_) {
+    return 'zh';
+  }
+}
+
+function applySiteLanguage(lang) {
+  const normalized = lang === 'en' ? 'en' : 'zh';
+  document.documentElement.setAttribute('data-site-lang', normalized);
+  try {
+    localStorage.setItem('shawn_site_lang', normalized);
+  } catch (_) {}
+
+  document.querySelectorAll('.nav-lang-btn .lang-opt').forEach((opt) => {
+    opt.classList.toggle('is-active', opt.getAttribute('data-lang') === normalized);
+  });
+
+  document.querySelectorAll('[data-i18n-zh][data-i18n-en]').forEach((el) => {
+    const val = el.getAttribute(normalized === 'en' ? 'data-i18n-en' : 'data-i18n-zh');
+    if (val !== null) {
+      el.textContent = val;
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-html-zh][data-i18n-html-en]').forEach((el) => {
+    const val = el.getAttribute(normalized === 'en' ? 'data-i18n-html-en' : 'data-i18n-html-zh');
+    if (val !== null) {
+      el.innerHTML = val;
+    }
+  });
+
+  window.dispatchEvent(new CustomEvent('shawn:langchange', { detail: { lang: normalized } }));
+}
+
+function initGlobalLanguageSwitcher() {
+  const currentLang = getSiteLanguage();
+  applySiteLanguage(currentLang);
+
+  document.querySelectorAll('.nav-lang-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextLang = getSiteLanguage() === 'zh' ? 'en' : 'zh';
+      applySiteLanguage(nextLang);
+    });
+  });
+}
+
+/**
+ * 7. Interactive Operations on "How Can I Help" Page (help.html)
+ *    - Top horizontal bar switches which single proposal card is displayed (.help-filter-btn)
+ *    - "了解更多 / Learn More" button opens the Liquid Glass Full Details Modal (#help-detail-modal)
+ *    - One-click copy email address (shawnfeng@moonshotacademy.cn) + open mailto
  */
 function initHelpPageInteractions() {
-  const expandBtns = document.querySelectorAll('.help-expand-btn');
   const filterBtns = document.querySelectorAll('.help-filter-btn');
   const copyBtns = document.querySelectorAll('.help-copy-btn');
   const helpItems = document.querySelectorAll('[data-help-category]');
+  const openModalTriggers = document.querySelectorAll('[data-open-help-modal]');
+  const helpModal = document.getElementById('help-detail-modal');
+  const helpModalTag = document.getElementById('help-modal-tag');
+  const helpModalTitle = document.getElementById('help-modal-title');
+  const helpModalBody = document.getElementById('help-modal-body');
+  const helpModalClose = document.getElementById('help-modal-close');
   const toastEl = document.getElementById('help-copy-toast');
   let toastTimer = null;
+  let activeModalKey = null;
 
-  // 1. Expand / Collapse Details & Questions Drawers
-  expandBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target-drawer') || btn.getAttribute('data-target');
-      const drawer = targetId ? document.getElementById(targetId) : null;
-      if (!drawer) return;
+  const HELP_DETAILS_DATA = {
+    photo: {
+      tag: 'PROPOSAL 01 / PHOTOGRAPHY & COLOR GRADING',
+      titleZh: '摄影与后期调色 · 线上指导详情',
+      titleEn: 'Photography & Color Grading · Full Details',
+      rows: [
+        {
+          labelZh: '帮谁 WHO',
+          labelEn: 'WHO I HELP',
+          valZh: '想提升拍照构图、想拍出有氛围感的城市风光或人像，或拍完照片不知道如何用 Lightroom / Camera Raw 调出干净冷暖色调的同学与摄影新手（手机或相机拍照均可）。',
+          valEn: 'Students and beginners who want to improve photo framing, master twilight exposure, or learn clean Lightroom / Camera Raw color grading (phone or camera welcome).'
+        },
+        {
+          labelZh: '做什么 WHAT',
+          labelEn: 'WHAT WE DO',
+          valZh: '提供线上摄影与修图指导：解答你在拍摄构图、曝光参数（ISO/快门/光圈）与后期修图上的疑问；你可以把原片发到我邮箱，我在线上为你分析取景构图并做调色修改示范。',
+          valEn: 'Online photography & grading guidance: send your photos to my email for framing critique, exposure parameter Q&A (ISO/shutter/aperture), and step-by-step Lightroom grading demos.'
+        },
+        {
+          labelZh: '相关经历 EXP',
+          labelEn: 'EXPERIENCE',
+          valZh: '持续 2 年个人摄影项目，走过北京、郑州、西安、上海、重庆、甘肃、九寨沟等地，独立完成 10 余组建筑、风光与人文纪实系列的拍摄、选片与后期调色。',
+          valEn: '2-year personal photography project across Beijing, Zhengzhou, Xi’an, Shanghai, Chongqing, Gansu, and Jiuzhaigou—independently shooting and grading 10+ architectural and landscape series.'
+        },
+        {
+          labelZh: '投入时间 TIME',
+          labelEn: 'TIME COMMIT',
+          valZh: '每周末可投入 1.5 – 2 小时提供线上看片与调色指导，平时收到提问邮件后也会在当天或次日详细回复。',
+          valEn: '1.5–2 hours every weekend for online photo critique and grading walkthroughs, plus email replies within 24–48 hours on school days.'
+        },
+        {
+          labelZh: '怎样开始 START',
+          labelEn: 'HOW TO START',
+          valZh: '直接发送邮件至 shawnfeng@moonshotacademy.cn，附上 1–3 张你拍的原片或你想请教的摄影/调色问题即可开始！',
+          valEn: 'Send an email to shawnfeng@moonshotacademy.cn with 1–3 of your photos or your specific photography/color grading question.'
+        }
+      ],
+      topics: [
+        {
+          num: 'TOPIC 01 · FRAMING',
+          zh: '线上构图评析：分析三分法、引导线、画面裁剪比例与长焦空间压缩技巧。',
+          en: 'Online Framing Critique: Rule of thirds, leading lines, aspect crops, and telephoto compression.'
+        },
+        {
+          num: 'TOPIC 02 · EXPOSURE',
+          zh: '光线与参数答疑：解答日落与蓝调时刻如何避免高光过曝或暗部死黑。',
+          en: 'Exposure & Twilight Q&A: How to balance sunset highlights and blue-hour shadow detail.'
+        },
+        {
+          num: 'TOPIC 03 · GRADING',
+          zh: '后期调色示范：演示色温校准、暗部细节提亮与冷暖色调分离。',
+          en: 'RAW Color Grading: White balance calibration, shadow recovery, and cool-warm color separation.'
+        }
+      ],
+      checks: [
+        {
+          zh: '你想请教的具体问题（例如：怎么构图更有层次 / 夜景怎么去噪点 / 怎么调出蓝调冷暖对比）',
+          en: 'Your specific question (e.g., how to improve framing depth, reduce night noise, or grade blue-hour tones)'
+        },
+        {
+          zh: '1–3 张你拍的原片（RAW 或 JPG 均可）或参考图，直接作为邮件附件发送',
+          en: '1–3 original photos (RAW or JPG) or reference images attached to your email'
+        },
+        {
+          zh: '你目前使用的拍摄设备（手机型号 / 微单或单反相机均可）',
+          en: 'Your shooting device (smartphone model or mirrorless/DSLR camera)'
+        }
+      ]
+    },
+    drone: {
+      tag: 'PROPOSAL 02 / DRONE AERIAL & SAFE FLIGHT',
+      titleZh: '无人机航拍与安全飞行 · 线上指导详情',
+      titleEn: 'Drone Aerial & Safe Flight · Full Details',
+      rows: [
+        {
+          labelZh: '帮谁 WHO',
+          labelEn: 'WHO I HELP',
+          valZh: '对大疆（DJI）无人机感兴趣想咨询选购、刚买无人机不敢独自起飞、不清楚 2025 空域政策与实名登记流程，或想学习高空俯拍（Top-Down）构图的同学。',
+          valEn: 'Students curious about choosing a DJI drone, nervous about their first flight, unsure about 2025 airspace registration rules, or learning top-down aerial composition.'
+        },
+        {
+          labelZh: '做什么 WHAT',
+          labelEn: 'WHAT WE DO',
+          valZh: '提供无人机航拍全流程线上指导：为你解答 UOM 实名登记、适飞空域查询、返航高度与避障设置等安全问题，并在线上指导航拍运镜方法、高空俯视构图与全景合成。',
+          valEn: 'Online drone guidance covering UOM real-name registration, legal airspace checks, RTH/obstacle safety settings, top-down composition, and aerial panorama stitching.'
+        },
+        {
+          labelZh: '相关经历 EXP',
+          labelEn: 'EXPERIENCE',
+          valZh: '4 年无人机航拍经验，曾赴甘肃苦水丹霞、川西九寨沟、西安中轴线与永宁门、郑州龙湖湿地等地航拍创作，熟悉北京 2025 新规下的合规安全飞行操作。',
+          valEn: '4 years of DJI drone aerial experience across Gansu Danxia, Jiuzhaigou, Xi’an Central Axis, and Zhengzhou wetlands, well-versed in Beijing’s 2025 airspace regulations.'
+        },
+        {
+          labelZh: '投入时间 TIME',
+          labelEn: 'TIME COMMIT',
+          valZh: '每周末可投入 1 – 1.5 小时提供线上航拍构图与后期指导，平时随时通过邮件解答机型选购、空域申报与飞行设置问题。',
+          valEn: '1–1.5 hours every weekend for online aerial composition and post-processing guidance, plus anytime email Q&A on gear and airspace rules.'
+        },
+        {
+          labelZh: '怎样开始 START',
+          labelEn: 'HOW TO START',
+          valZh: '哪怕你还没有买无人机，也可以直接发邮件至 shawnfeng@moonshotacademy.cn 告诉我你想了解“选购/申报”还是“航拍构图与后期”！',
+          valEn: 'Even if you do not own a drone yet, email shawnfeng@moonshotacademy.cn and let me know whether you want advice on gear/airspace rules or aerial composition.'
+        }
+      ],
+      topics: [
+        {
+          num: 'TOPIC 01 · SAFE & LEGAL',
+          zh: '空域与合规指导：查询适飞空域、UOM 实名登记，以及起飞前 GPS 与返航高度设置。',
+          en: 'Airspace & Safety: Checking legal fly zones, UOM registration, and pre-flight RTH settings.'
+        },
+        {
+          num: 'TOPIC 02 · COMPOSITION',
+          zh: '高空俯拍构图：如何利用道路、河流与建筑几何轴线拍出有秩序感的航拍画面。',
+          en: 'Aerial Composition: Using roads, shorelines, and architectural axes for striking top-down frames.'
+        },
+        {
+          num: 'TOPIC 03 · AERIAL EDIT',
+          zh: '航拍后期与接片：解答 D-Log M 色彩还原、广角畸变校正与高空全景合成。',
+          en: 'Aerial Post-Processing: D-Log M color recovery, distortion correction, and panorama stitching.'
+        }
+      ],
+      checks: [
+        {
+          zh: '了解北京及出游目的地如何查询合法适飞空域与 UOM 实名登记流程',
+          en: 'How to check legal flight zones in Beijing/travel destinations and complete UOM registration'
+        },
+        {
+          zh: '新手选购哪款大疆无人机更合适，或第一次起飞前需要做哪些安全参数设置',
+          en: 'Which DJI drone model suits beginners best and essential pre-flight safety settings'
+        },
+        {
+          zh: '如何对航拍照片或视频进行俯视构图裁剪与 D-Log 色彩还原',
+          en: 'How to frame top-down aerial shots and grade D-Log aerial footage'
+        }
+      ]
+    },
+    digital: {
+      tag: 'PROPOSAL 03 / VIDEO EDITING & WEB CREATION',
+      titleZh: '短片剪辑与个人建站 · 线上指导详情',
+      titleEn: 'Video Editing & Web Creation · Full Details',
+      rows: [
+        {
+          labelZh: '帮谁 WHO',
+          labelEn: 'WHO I HELP',
+          valZh: '正在制作学校项目视频或定格动画短片需要分镜与剪辑建议的同学，或者想用 Figma + AI 把自己的设计稿变成个人网站并部署上线的朋友。',
+          valEn: 'Students working on school video/stop-motion projects or wanting to turn a Figma design into a live personal website using AI.'
+        },
+        {
+          labelZh: '做什么 WHAT',
+          labelEn: 'WHAT WE DO',
+          valZh: '提供线上指导：解答定格动画固定机位、分镜节奏与音效卡点问题；或在线上指导如何给 AI 写结构化提示词（Prompt）、调整 HTML/CSS 样式并部署到 GitHub Pages。',
+          valEn: 'Online guidance on stop-motion storyboarding, editing rhythm, writing structured AI prompts for HTML/CSS layout, and deploying to GitHub Pages.'
+        },
+        {
+          labelZh: '相关经历 EXP',
+          labelEn: 'EXPERIENCE',
+          valZh: '2026 年 4 月担任校园定格动画悬疑短片项目组长与摄影记录，并独立使用 Figma + AI 编程完成了当前这个液态玻璃风格个人作品集网站。',
+          valEn: 'Group leader & cinematographer for a 2026 Stop-Motion Thriller project, and creator of this Liquid Glass portfolio website built with Figma + AI.'
+        },
+        {
+          labelZh: '投入时间 TIME',
+          labelEn: 'TIME COMMIT',
+          valZh: '每周可投入 45 – 60 分钟在线上帮你看代码、调样式或交流视频剪辑思路，平时收到提问邮件后也会及时回复。',
+          valEn: '45–60 minutes weekly for online code/style review or video editing feedback, plus prompt email replies.'
+        },
+        {
+          labelZh: '怎样开始 START',
+          labelEn: 'HOW TO START',
+          valZh: '直接发邮件到 shawnfeng@moonshotacademy.cn 把你的 Figma 截图、网页报错或视频片段发给我，即可获取线上指导！',
+          valEn: 'Email your Figma screenshot, webpage issue, or video draft to shawnfeng@moonshotacademy.cn to get started.'
+        }
+      ],
+      topics: [
+        {
+          num: 'TOPIC 01 · STOP-MOTION',
+          zh: '定格动画与剪辑：如何设计分镜、保持逐帧光线稳定，以及通过音效增强节奏感。',
+          en: 'Stop-Motion & Pacing: Storyboarding, consistent frame lighting, and sound design rhythm.'
+        },
+        {
+          num: 'TOPIC 02 · AI PROMPTING',
+          zh: 'Figma 转网页提示词：如何向 AI 清晰描述页面布局、保留原有内容并一步步调试细节。',
+          en: 'AI Web Prompting: Structuring clear prompts to translate Figma layouts into clean code.'
+        },
+        {
+          num: 'TOPIC 03 · GITHUB PAGES',
+          zh: '个人网站发布上线：如何把本地 HTML/CSS/JS 文件夹上传到 GitHub 并生成公开链接。',
+          en: 'GitHub Pages Publishing: Uploading local HTML/CSS/JS files to GitHub for a live public URL.'
+        }
+      ],
+      checks: [
+        {
+          zh: '你正在做的短片主题/分镜草图，或你想实现的个人网站页面截图',
+          en: 'Your video storyboard/theme or a screenshot of your Figma personal website design'
+        },
+        {
+          zh: '你在网页制作或剪辑时遇到的具体问题（如：图片比例不对 / 弹窗不显示 / 链接打不开）',
+          en: 'Specific blockers you hit (e.g., aspect ratio issues, modal bugs, or GitHub Pages setup)'
+        },
+        {
+          zh: '直接发邮件至 shawnfeng@moonshotacademy.cn，我通过邮件为你提供线上指导',
+          en: 'Send directly to shawnfeng@moonshotacademy.cn for step-by-step online guidance'
+        }
+      ]
+    }
+  };
 
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-      const nextState = !isExpanded;
-      btn.setAttribute('aria-expanded', String(nextState));
-      drawer.classList.toggle('is-open', nextState);
-      drawer.setAttribute('aria-hidden', String(!nextState));
+  function renderHelpDetailModal(key) {
+    const data = HELP_DETAILS_DATA[key];
+    if (!data || !helpModalBody) return;
+    activeModalKey = key;
+    const isEn = getSiteLanguage() === 'en';
 
-      const labelSpan = btn.querySelector('.expand-btn-text');
-      if (labelSpan) {
-        labelSpan.textContent = nextState
-          ? '收起详情 / Collapse'
-          : '展开详情与可问问题 / Details';
+    if (helpModalTag) helpModalTag.textContent = data.tag;
+    if (helpModalTitle) helpModalTitle.textContent = isEn ? data.titleEn : data.titleZh;
+
+    const rowsHtml = data.rows
+      .map(
+        (r) => `
+        <div class="modal-meta-row">
+          <span class="modal-meta-label">${isEn ? r.labelEn : r.labelZh}</span>
+          <span class="modal-meta-value">${isEn ? r.valEn : r.valZh}</span>
+        </div>`
+      )
+      .join('');
+
+    const topicsHtml = data.topics
+      .map(
+        (t) => `
+        <div class="drawer-step-box">
+          <div class="drawer-step-num">${t.num}</div>
+          <div class="drawer-step-text">${isEn ? t.en : t.zh}</div>
+        </div>`
+      )
+      .join('');
+
+    const checksHtml = data.checks
+      .map(
+        (c, i) => `
+        <label class="drawer-check-item">
+          <input type="checkbox" ${i === 0 ? 'checked' : ''}>
+          <span>${isEn ? c.en : c.zh}</span>
+        </label>`
+      )
+      .join('');
+
+    helpModalBody.innerHTML = `
+      <div class="modal-meta-list">${rowsHtml}</div>
+      <div>
+        <div class="drawer-section-title">${
+          isEn
+            ? 'ONLINE GUIDANCE TOPICS · 3 AREAS I CAN HELP WITH'
+            : 'ONLINE GUIDANCE TOPICS · 我能在线上为你指导与解答的 3 件事'
+        }</div>
+        <div class="drawer-steps">${topicsHtml}</div>
+      </div>
+      <div>
+        <div class="drawer-section-title">${
+          isEn
+            ? 'INTERACTIVE CHECKLIST · WHAT TO INCLUDE IN YOUR EMAIL'
+            : 'INTERACTIVE CHECKLIST · 发邮件获取线上指导时可以附上（可点击勾选）'
+        }</div>
+        <div class="drawer-checklist">${checksHtml}</div>
+      </div>
+    `;
+  }
+
+  function openHelpModal(key) {
+    if (!helpModal) return;
+    renderHelpDetailModal(key);
+    helpModal.classList.add('is-active');
+    helpModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeHelpModal() {
+    if (!helpModal) return;
+    helpModal.classList.remove('is-active');
+    helpModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    activeModalKey = null;
+  }
+
+  openModalTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const key = trigger.getAttribute('data-open-help-modal') || 'photo';
+      openHelpModal(key);
+    });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const key = trigger.getAttribute('data-open-help-modal') || 'photo';
+        openHelpModal(key);
       }
     });
   });
 
-  // 2. Top Horizontal Switcher Bar: Only Show 1 Help Proposal at a Time
+  if (helpModalClose) {
+    helpModalClose.addEventListener('click', closeHelpModal);
+  }
+  if (helpModal) {
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) closeHelpModal();
+    });
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && helpModal && helpModal.classList.contains('is-active')) {
+      closeHelpModal();
+    }
+  });
+
+  window.addEventListener('shawn:langchange', () => {
+    if (activeModalKey && helpModal && helpModal.classList.contains('is-active')) {
+      renderHelpDetailModal(activeModalKey);
+    }
+  });
+
+  // Top Horizontal Switcher Bar: Only Show 1 Help Proposal at a Time
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const selectedFilter =
@@ -1382,7 +1741,7 @@ function initHelpPageInteractions() {
     });
   });
 
-  // 3. One-Click Copy Email (shawnfeng@moonshotacademy.cn) + Toast Notification
+  // One-Click Copy Email (shawnfeng@moonshotacademy.cn) + Toast Notification
   function showCopyToast(message) {
     if (!toastEl) return;
     toastEl.textContent = message;
@@ -1397,6 +1756,7 @@ function initHelpPageInteractions() {
     btn.addEventListener('click', async () => {
       const textToCopy = btn.getAttribute('data-copy-text') || 'shawnfeng@moonshotacademy.cn';
       const mailtoUrl = btn.getAttribute('data-mailto') || '';
+      const isEn = getSiteLanguage() === 'en';
 
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1415,8 +1775,14 @@ function initHelpPageInteractions() {
 
       const originalText = btn.textContent;
       btn.classList.add('is-copied');
-      btn.textContent = '✓ 已复制邮箱：shawnfeng@moonshotacademy.cn';
-      showCopyToast('✓ 已复制邮箱 shawnfeng@moonshotacademy.cn 到剪贴板！欢迎随时发邮件向我提问。');
+      btn.textContent = isEn
+        ? '✓ Copied: shawnfeng@moonshotacademy.cn'
+        : '✓ 已复制邮箱：shawnfeng@moonshotacademy.cn';
+      showCopyToast(
+        isEn
+          ? '✓ Copied shawnfeng@moonshotacademy.cn to clipboard! Feel free to email me anytime.'
+          : '✓ 已复制邮箱 shawnfeng@moonshotacademy.cn 到剪贴板！欢迎随时发邮件获取线上指导。'
+      );
 
       if (mailtoUrl) {
         window.location.href = mailtoUrl;

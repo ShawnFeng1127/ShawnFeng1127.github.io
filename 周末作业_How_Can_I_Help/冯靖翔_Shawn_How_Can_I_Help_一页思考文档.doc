@@ -166,17 +166,17 @@
   <div class="ideas-list">
     <div class="idea-box">
       <div class="idea-tag">IDEA 01 · 重点展开</div>
-      <div class="idea-name">城市建筑与蓝调摄影 &amp; 调色线上指导</div>
+      <div class="idea-name">摄影与后期调色线上指导</div>
       <div class="idea-desc">提供线上看片构图评析、曝光参数答疑与 Lightroom / Camera Raw 修图调色指导（手机或相机均可）。</div>
     </div>
     <div class="idea-box">
       <div class="idea-tag">IDEA 02 · 重点展开</div>
-      <div class="idea-name">无人机航拍与合规飞行线上指导</div>
+      <div class="idea-name">无人机航拍与安全飞行指导</div>
       <div class="idea-desc">提供无人机选购、UOM 空域申报、起飞安全参数设置与高空俯拍（Top-Down）构图线上指导。</div>
     </div>
     <div class="idea-box">
       <div class="idea-tag">IDEA 03 · 补充分享</div>
-      <div class="idea-name">定格动画剪辑 &amp; Figma+AI 建站指导</div>
+      <div class="idea-name">短片剪辑与个人建站指导</div>
       <div class="idea-desc">线上分享校园定格动画短片分镜节奏与剪辑经验，或指导如何用 Figma + AI 把设计稿变成个人网站。</div>
     </div>
   </div>
@@ -186,7 +186,7 @@
   <!-- Proposal 01 -->
   <div class="proposal-card">
     <div class="proposal-header">
-      <h3>提议 01：城市建筑与黄昏/蓝调摄影 &amp; 后期调色线上指导</h3>
+      <h3>提议 01：摄影与后期调色（线上指导）</h3>
       <span>提供线上看片评析 + 修图调色指导（📱 手机 / 相机均可）</span>
     </div>
     <table class="proposal-table">
@@ -216,7 +216,7 @@
   <!-- Proposal 02 -->
   <div class="proposal-card">
     <div class="proposal-header">
-      <h3>提议 02：无人机航拍新手指导、高空构图与合规安全飞行线上答疑</h3>
+      <h3>提议 02：无人机航拍与安全飞行（线上指导）</h3>
       <span>提供线上选购申报、安全设置与航拍构图指导</span>
     </div>
     <table class="proposal-table">
