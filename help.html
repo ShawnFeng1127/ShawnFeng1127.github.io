@@ -65,7 +65,7 @@
       </div>
     </section>
 
-    <!-- Single-Proposal Stage (Visual Hierarchy: 1. 标题 Title > 2. 图片 Image > 3. 展示出的内容 Summary > 4. 了解更多 Learn More) -->
+    <!-- Single-Proposal Stage (Visual Hierarchy: 1. 标题 Title > 2. 图片 Image Row > 3. 展示出的内容 Summary > 4. 了解更多 Learn More) -->
     <main class="help-proposals-grid">
       <!-- ==================== 01: 摄影与后期调色 (Default Active) ==================== -->
       <article class="help-card is-active-panel" data-help-category="photo" role="tabpanel">
@@ -78,9 +78,47 @@
           <span class="help-badge-pill" data-i18n-zh="📱 手机 / 相机均可提问" data-i18n-en="📱 PHONE &amp; CAMERA FRIENDLY">📱 手机 / 相机均可提问</span>
         </div>
 
-        <!-- 2. 图片 (Image) -->
-        <div class="help-card-media" data-open-help-modal="photo" role="button" tabindex="0" aria-label="点击查看摄影与后期调色完整详情">
-          <img src="Project pictures/project 9.jpg" alt="摄影与后期调色">
+        <!-- 2. 图片与视觉展示层 (Uncropped Proportionally Scaled Photos + Visual Spec Card Filling the Row) -->
+        <div class="help-visual-row">
+          <div class="help-card-media" data-open-help-modal="photo" role="button" tabindex="0" aria-label="北京 CBD 晚霞 — 点击查看详情">
+            <img src="Project pictures/project 9.jpg" alt="北京 CBD 晚霞">
+            <span class="help-media-caption">BEIJING CBD · AFTERGLOW</span>
+          </div>
+
+          <div class="help-card-media" data-open-help-modal="photo" role="button" tabindex="0" aria-label="北京 CBD 蓝调时刻 — 点击查看详情">
+            <img src="Project pictures/Project 3.png" alt="北京 CBD 蓝调时刻">
+            <span class="help-media-caption">BEIJING CBD · BLUE HOUR</span>
+          </div>
+
+          <aside class="help-visual-spec-card" data-open-help-modal="photo" role="button" tabindex="0">
+            <div class="spec-card-top">
+              <span class="spec-card-label" data-i18n-zh="色彩与参数 · VISUAL SPEC" data-i18n-en="COLOR &amp; EXIF SPEC">色彩与参数 · VISUAL SPEC</span>
+              <div class="spec-palette-row" aria-hidden="true">
+                <span class="palette-dot" style="background: #132238;"></span>
+                <span class="palette-dot" style="background: #2C4A6F;"></span>
+                <span class="palette-dot" style="background: #8E4A62;"></span>
+                <span class="palette-dot" style="background: #C47A45;"></span>
+                <span class="palette-dot" style="background: #F4B976;"></span>
+              </div>
+            </div>
+
+            <div class="spec-metrics-grid">
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">2 YRS</span>
+                <span class="spec-metric-tag" data-i18n-zh="摄影项目经验" data-i18n-en="PHOTO ARCHIVE">摄影项目经验</span>
+              </div>
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">10+</span>
+                <span class="spec-metric-tag" data-i18n-zh="城市与风光系列" data-i18n-en="CITY SERIES">城市与风光系列</span>
+              </div>
+            </div>
+
+            <div class="spec-tags-wrap">
+              <span class="spec-mini-pill">RAW 14-BIT</span>
+              <span class="spec-mini-pill">LIGHTROOM</span>
+              <span class="spec-mini-pill">FRAMING</span>
+            </div>
+          </aside>
         </div>
 
         <!-- 3. 展示出的内容 (Concise 3-Column Core Summary — Matches projects detail.html Density) -->
@@ -129,9 +167,47 @@
           <span class="help-badge-pill" data-i18n-zh="🛸 选购 / 申报 / 航拍均可提问" data-i18n-en="🛸 GEAR, AIRSPACE &amp; AERIAL Q&amp;A">🛸 选购 / 申报 / 航拍均可提问</span>
         </div>
 
-        <!-- 2. 图片 (Image) -->
-        <div class="help-card-media" data-open-help-modal="drone" role="button" tabindex="0" aria-label="点击查看无人机航拍与安全飞行完整详情">
-          <img src="Project pictures/project 4a.jpg" alt="无人机航拍与安全飞行">
+        <!-- 2. 图片与视觉展示层 (Uncropped Proportionally Scaled Photos + Visual Telemetry Card) -->
+        <div class="help-visual-row">
+          <div class="help-card-media" data-open-help-modal="drone" role="button" tabindex="0" aria-label="西安中轴线航拍 — 点击查看详情">
+            <img src="Project pictures/project 4a.jpg" alt="西安中轴线航拍">
+            <span class="help-media-caption">XI'AN AXIS · AERIAL VIEW</span>
+          </div>
+
+          <div class="help-card-media" data-open-help-modal="drone" role="button" tabindex="0" aria-label="甘肃苦水丹霞航拍 — 点击查看详情">
+            <img src="Project pictures/Project 2.jpg" alt="甘肃苦水丹霞航拍">
+            <span class="help-media-caption">GANSU DANXIA · TOP-DOWN</span>
+          </div>
+
+          <aside class="help-visual-spec-card" data-open-help-modal="drone" role="button" tabindex="0">
+            <div class="spec-card-top">
+              <span class="spec-card-label" data-i18n-zh="飞行参数 · FLIGHT TELEMETRY" data-i18n-en="FLIGHT TELEMETRY">飞行参数 · FLIGHT TELEMETRY</span>
+              <div class="spec-palette-row" aria-hidden="true">
+                <span class="palette-dot" style="background: #0F2437;"></span>
+                <span class="palette-dot" style="background: #2C5E7A;"></span>
+                <span class="palette-dot" style="background: #A45D38;"></span>
+                <span class="palette-dot" style="background: #D48954;"></span>
+                <span class="palette-dot" style="background: #52D681;"></span>
+              </div>
+            </div>
+
+            <div class="spec-metrics-grid">
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">4 YRS</span>
+                <span class="spec-metric-tag" data-i18n-zh="安全航拍经验" data-i18n-en="FLIGHT EXP">安全航拍经验</span>
+              </div>
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">120M</span>
+                <span class="spec-metric-tag" data-i18n-zh="UOM 适飞合规" data-i18n-en="LEGAL AIRSPACE">UOM 适飞合规</span>
+              </div>
+            </div>
+
+            <div class="spec-tags-wrap">
+              <span class="spec-mini-pill">DJI AERIAL</span>
+              <span class="spec-mini-pill">UOM CHECK</span>
+              <span class="spec-mini-pill">PANORAMA</span>
+            </div>
+          </aside>
         </div>
 
         <!-- 3. 展示出的内容 (Concise 3-Column Core Summary) -->
@@ -180,9 +256,47 @@
           <span class="help-badge-pill" data-i18n-zh="🎬 定格动画 / AI 建站均可提问" data-i18n-en="🎬 STOP-MOTION &amp; AI WEB Q&amp;A">🎬 定格动画 / AI 建站均可提问</span>
         </div>
 
-        <!-- 2. 图片 (Image) -->
-        <div class="help-card-media" data-open-help-modal="digital" role="button" tabindex="0" aria-label="点击查看短片剪辑与个人建站完整详情">
-          <img src="Project pictures/Project 1.png" alt="短片剪辑与个人建站">
+        <!-- 2. 图片与视觉展示层 (Uncropped Proportionally Scaled Photos + Creative Workflow Card) -->
+        <div class="help-visual-row">
+          <div class="help-card-media" data-open-help-modal="digital" role="button" tabindex="0" aria-label="空间与叙事构图 — 点击查看详情">
+            <img src="Project pictures/Project 1.png" alt="郑州黑川纪章纪念馆">
+            <span class="help-media-caption">STORYBOARD &amp; SPACE</span>
+          </div>
+
+          <div class="help-card-media" data-open-help-modal="digital" role="button" tabindex="0" aria-label="川西九寨沟色彩与层次 — 点击查看详情">
+            <img src="Project pictures/project 5.jpg" alt="川西九寨沟航拍">
+            <span class="help-media-caption">VISUAL DESIGN &amp; WEB</span>
+          </div>
+
+          <aside class="help-visual-spec-card" data-open-help-modal="digital" role="button" tabindex="0">
+            <div class="spec-card-top">
+              <span class="spec-card-label" data-i18n-zh="创作工具 · DIGITAL WORKFLOW" data-i18n-en="DIGITAL WORKFLOW">创作工具 · DIGITAL WORKFLOW</span>
+              <div class="spec-palette-row" aria-hidden="true">
+                <span class="palette-dot" style="background: #0B131E;"></span>
+                <span class="palette-dot" style="background: #1B4D4B;"></span>
+                <span class="palette-dot" style="background: #3A6B7C;"></span>
+                <span class="palette-dot" style="background: #C47A45;"></span>
+                <span class="palette-dot" style="background: #EAE6DF;"></span>
+              </div>
+            </div>
+
+            <div class="spec-metrics-grid">
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">24 FPS</span>
+                <span class="spec-metric-tag" data-i18n-zh="定格动画短片组长" data-i18n-en="STOP-MOTION">定格动画短片组长</span>
+              </div>
+              <div class="spec-metric-item">
+                <span class="spec-metric-num">AI+UI</span>
+                <span class="spec-metric-tag" data-i18n-zh="Figma 转个人网站" data-i18n-en="FIGMA TO WEB">Figma 转个人网站</span>
+              </div>
+            </div>
+
+            <div class="spec-tags-wrap">
+              <span class="spec-mini-pill">FIGMA UI</span>
+              <span class="spec-mini-pill">AI PROMPT</span>
+              <span class="spec-mini-pill">GITHUB PAGES</span>
+            </div>
+          </aside>
         </div>
 
         <!-- 3. 展示出的内容 (Concise 3-Column Core Summary) -->
