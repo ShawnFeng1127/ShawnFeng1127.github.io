@@ -183,20 +183,25 @@ body.help-page {
   letter-spacing: 0.6px;
 }
 
-/* 2. 图片 (Dominant Visual Image Frame — Preserves Original Uncropped Proportions) */
+/* 2. 图片 (Dominant Visual Image Frame — Proportionally Scaled Down Without Cropping) */
 .help-card-media {
   position: relative;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   height: auto;
+  margin: 0 auto;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 
 .help-card-media img {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: clamp(220px, 32vh, 310px);
   display: block;
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
