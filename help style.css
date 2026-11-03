@@ -414,6 +414,90 @@ body.help-page {
 }
 
 /* ==========================================================================
+   Photo Preview Lightbox (Opens When Clicking Any Image on help.html)
+   ========================================================================== */
+.help-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 450;
+  background: rgba(5, 8, 12, 0.86);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.help-photo-lightbox.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.help-photo-lightbox-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 92vw;
+  max-height: 90vh;
+  transform: scale(0.96);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.help-photo-lightbox.is-active .help-photo-lightbox-inner {
+  transform: scale(1);
+}
+
+.help-photo-lightbox-img {
+  max-width: 90vw;
+  max-height: 82vh;
+  width: auto;
+  height: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.72);
+  display: block;
+}
+
+.help-photo-lightbox-caption {
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(16, 22, 30, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: var(--ink-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+}
+
+.help-photo-lightbox-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(16, 22, 30, 0.88);
+  color: #FFFFFF;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  transition: all var(--transition-fast);
+}
+
+.help-photo-lightbox-close:hover {
+  background: var(--accent-copper);
+  border-color: var(--accent-copper);
+}
+
+/* ==========================================================================
    Liquid Glass Full Details Modal (Opens When Clicking "了解更多 / Learn More")
    ========================================================================== */
 .help-modal {

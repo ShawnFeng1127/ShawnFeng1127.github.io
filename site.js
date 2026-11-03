@@ -1266,6 +1266,8 @@ function initScrollAndKeyGuidance() {
       if (modal && modal.classList.contains('is-active')) return;
       const helpModal = document.getElementById('help-detail-modal');
       if (helpModal && helpModal.classList.contains('is-active')) return;
+      const helpPhotoLightbox = document.getElementById('help-photo-lightbox');
+      if (helpPhotoLightbox && helpPhotoLightbox.classList.contains('is-active')) return;
       if (document.getElementById('site-intro-overlay')) return;
       // Ignore if cursor is inside the horizontal gallery viewport
       if (galleryViewport && galleryViewport.contains(e.target)) return;
@@ -1542,69 +1544,69 @@ function initHelpPageInteractions() {
       ]
     },
     digital: {
-      tag: 'PROPOSAL 03 / VIDEO EDITING & WEB CREATION',
-      titleZh: '短片剪辑与个人建站 · 线上指导详情',
-      titleEn: 'Video Editing & Web Creation · Full Details',
+      tag: 'PROPOSAL 03 / VIBE CODING & AI WEB CREATION',
+      titleZh: 'Vibe Coding 个人建站 · 线上指导详情',
+      titleEn: 'Vibe Coding & Web Creation · Full Details',
       rows: [
         {
           labelZh: '帮谁 WHO',
           labelEn: 'WHO I HELP',
-          valZh: '正在制作学校项目视频或定格动画短片需要分镜与剪辑建议的同学，或者想用 Figma + AI 把自己的设计稿变成个人网站并部署上线的朋友。',
-          valEn: 'Students working on school video/stop-motion projects or wanting to turn a Figma design into a live personal website using AI.'
+          valZh: '没有深厚编程基础，但想通过 Figma + AI (Vibe Coding) 把自己的设计想法变成可交互的个人网站，并发布上线到 GitHub Pages 的同学。',
+          valEn: 'Students without heavy coding backgrounds who want to turn a Figma design or concept into a live interactive website using AI (Vibe Coding).'
         },
         {
           labelZh: '做什么 WHAT',
           labelEn: 'WHAT WE DO',
-          valZh: '提供线上指导：解答定格动画固定机位、分镜节奏与音效卡点问题；或在线上指导如何给 AI 写结构化提示词（Prompt）、调整 HTML/CSS 样式并部署到 GitHub Pages。',
-          valEn: 'Online guidance on stop-motion storyboarding, editing rhythm, writing structured AI prompts for HTML/CSS layout, and deploying to GitHub Pages.'
+          valZh: '提供 Vibe Coding 建站全流程线上指导：教你如何把 Figma 布局转化为结构化 AI 提示词（Prompt）、一步步调试 HTML/CSS/JS 视觉效果与交互动画，并部署到 GitHub Pages。',
+          valEn: 'Online Vibe Coding guidance: writing structured AI prompts from Figma designs, refining HTML/CSS/JS visual hierarchy and animations, and deploying to GitHub Pages.'
         },
         {
           labelZh: '相关经历 EXP',
           labelEn: 'EXPERIENCE',
-          valZh: '2026 年 4 月担任校园定格动画悬疑短片项目组长与摄影记录，并独立使用 Figma + AI 编程完成了当前这个液态玻璃风格个人作品集网站。',
-          valEn: 'Group leader & cinematographer for a 2026 Stop-Motion Thriller project, and creator of this Liquid Glass portfolio website built with Figma + AI.'
+          valZh: '独立使用 Figma 进行多页面视觉与组件设计，并通过 Vibe Coding（AI 协同编程）完成了当前这个包含液态玻璃光学折射、3D 无人机物理交互与双语切换的个人作品集网站。',
+          valEn: 'Independently designed in Figma and built this Liquid Glass portfolio website through Vibe Coding—featuring SVG optical refraction, 3D drone physics, and bilingual i18n.'
         },
         {
           labelZh: '投入时间 TIME',
           labelEn: 'TIME COMMIT',
-          valZh: '每周可投入 45 – 60 分钟在线上帮你看代码、调样式或交流视频剪辑思路，平时收到提问邮件后也会及时回复。',
-          valEn: '45–60 minutes weekly for online code/style review or video editing feedback, plus prompt email replies.'
+          valZh: '每周可投入 45 – 60 分钟在线上帮你看提示词、调网页样式或排查部署问题，平时收到提问邮件后也会及时回复。',
+          valEn: '45–60 minutes weekly for online prompt review, CSS layout debugging, or GitHub Pages troubleshooting, plus timely email replies.'
         },
         {
           labelZh: '怎样开始 START',
           labelEn: 'HOW TO START',
-          valZh: '直接发邮件到 shawnfeng@moonshotacademy.cn 把你的 Figma 截图、网页报错或视频片段发给我，即可获取线上指导！',
-          valEn: 'Email your Figma screenshot, webpage issue, or video draft to shawnfeng@moonshotacademy.cn to get started.'
+          valZh: '直接发邮件到 shawnfeng@moonshotacademy.cn 把你的 Figma 设计截图、想实现的页面效果或遇到的报错发给我，即可获取线上指导！',
+          valEn: 'Email your Figma screenshot, desired webpage interaction, or bug to shawnfeng@moonshotacademy.cn to get started.'
         }
       ],
       topics: [
         {
-          num: 'TOPIC 01 · STOP-MOTION',
-          zh: '定格动画与剪辑：如何设计分镜、保持逐帧光线稳定，以及通过音效增强节奏感。',
-          en: 'Stop-Motion & Pacing: Storyboarding, consistent frame lighting, and sound design rhythm.'
+          num: 'TOPIC 01 · FIGMA TO PROMPT',
+          zh: '结构化提示词编写：如何向 AI 清晰交代现有文件、视觉层级、修改范围与保留内容。',
+          en: 'Structured AI Prompting: Clearly specifying files, visual hierarchy, scope, and constraints.'
         },
         {
-          num: 'TOPIC 02 · AI PROMPTING',
-          zh: 'Figma 转网页提示词：如何向 AI 清晰描述页面布局、保留原有内容并一步步调试细节。',
-          en: 'AI Web Prompting: Structuring clear prompts to translate Figma layouts into clean code.'
+          num: 'TOPIC 02 · UI & INTERACTION',
+          zh: '页面排版与交互精修：如何用自然语言引导 AI 调整照片比例、弹窗交互与中英双语切换。',
+          en: 'UI & Interaction Refinement: Guiding AI to fine-tune aspect ratios, modals, and bilingual toggles.'
         },
         {
           num: 'TOPIC 03 · GITHUB PAGES',
-          zh: '个人网站发布上线：如何把本地 HTML/CSS/JS 文件夹上传到 GitHub 并生成公开链接。',
+          zh: '个人网站发布上线：如何把本地 HTML/CSS/JS 文件夹上传到 GitHub 仓库并生成公开链接。',
           en: 'GitHub Pages Publishing: Uploading local HTML/CSS/JS files to GitHub for a live public URL.'
         }
       ],
       checks: [
         {
-          zh: '你正在做的短片主题/分镜草图，或你想实现的个人网站页面截图',
-          en: 'Your video storyboard/theme or a screenshot of your Figma personal website design'
+          zh: '你想制作的个人网站草图、Figma 页面截图或参考网站风格',
+          en: 'A sketch, Figma screenshot, or reference style for the personal website you want to build'
         },
         {
-          zh: '你在网页制作或剪辑时遇到的具体问题（如：图片比例不对 / 弹窗不显示 / 链接打不开）',
-          en: 'Specific blockers you hit (e.g., aspect ratio issues, modal bugs, or GitHub Pages setup)'
+          zh: '你在 Vibe Coding 时遇到的具体卡点（如：布局错位 / 照片被裁切 / GitHub Pages 链接打不开）',
+          en: 'Specific Vibe Coding blockers you hit (e.g., layout shifts, cropped images, or GitHub Pages setup)'
         },
         {
-          zh: '直接发邮件至 shawnfeng@moonshotacademy.cn，我通过邮件为你提供线上指导',
+          zh: '直接发邮件至 shawnfeng@moonshotacademy.cn，我通过邮件为你提供一步步的线上指导',
           en: 'Send directly to shawnfeng@moonshotacademy.cn for step-by-step online guidance'
         }
       ]
@@ -1709,9 +1711,69 @@ function initHelpPageInteractions() {
       if (e.target === helpModal) closeHelpModal();
     });
   }
+
+  // Photo Lightbox on Help Page (Clicking Any Image Opens the Image Itself, Not Details Modal)
+  const photoTriggers = document.querySelectorAll('[data-open-help-photo]');
+  const photoLightbox = document.getElementById('help-photo-lightbox');
+  const photoLightboxImg = document.getElementById('help-photo-lightbox-img');
+  const photoLightboxCaption = document.getElementById('help-photo-lightbox-caption');
+  const photoLightboxClose = document.getElementById('help-photo-lightbox-close');
+
+  function openHelpPhotoLightbox(src, caption) {
+    if (!photoLightbox || !photoLightboxImg) return;
+    photoLightboxImg.src = src;
+    photoLightboxImg.alt = caption || 'Preview';
+    if (photoLightboxCaption) {
+      photoLightboxCaption.textContent = caption || '';
+    }
+    photoLightbox.classList.add('is-active');
+    photoLightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeHelpPhotoLightbox() {
+    if (!photoLightbox) return;
+    photoLightbox.classList.remove('is-active');
+    photoLightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  photoTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const src = trigger.getAttribute('data-open-help-photo');
+      const caption = trigger.getAttribute('data-photo-caption') || '';
+      if (src) openHelpPhotoLightbox(src, caption);
+    });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        const src = trigger.getAttribute('data-open-help-photo');
+        const caption = trigger.getAttribute('data-photo-caption') || '';
+        if (src) openHelpPhotoLightbox(src, caption);
+      }
+    });
+  });
+
+  if (photoLightboxClose) {
+    photoLightboxClose.addEventListener('click', closeHelpPhotoLightbox);
+  }
+  if (photoLightbox) {
+    photoLightbox.addEventListener('click', (e) => {
+      if (e.target === photoLightbox || e.target.id === 'help-photo-lightbox-inner') {
+        closeHelpPhotoLightbox();
+      }
+    });
+  }
+
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && helpModal && helpModal.classList.contains('is-active')) {
-      closeHelpModal();
+    if (e.key === 'Escape') {
+      if (photoLightbox && photoLightbox.classList.contains('is-active')) {
+        closeHelpPhotoLightbox();
+      } else if (helpModal && helpModal.classList.contains('is-active')) {
+        closeHelpModal();
+      }
     }
   });
 
