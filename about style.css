@@ -19,15 +19,29 @@ body.about-page {
   justify-content: space-between;
 }
 
-/* Original Top-Left Perch Target for the Drone on About Page (338x368 at left: 0, top: 0) */
+/* Original Top-Left Perch Target for the Drone on About Page (Clickable to Open FPV Flight Card) */
 .drone-perch-target {
   position: absolute;
   left: 0;
   top: 0;
   width: 338px;
   height: 368px;
-  pointer-events: none;
-  z-index: 4;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 16;
+}
+
+body.about-page .interactive-drone-layer {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.28s ease;
+}
+
+body.about-page .interactive-drone-layer:hover .interactive-drone-img,
+body.about-page .interactive-drone-layer:hover .interactive-drone-img-airborne,
+body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img,
+body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img-airborne {
+  filter: drop-shadow(0 0 18px rgba(240, 123, 50, 0.55)) brightness(1.06);
 }
 
 /* Main 2-Column Minimalist Editorial Grid */
@@ -134,14 +148,6 @@ body.about-page {
   transform: scaleY(-0.22) translateX(-2px);
   transform-origin: bottom center;
   opacity: 0.85;
-}
-
-.about-bio {
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 1.68;
-  color: var(--ink-muted);
-  max-width: 500px;
 }
 
 /* ==========================================================================
@@ -251,5 +257,587 @@ body.about-page {
   }
   .perspective-glass-wrap {
     margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   Drone First-Person View (FPV) Interactive Flight Card (#drone-fpv-modal)
+   Opens when clicking the DJI Drone on the About Page
+   ========================================================================== */
+.drone-fpv-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 9, 13, 0.78);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.34s;
+}
+
+.drone-fpv-modal.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.drone-fpv-card {
+  position: relative;
+  width: min(1040px, 95vw);
+  height: min(680px, 90vh);
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    rgba(24, 30, 38, 0.92) 0%,
+    rgba(12, 16, 22, 0.96) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.35),
+    inset 0 -1.5px 3px rgba(240, 123, 50, 0.24),
+    0 32px 80px rgba(0, 0, 0, 0.68);
+  transform: scale(0.94) translateY(16px);
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.drone-fpv-modal.is-active .drone-fpv-card {
+  transform: scale(1) translateY(0);
+}
+
+/* Top Telemetry & Flight Mode Bar */
+.fpv-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 20px;
+  background: rgba(10, 14, 19, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 5;
+}
+
+.fpv-top-left,
+.fpv-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fpv-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ADE80;
+  box-shadow: 0 0 10px #4ADE80;
+  animation: fpvPulseDot 1.6s infinite ease-in-out;
+}
+
+@keyframes fpvPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.fpv-link-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: rgba(241, 240, 235, 0.92);
+}
+
+.fpv-mode-switch {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-left: 6px;
+}
+
+.fpv-mode-btn {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(241, 240, 235, 0.65);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fpv-mode-btn.is-active {
+  background: rgba(240, 123, 50, 0.88);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(240, 123, 50, 0.4);
+}
+
+/* Compass Tape in Top Bar */
+.fpv-compass-tape {
+  position: relative;
+  width: 220px;
+  height: 26px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+}
+
+.fpv-compass-track {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(241, 240, 235, 0.82);
+  padding: 0 16px;
+  will-change: transform;
+}
+
+.fpv-compass-Lubber {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: #F07B32;
+  pointer-events: none;
+}
+
+.fpv-stat-chip {
+  padding: 4px 9px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  color: rgba(241, 240, 235, 0.85);
+}
+
+.fpv-bat-chip {
+  color: #4ADE80;
+  border-color: rgba(74, 222, 128, 0.28);
+}
+
+.fpv-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.fpv-close-btn:hover {
+  background: rgba(240, 123, 50, 0.82);
+  transform: scale(1.06);
+}
+
+/* Main Interactive FPV Viewport */
+.fpv-viewport {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #070A0E;
+  cursor: grab;
+  perspective: 900px;
+}
+
+.fpv-viewport:active {
+  cursor: grabbing;
+}
+
+.fpv-world-plane {
+  position: absolute;
+  inset: -14%;
+  width: 128%;
+  height: 128%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.fpv-world-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.04) saturate(1.08);
+  transition: opacity 0.28s ease;
+  pointer-events: none;
+}
+
+.fpv-cloud-stream {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Shutter Flash Effect */
+.fpv-shutter-flash {
+  position: absolute;
+  inset: 0;
+  background: #FFFFFF;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+  transition: opacity 0.22s ease;
+}
+
+.fpv-shutter-flash.is-flashing {
+  opacity: 0.82;
+  transition: none;
+}
+
+/* Optical HUD Overlay */
+.fpv-hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px;
+}
+
+/* Left Speed & Right Altitude Tapes */
+.fpv-tape {
+  width: 68px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: rgba(10, 14, 20, 0.56);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.fpv-tape-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: rgba(240, 123, 50, 0.95);
+}
+
+.fpv-tape-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-variant-numeric: tabular-nums;
+}
+
+.fpv-tape-unit {
+  font-size: 9px;
+  color: rgba(241, 240, 235, 0.65);
+}
+
+/* Center Artificial Horizon & Pitch Ladder */
+.fpv-center-reticle {
+  position: relative;
+  width: 280px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fpv-horizon-group {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  will-change: transform;
+}
+
+.fpv-horizon-line {
+  width: 190px;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(74, 222, 128, 0.85) 20%,
+    transparent 44%,
+    transparent 56%,
+    rgba(74, 222, 128, 0.85) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.45);
+}
+
+.fpv-pitch-rung {
+  width: 110px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(74, 222, 128, 0.82);
+  border-top: 1px dashed rgba(74, 222, 128, 0.48);
+  padding-top: 3px;
+}
+
+.fpv-pitch-down {
+  border-top: none;
+  border-bottom: 1px dashed rgba(74, 222, 128, 0.48);
+  padding-top: 0;
+  padding-bottom: 3px;
+}
+
+.fpv-crosshair {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fpv-crosshair-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(240, 123, 50, 0.85);
+  box-shadow: 0 0 12px rgba(240, 123, 50, 0.35);
+}
+
+.fpv-crosshair-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #F07B32;
+}
+
+/* Bottom-Left Attitude Telemetry */
+.fpv-corner-telemetry {
+  position: absolute;
+  left: 24px;
+  bottom: 16px;
+  display: flex;
+  gap: 14px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(10, 14, 20, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(241, 240, 235, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Capture Toast Badge */
+.fpv-capture-badge {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(240, 123, 50, 0.92);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fpv-capture-badge.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Bottom Interactive Flight Deck */
+.fpv-flight-deck {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 22px;
+  background: rgba(11, 15, 21, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  z-index: 5;
+}
+
+.fpv-sticks-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.fpv-stick-pad {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.03) 70%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.fpv-stick-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #F59E6C, #D96B27);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.fpv-stick-label {
+  position: absolute;
+  bottom: -16px;
+  white-space: nowrap;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: rgba(241, 240, 235, 0.58);
+  pointer-events: none;
+}
+
+/* Aerial Scene Switcher Pills */
+.fpv-scenes-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.fpv-scene-btn {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(241, 240, 235, 0.78);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.fpv-scene-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+}
+
+.fpv-scene-btn.is-active {
+  background: rgba(240, 123, 50, 0.24);
+  border-color: rgba(240, 123, 50, 0.78);
+  color: #FFFFFF;
+  box-shadow: 0 0 14px rgba(240, 123, 50, 0.28);
+}
+
+/* Gimbal & Shutter Buttons */
+.fpv-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fpv-gimbal-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(241, 240, 235, 0.90);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fpv-gimbal-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.fpv-shutter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 123, 50, 0.75);
+  background: linear-gradient(135deg, rgba(240, 123, 50, 0.92), rgba(205, 88, 28, 0.92));
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(240, 123, 50, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fpv-shutter-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(240, 123, 50, 0.5);
+}
+
+.fpv-shutter-btn:active {
+  transform: scale(0.96);
+}
+
+.fpv-shutter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+@media (max-width: 900px) {
+  .fpv-compass-tape {
+    display: none;
+  }
+  .fpv-flight-deck {
+    flex-direction: column;
+    padding: 14px;
+    gap: 18px;
   }
 }

@@ -22,11 +22,11 @@
   <div class="liquid-glow-orb"></div>
 
   <div class="about-stage">
-    <!-- Invisible Perch Target at Original Top-Left Position (left: 0, top: 0) -->
-    <div id="drone-perch-target" class="drone-perch-target" aria-hidden="true"></div>
+    <!-- Clickable Perch Target at Original Top-Left Position (Click Drone to Open FPV Flight Card) -->
+    <div id="drone-perch-target" class="drone-perch-target" role="button" tabindex="0" aria-label="点击无人机进入第一视角飞行交互"></div>
 
-    <!-- Interactive Drone (Flies back to original top-left perch on arrival; flies away when leaving) -->
-    <div id="interactive-drone" class="interactive-drone-layer is-airborne" title="Click to toggle drone flight / perch">
+    <!-- Interactive Drone (Click to Open First-Person View Flight Interactive Card) -->
+    <div id="interactive-drone" class="interactive-drone-layer is-airborne" role="button" tabindex="0" aria-label="点击无人机开启第一视角飞行">
       <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="DJI Drone">
     </div>
 
@@ -44,7 +44,7 @@
       </nav>
     </header>
 
-    <!-- Main About Content (Minimalist Editorial Layout) -->
+    <!-- Main About Content (Minimalist Editorial Layout — Small Bio Text Removed) -->
     <main class="about-hero-grid">
       <!-- Left Editorial Column -->
       <section class="about-editorial">
@@ -61,10 +61,6 @@
             <span class="perspective-text">PERSPECTIVE.</span>
           </span>
         </h1>
-
-        <p class="about-bio" data-i18n-zh="我是冯靖翔（Shawn Feng），14 岁，来自北京，目前是探月学校（Moonshot Academy）九年级学生。我热衷于摄影、无人机航拍与数字视觉创作。" data-i18n-en="My name is Shawn Feng. I am 14, from Beijing, and a 9th grade student at Moonshot Academy. I am interested in digital and visual creation.">
-          My name is Shawn Feng. I am 14, from Beijing, and a 9th grade student at Moonshot Academy. I am interested in digital and visual creation.
-        </p>
       </section>
 
       <!-- Right Portrait Card & Overlapping Liquid Glass Badge -->
@@ -99,6 +95,135 @@
       <a href="home page.html" data-i18n-zh="← 返回首页" data-i18n-en="← HOME">← HOME</a>
       <span>PORTFOLIO / 2026</span>
     </footer>
+  </div>
+
+  <!-- ==========================================================================
+       Drone First-Person View (FPV) Interactive Flight Card (Opens on Clicking Drone)
+       ========================================================================== -->
+  <div id="drone-fpv-modal" class="drone-fpv-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="drone-fpv-card" id="drone-fpv-card">
+      <!-- Top HUD Telemetry Bar -->
+      <header class="fpv-top-bar">
+        <div class="fpv-top-left">
+          <span class="fpv-live-dot"></span>
+          <span class="fpv-link-label">DJI FPV · FIRST-PERSON VIEW</span>
+          <div class="fpv-mode-switch" role="group" aria-label="Flight Mode">
+            <button type="button" class="fpv-mode-btn" data-fpv-mode="cine">CINE</button>
+            <button type="button" class="fpv-mode-btn is-active" data-fpv-mode="normal">NORMAL</button>
+            <button type="button" class="fpv-mode-btn" data-fpv-mode="sport">SPORT</button>
+          </div>
+        </div>
+
+        <div class="fpv-compass-tape" aria-hidden="true">
+          <div class="fpv-compass-track" id="fpv-compass-track">
+            <span>NW 315°</span><span>N 0°</span><span>NE 45°</span><span>E 90°</span><span>SE 135°</span><span>S 180°</span><span>SW 225°</span><span>W 270°</span><span>NW 315°</span><span>N 0°</span><span>NE 45°</span>
+          </div>
+          <div class="fpv-compass-Lubber">▼</div>
+        </div>
+
+        <div class="fpv-top-right">
+          <span class="fpv-stat-chip">GPS 26 SAT</span>
+          <span class="fpv-stat-chip fpv-bat-chip">BAT 96%</span>
+          <button type="button" class="fpv-close-btn" id="fpv-close-btn" aria-label="退出第一视角">&times;</button>
+        </div>
+      </header>
+
+      <!-- Interactive First-Person View (FPV) Viewport -->
+      <div class="fpv-viewport" id="fpv-viewport">
+        <!-- 3D Perspective Aerial World Layer -->
+        <div class="fpv-world-plane" id="fpv-world-plane">
+          <img id="fpv-world-img" class="fpv-world-img" src="Project pictures/project 4a.jpg" alt="FPV Aerial View">
+          <div class="fpv-cloud-stream" id="fpv-cloud-stream"></div>
+        </div>
+
+        <!-- Camera Shutter Flash Overlay -->
+        <div class="fpv-shutter-flash" id="fpv-shutter-flash"></div>
+
+        <!-- FPV Optical HUD Overlay (Artificial Horizon, Pitch Ladder, Speed & Altitude Tapes) -->
+        <div class="fpv-hud-overlay" aria-hidden="true">
+          <!-- Left Speed Tape -->
+          <div class="fpv-tape fpv-tape-left">
+            <span class="fpv-tape-title">SPD</span>
+            <div class="fpv-tape-value" id="fpv-spd-val">14.2</div>
+            <span class="fpv-tape-unit">m/s</span>
+          </div>
+
+          <!-- Center Artificial Horizon & Gimbal Reticle -->
+          <div class="fpv-center-reticle">
+            <div class="fpv-horizon-group" id="fpv-horizon-group">
+              <div class="fpv-pitch-rung fpv-pitch-up"><span>+15°</span><span>+15°</span></div>
+              <div class="fpv-horizon-line"></div>
+              <div class="fpv-pitch-rung fpv-pitch-down"><span>-15°</span><span>-15°</span></div>
+            </div>
+            <div class="fpv-crosshair">
+              <span class="fpv-crosshair-ring"></span>
+              <span class="fpv-crosshair-dot"></span>
+            </div>
+          </div>
+
+          <!-- Right Altitude Tape -->
+          <div class="fpv-tape fpv-tape-right">
+            <span class="fpv-tape-title">ALT</span>
+            <div class="fpv-tape-value" id="fpv-alt-val">112</div>
+            <span class="fpv-tape-unit">m</span>
+          </div>
+
+          <!-- Bottom-Left Telemetry Readout -->
+          <div class="fpv-corner-telemetry">
+            <span id="fpv-pitch-readout">PITCH 0.0°</span>
+            <span id="fpv-roll-readout">ROLL 0.0°</span>
+            <span id="fpv-gimbal-readout">GIMBAL -35°</span>
+          </div>
+
+          <!-- Captured Photo Toast Badge inside FPV -->
+          <div class="fpv-capture-badge" id="fpv-capture-badge">
+            ✓ RAW CAPTURED · 4K D-LOG M
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Interactive Flight Deck (Dual Joysticks + Scene Switcher + Gimbal & Shutter) -->
+      <footer class="fpv-flight-deck">
+        <!-- Left Stick: Throttle (ALT) & Yaw + Right Stick: Pitch & Roll -->
+        <div class="fpv-sticks-group">
+          <div class="fpv-stick-pad" id="fpv-stick-left" title="拖拽或按 W/S 升降高度 · A/D 偏航转向">
+            <div class="fpv-stick-knob" id="fpv-knob-left"></div>
+            <span class="fpv-stick-label">ALT / YAW (WASD)</span>
+          </div>
+          <div class="fpv-stick-pad" id="fpv-stick-right" title="拖拽或在画面内移动鼠标 / 方向键控制俯仰与横滚">
+            <div class="fpv-stick-knob" id="fpv-knob-right"></div>
+            <span class="fpv-stick-label">PITCH / ROLL (↑↓←→)</span>
+          </div>
+        </div>
+
+        <!-- Aerial Location Switcher -->
+        <div class="fpv-scenes-bar" role="tablist" aria-label="Switch FPV Aerial Scene">
+          <button type="button" class="fpv-scene-btn is-active" data-fpv-src="Project pictures/project 4a.jpg" data-fpv-alt="118">
+            01 · 西安中轴线
+          </button>
+          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/Project 2.jpg" data-fpv-alt="120">
+            02 · 甘肃丹霞
+          </button>
+          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 5.jpg" data-fpv-alt="96">
+            03 · 川西九寨沟
+          </button>
+          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 7.jpg" data-fpv-alt="105">
+            04 · 郑州龙湖
+          </button>
+        </div>
+
+        <!-- Gimbal Angle Toggle & Shutter Button -->
+        <div class="fpv-actions-group">
+          <button type="button" class="fpv-gimbal-btn" id="fpv-gimbal-btn" data-i18n-zh="云台视角 -35°" data-i18n-en="GIMBAL -35°">
+            云台视角 -35°
+          </button>
+          <button type="button" class="fpv-shutter-btn" id="fpv-shutter-btn">
+            <span class="fpv-shutter-dot"></span>
+            <span data-i18n-zh="航拍快门" data-i18n-en="SHUTTER">航拍快门</span>
+          </button>
+        </div>
+      </footer>
+    </div>
   </div>
 
   <script src="site.js"></script>
