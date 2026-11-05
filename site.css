@@ -1309,13 +1309,13 @@ body.help-page.page-leaving {
    (Preserves 100% of Original Layout While Adding Depth & Entrance Motion)
    ========================================================================== */
 body.home-page .home-bg-photo {
-  transform: translate3d(calc(var(--px, 0px) * -0.35), calc(var(--py, 0px) * -0.35), 0) scale(var(--bg-intro-scale, 1));
+  transform: translate3d(calc(-50% + var(--px, 0px) * -0.35), calc(var(--py, 0px) * -0.35), 0) scale(var(--bg-intro-scale, 1));
   filter: blur(var(--bg-intro-blur, 0px));
   transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), filter 0.95s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.home-page .home-subject-photo {
-  transform: translate3d(calc(var(--px, 0px) * 0.55), calc(var(--py, 0px) * 0.45 + var(--subject-intro-y, 0px)), 0) scale(var(--subject-intro-scale, 1));
+  transform: translate3d(calc(-50% + var(--px, 0px) * 0.55), calc(var(--py, 0px) * 0.45 + var(--subject-intro-y, 0px)), 0) scale(var(--subject-intro-scale, 1));
   transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease;
 }
 
@@ -1466,9 +1466,10 @@ body.unified-canvas-page {
 .canvas-section.home-section {
   min-height: 100vh;
   height: 100vh;
-  padding: 0 40px 40px;
+  max-width: 100%;
+  padding: 0;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
 }
@@ -1615,7 +1616,7 @@ body.unified-canvas-page {
   .canvas-section.home-section {
     min-height: 100svh;
     height: 100svh;
-    padding: 72px 16px 36px;
+    padding: 0;
   }
 
   .home-editorial-layer {
@@ -1652,8 +1653,8 @@ body.unified-canvas-page {
   }
 
   .home-subject-photo {
-    object-position: 78% bottom;
-    opacity: 0.9;
+    object-position: center bottom;
+    opacity: 0.95;
   }
 
   .home-vertical-rule {

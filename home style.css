@@ -25,15 +25,15 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
 .home-stage {
   position: relative;
   width: 100%;
-  max-width: 1440px;
-  min-height: 100vh;
   height: 100vh;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 28px 40px 20px;
+  padding: 0;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  background-color: #08090A;
 }
 
 /* Atmospheric Bottom Dissolve: Blends the pavilion photo seamlessly into the canvas */
@@ -43,139 +43,183 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 320px;
+  height: 140px;
   background: linear-gradient(
     180deg,
     rgba(8, 9, 10, 0) 0%,
-    rgba(8, 9, 10, 0.22) 32%,
-    rgba(8, 9, 10, 0.65) 65%,
-    rgba(8, 9, 10, 0.95) 90%,
+    rgba(8, 9, 10, 0.35) 40%,
+    rgba(8, 9, 10, 0.85) 75%,
     #08090A 100%
   );
   pointer-events: none;
-  z-index: 6;
+  z-index: 2; /* In front of .home-bg-photo (z:1), but BEHIND .home-subject-photo (z:5) */
 }
 
 /* Layer 1: Atmospheric Pavilion Background Photo (home page背景.png) */
 .home-bg-photo {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  max-height: 100vh;
+  width: auto;
+  max-width: none;
+  aspect-ratio: 1440 / 1080;
+  object-fit: contain;
+  object-position: center bottom;
   z-index: 1;
   pointer-events: none;
   user-select: none;
+  mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
 }
 
-/* Layer 2: Minimalist Editorial Typography (Behind Subject Cutout) */
+/* Layer 2: Editorial Typography & Copper Axis (Left Column Layout) */
 .home-editorial-layer {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-  width: 100%;
-  max-width: 1240px;
-  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-46%);
+  left: max(40px, calc((100% - 1320px) / 2 + 36px));
+  z-index: 6;
+  width: auto;
+  max-width: 440px;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  pointer-events: auto;
 }
 
 .home-eyebrow {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   position: relative;
   z-index: 6;
 }
 
-/* Subtle minimalist vertical axis line */
-.home-vertical-rule {
-  position: absolute;
-  top: 20px;
-  bottom: 20px;
-  right: 16%;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(146, 153, 154, 0.18) 20%, rgba(146, 153, 154, 0.18) 80%, transparent);
-  pointer-events: none;
-}
-
 .home-main-block {
   width: 100%;
-  padding: 24px 20px 0;
+  padding: 0;
 }
 
 .hero-titles {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .hero-title-cn {
   font-family: 'Noto Sans SC', "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: clamp(64px, 9.8vw, 142px);
+  font-size: clamp(52px, 6.2vw, 86px);
   font-weight: 700;
   line-height: 1;
   color: #FFFFFF;
-  letter-spacing: -2px;
+  letter-spacing: -1px;
   white-space: nowrap;
 }
 
 .hero-title-en {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(60px, 9.2vw, 134px);
+  font-size: clamp(28px, 3.4vw, 48px);
   font-weight: 700;
-  line-height: 1;
-  color: #FFFFFF;
-  letter-spacing: 2px;
+  line-height: 1.05;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 3.5px;
   white-space: nowrap;
 }
 
 /* Minimalist copper horizon line */
 .hero-divider {
-  width: 100%;
-  height: 1.5px;
-  background: linear-gradient(90deg, var(--accent-copper) 0%, rgba(196, 122, 69, 0.85) 75%, rgba(196, 122, 69, 0.15) 100%);
-  margin: 18px 0 26px;
+  width: 120px;
+  height: 2px;
+  background: var(--accent-copper);
+  margin: 18px 0 20px;
 }
 
 .hero-tagline {
-  font-size: clamp(22px, 2.3vw, 32px);
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.6px;
-  color: var(--ink-primary);
+  font-size: clamp(15px, 1.6vw, 20px);
+  font-weight: 500;
+  line-height: 1.36;
+  letter-spacing: 0.4px;
+  color: var(--ink-secondary);
   text-transform: uppercase;
 }
 
 /* Layer 3: Foreground Cutout Portrait of Shawn Feng (home page人物.png)
-   Sits IN FRONT of the titles & copper line (z-index: 5),
-   and BEHIND the bottom Liquid Glass guidance bar (z-index: 20) */
+   100% Complete & Unclipped: Scaled to fit viewport height */
 .home-subject-photo {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   height: 100%;
-  object-fit: cover;
+  max-height: 100vh;
+  width: auto;
+  max-width: none;
+  aspect-ratio: 1440 / 1080;
+  object-fit: contain;
   object-position: center bottom;
   z-index: 5;
   pointer-events: none;
   user-select: none;
-  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.42));
 }
 
 @media (max-width: 1024px) {
+  .home-editorial-layer {
+    left: 28px;
+    max-width: 380px;
+  }
+}
+
+@media (max-width: 768px) {
   .home-stage {
-    padding: 20px;
-  }
-  .home-main-block {
     padding: 0;
+    justify-content: flex-start;
   }
+
+  .home-editorial-layer {
+    position: absolute;
+    top: 68px;
+    transform: none;
+    left: 20px;
+    right: 20px;
+    max-width: calc(100% - 40px);
+    z-index: 6;
+  }
+
+  .home-eyebrow {
+    margin-bottom: 10px;
+  }
+
   .hero-titles {
-    flex-direction: column;
-    gap: 8px;
+    gap: 2px;
   }
-  .home-vertical-rule {
-    display: none;
+
+  .hero-title-cn {
+    font-size: 38px;
+    letter-spacing: -1px;
+  }
+
+  .hero-title-en {
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+
+  .hero-divider {
+    width: 60px;
+    margin: 8px 0 10px;
+  }
+
+  .hero-tagline {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .home-bg-photo,
+  .home-subject-photo {
+    height: 68svh;
+    max-height: 600px;
+    bottom: 0;
   }
 }

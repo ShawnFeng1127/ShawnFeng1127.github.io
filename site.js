@@ -358,10 +358,11 @@ function initInteractiveDrone() {
     if (raw) saved = JSON.parse(raw);
   } catch (_) {}
 
-  let mouseX = saved ? saved.mouseX : window.innerWidth * 0.55;
-  let mouseY = saved ? saved.mouseY : window.innerHeight * 0.45;
-  let droneX = saved ? saved.x : window.innerWidth * 0.5;
-  let droneY = saved ? saved.y : window.innerHeight * 0.35;
+  const isMobileScreen = window.innerWidth <= 768;
+  let mouseX = saved ? saved.mouseX : (isMobileScreen ? window.innerWidth * 0.82 : window.innerWidth * 0.65);
+  let mouseY = saved ? saved.mouseY : (isMobileScreen ? 140 : window.innerHeight * 0.40);
+  let droneX = saved ? saved.x : mouseX;
+  let droneY = saved ? saved.y : mouseY;
   let vx = saved ? saved.vx || 0 : 0;
   let vy = saved ? saved.vy || 0 : 0;
   let currentScale = saved ? saved.scale || FLY_SCALE : FLY_SCALE;
