@@ -1336,7 +1336,7 @@ function initInfiniteRingGallery() {
  */
 function initUnifiedCanvasNavigation() {
   const links = document.querySelectorAll(
-    '.nav-links .nav-link[href^="#"], .home-scroll-prompt, a[href^="#section-"]'
+    '.nav-links .nav-link[href^="#"], a[href^="#section-"]'
   );
 
   links.forEach((link) => {
@@ -1528,91 +1528,6 @@ function initScrollAndKeyGuidance() {
       navigateToPage(prevPage, null, 'up');
     }
   });
-}
-
-/**
- * 5b. Unified Continuous Single-Canvas Smooth Navigation & Scroll Spy
- *     - Smoothly scrolls to #section-home, #section-about, #section-work, #section-help
- *     - Dynamically updates active nav link as the user scrolls
- */
-function initUnifiedCanvasNavigation() {
-  const links = document.querySelectorAll(
-    '.nav-links .nav-link[href^="#"], .home-scroll-prompt, a[href^="#section-"]'
-  );
-
-  links.forEach((link) => {
-    link.addEventListener('click', (e) => {
-      const href = link.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        const target = document.querySelector(href);
-        if (target) {
-          e.preventDefault();
-          const nav = document.getElementById('main-glass-nav');
-          const navOffset = nav ? nav.offsetHeight + 18 : 72;
-          const targetY = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
-          window.scrollTo({
-            top: Math.max(0, targetY),
-            behavior: 'smooth'
-          });
-          if (history.replaceState) {
-            history.replaceState(null, '', href);
-          }
-        }
-      }
-    });
-  });
-
-  initScrollSpy();
-}
-
-function initScrollSpy() {
-  const sections = [
-    { id: 'section-home', link: document.querySelector('.nav-link[data-nav-target="section-home"], .nav-link[href="#section-home"]') },
-    { id: 'section-about', link: document.querySelector('.nav-link[data-nav-target="section-about"], .nav-link[href="#section-about"]') },
-    { id: 'section-work', link: document.querySelector('.nav-link[data-nav-target="section-work"], .nav-link[href="#section-work"]') },
-    { id: 'section-help', link: document.querySelector('.nav-link[data-nav-target="section-help"], .nav-link[href="#section-help"]') }
-  ];
-
-  function updateActiveLink() {
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const nav = document.getElementById('main-glass-nav');
-    const navOffset = nav ? nav.offsetHeight + 40 : 90;
-    const probeY = scrollY + navOffset + 80;
-
-    let currentSection = sections[0];
-    for (let i = 0; i < sections.length; i++) {
-      const sec = sections[i];
-      const el = document.getElementById(sec.id);
-      if (el) {
-        const top = el.offsetTop;
-        if (probeY >= top) {
-          currentSection = sec;
-        }
-      }
-    }
-
-    sections.forEach((sec) => {
-      if (sec.link) {
-        sec.link.classList.toggle('active', sec === currentSection);
-      }
-    });
-  }
-
-  window.addEventListener('scroll', updateActiveLink, { passive: true });
-  updateActiveLink();
-
-  // Scroll to hash on initial page load if URL contains #section-...
-  if (window.location.hash) {
-    const hashTarget = document.querySelector(window.location.hash);
-    if (hashTarget) {
-      setTimeout(() => {
-        const nav = document.getElementById('main-glass-nav');
-        const navOffset = nav ? nav.offsetHeight + 18 : 72;
-        const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset - navOffset;
-        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-      }, 120);
-    }
-  }
 }
 
 /**
