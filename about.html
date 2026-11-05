@@ -98,131 +98,281 @@
   </div>
 
   <!-- ==========================================================================
-       Drone First-Person View (FPV) Interactive Flight Card (Opens on Clicking Drone)
+       DJI Fly First-Person View (FPV) Interactive Flight Screen (Opens on Clicking Drone)
        ========================================================================== -->
   <div id="drone-fpv-modal" class="drone-fpv-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="drone-fpv-card" id="drone-fpv-card">
-      <!-- Top HUD Telemetry Bar -->
-      <header class="fpv-top-bar">
-        <div class="fpv-top-left">
-          <span class="fpv-live-dot"></span>
-          <span class="fpv-link-label">DJI FPV · FIRST-PERSON VIEW</span>
-          <div class="fpv-mode-switch" role="group" aria-label="Flight Mode">
-            <button type="button" class="fpv-mode-btn" data-fpv-mode="cine">CINE</button>
-            <button type="button" class="fpv-mode-btn is-active" data-fpv-mode="normal">NORMAL</button>
-            <button type="button" class="fpv-mode-btn" data-fpv-mode="sport">SPORT</button>
-          </div>
-        </div>
-
-        <div class="fpv-compass-tape" aria-hidden="true">
-          <div class="fpv-compass-track" id="fpv-compass-track">
-            <span>NW 315°</span><span>N 0°</span><span>NE 45°</span><span>E 90°</span><span>SE 135°</span><span>S 180°</span><span>SW 225°</span><span>W 270°</span><span>NW 315°</span><span>N 0°</span><span>NE 45°</span>
-          </div>
-          <div class="fpv-compass-Lubber">▼</div>
-        </div>
-
-        <div class="fpv-top-right">
-          <span class="fpv-stat-chip">GPS 26 SAT</span>
-          <span class="fpv-stat-chip fpv-bat-chip">BAT 96%</span>
-          <button type="button" class="fpv-close-btn" id="fpv-close-btn" aria-label="退出第一视角">&times;</button>
-        </div>
-      </header>
-
-      <!-- Interactive First-Person View (FPV) Viewport -->
+      <!-- Full-Screen Live Camera Viewport -->
       <div class="fpv-viewport" id="fpv-viewport">
         <!-- 3D Perspective Aerial World Layer -->
         <div class="fpv-world-plane" id="fpv-world-plane">
-          <img id="fpv-world-img" class="fpv-world-img" src="Project pictures/project 4a.jpg" alt="FPV Aerial View">
+          <img id="fpv-world-img" class="fpv-world-img" src="Project pictures/project 4a.jpg" alt="DJI Fly Aerial View">
           <div class="fpv-cloud-stream" id="fpv-cloud-stream"></div>
+        </div>
+
+        <!-- DJI Rule-of-Thirds Gridlines -->
+        <div class="dji-gridlines" aria-hidden="true">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
         </div>
 
         <!-- Camera Shutter Flash Overlay -->
         <div class="fpv-shutter-flash" id="fpv-shutter-flash"></div>
 
-        <!-- FPV Optical HUD Overlay (Artificial Horizon, Pitch Ladder, Speed & Altitude Tapes) -->
-        <div class="fpv-hud-overlay" aria-hidden="true">
-          <!-- Left Speed Tape -->
-          <div class="fpv-tape fpv-tape-left">
-            <span class="fpv-tape-title">SPD</span>
-            <div class="fpv-tape-value" id="fpv-spd-val">14.2</div>
-            <span class="fpv-tape-unit">m/s</span>
-          </div>
-
-          <!-- Center Artificial Horizon & Gimbal Reticle -->
-          <div class="fpv-center-reticle">
-            <div class="fpv-horizon-group" id="fpv-horizon-group">
-              <div class="fpv-pitch-rung fpv-pitch-up"><span>+15°</span><span>+15°</span></div>
-              <div class="fpv-horizon-line"></div>
-              <div class="fpv-pitch-rung fpv-pitch-down"><span>-15°</span><span>-15°</span></div>
+        <!-- ================= 1. TOP DJI FLY STATUS BAR ================= -->
+        <header class="dji-top-hud">
+          <div class="dji-top-left">
+            <span class="dji-brand-pill">DJI FLY</span>
+            <div class="dji-flight-status">
+              <span class="fpv-live-dot"></span>
+              <span class="dji-status-text" data-i18n-zh="正常飞行 (GPS)" data-i18n-en="In Flight (GPS)">正常飞行 (GPS)</span>
             </div>
-            <div class="fpv-crosshair">
-              <span class="fpv-crosshair-ring"></span>
-              <span class="fpv-crosshair-dot"></span>
+            <!-- C / N / S Flight Mode Switcher -->
+            <div class="fpv-mode-switch" role="group" aria-label="DJI Flight Mode">
+              <button type="button" class="fpv-mode-btn" data-fpv-mode="cine" title="平稳档 Cine">C 平稳</button>
+              <button type="button" class="fpv-mode-btn is-active" data-fpv-mode="normal" title="普通档 Normal">N 普通</button>
+              <button type="button" class="fpv-mode-btn" data-fpv-mode="sport" title="运动档 Sport">S 运动</button>
             </div>
           </div>
 
-          <!-- Right Altitude Tape -->
-          <div class="fpv-tape fpv-tape-right">
-            <span class="fpv-tape-title">ALT</span>
-            <div class="fpv-tape-value" id="fpv-alt-val">112</div>
-            <span class="fpv-tape-unit">m</span>
+          <!-- Center Heading Compass Tape -->
+          <div class="fpv-compass-tape" aria-hidden="true">
+            <div class="fpv-compass-track" id="fpv-compass-track">
+              <span>NW 315°</span><span>N 0°</span><span>NE 45°</span><span>E 90°</span><span>SE 135°</span><span>S 180°</span><span>SW 225°</span><span>W 270°</span><span>NW 315°</span><span>N 0°</span><span>NE 45°</span>
+            </div>
+            <div class="fpv-compass-Lubber">▼ <span id="fpv-heading-val">035°</span></div>
           </div>
 
-          <!-- Bottom-Left Telemetry Readout -->
-          <div class="fpv-corner-telemetry">
-            <span id="fpv-pitch-readout">PITCH 0.0°</span>
-            <span id="fpv-roll-readout">ROLL 0.0°</span>
-            <span id="fpv-gimbal-readout">GIMBAL -35°</span>
+          <!-- Top-Right DJI Telemetry Icons (APAS, Battery, RC, Satellites, Close) -->
+          <div class="dji-top-right">
+            <span class="dji-telemetry-pill" title="全向避障已开启">◎ APAS 5.0</span>
+            <span class="dji-telemetry-pill dji-bat-pill" title="智能飞行电池剩余电量">
+              <span class="dji-bat-icon">96%</span>
+              <span class="dji-bat-time">38'12"</span>
+            </span>
+            <span class="dji-telemetry-pill" title="O4 图传信号">RC ▂▄▆█</span>
+            <span class="dji-telemetry-pill" title="GNSS 卫星数量">🛰 28</span>
+            <button type="button" class="fpv-close-btn" id="fpv-close-btn" aria-label="退出无人机第一视角">&times;</button>
+          </div>
+        </header>
+
+        <!-- ================= 2. LEFT DJI DOCK (Hover Reset & Aerial Locations) ================= -->
+        <aside class="dji-left-dock">
+          <button type="button" class="dji-rth-btn" id="fpv-rth-btn" title="悬停归位 / 重置机位">
+            <span class="dji-rth-icon">H</span>
+            <span class="dji-rth-label" data-i18n-zh="悬停复位" data-i18n-en="HOVER">悬停复位</span>
+          </button>
+
+          <div class="fpv-scenes-bar" role="tablist" aria-label="切换航拍机位">
+            <button type="button" class="fpv-scene-btn is-active" data-fpv-src="Project pictures/project 4a.jpg" data-fpv-alt="118">
+              01 · 西安中轴线
+            </button>
+            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/Project 2.jpg" data-fpv-alt="120">
+              02 · 甘肃丹霞
+            </button>
+            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 5.jpg" data-fpv-alt="96">
+              03 · 川西九寨沟
+            </button>
+            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 7.jpg" data-fpv-alt="105">
+              04 · 郑州龙湖
+            </button>
+          </div>
+        </aside>
+
+        <!-- ================= 3. CENTER DJI RETICLE & ARTIFICIAL HORIZON ================= -->
+        <div class="fpv-center-reticle" aria-hidden="true">
+          <div class="fpv-horizon-group" id="fpv-horizon-group">
+            <div class="fpv-pitch-rung fpv-pitch-up"><span>+15°</span><span>+15°</span></div>
+            <div class="fpv-horizon-line"></div>
+            <div class="fpv-pitch-rung fpv-pitch-down"><span>-15°</span><span>-15°</span></div>
+          </div>
+          <div class="dji-center-cross">
+            <span class="dji-cross-h"></span>
+            <span class="dji-cross-v"></span>
+            <span class="dji-cross-box"></span>
+          </div>
+        </div>
+
+        <!-- Captured Photo Toast Badge inside FPV -->
+        <div class="fpv-capture-badge" id="fpv-capture-badge">
+          ✓ DNG RAW + 4K D-LOG M 已抓拍保存
+        </div>
+
+        <!-- ================= 4. RIGHT DJI CAMERA & SHUTTER DOCK ================= -->
+        <aside class="dji-right-dock">
+          <div class="dji-cam-format">
+            <span class="dji-format-tag">RAW</span>
+            <span class="dji-format-res">48MP · D-Log M</span>
           </div>
 
-          <!-- Captured Photo Toast Badge inside FPV -->
-          <div class="fpv-capture-badge" id="fpv-capture-badge">
-            ✓ RAW CAPTURED · 4K D-LOG M
+          <button type="button" class="fpv-gimbal-btn" id="fpv-gimbal-btn" data-i18n-zh="云台 -35°" data-i18n-en="GIMBAL -35°">
+            云台 -35°
+          </button>
+
+          <!-- Authentic DJI Circular Shutter Button -->
+          <button type="button" class="dji-shutter-ring" id="fpv-shutter-btn" aria-label="航拍快门拍照" title="点击拍摄航拍照片">
+            <span class="dji-shutter-core"></span>
+          </button>
+          <span class="dji-shutter-caption" data-i18n-zh="拍照" data-i18n-en="PHOTO">拍照</span>
+        </aside>
+
+        <!-- ================= 5. BOTTOM DJI FLY HUD (Attitude Ball, Telemetry, Sticks, Controls Guide Button) ================= -->
+        <footer class="dji-bottom-hud">
+          <!-- Bottom-Left: Iconic DJI Attitude Radar + H / D Telemetry -->
+          <div class="dji-bottom-left">
+            <!-- DJI Attitude & Orientation Radar Ball -->
+            <div class="dji-attitude-radar" aria-hidden="true">
+              <div class="dji-radar-compass" id="fpv-radar-compass">
+                <span class="dji-radar-north">N</span>
+              </div>
+              <div class="dji-radar-sphere">
+                <div class="dji-radar-horizon" id="fpv-radar-horizon"></div>
+                <div class="dji-radar-center-line"></div>
+                <!-- Center DJI Aircraft Arrow -->
+                <svg class="dji-radar-aircraft" id="fpv-radar-aircraft" viewBox="0 0 24 24">
+                  <path d="M12 3 L19 19 L12 15.5 L5 19 Z" fill="#F07B32" stroke="#FFFFFF" stroke-width="1.2" />
+                </svg>
+                <span class="dji-radar-home" title="返航点 Home">H</span>
+              </div>
+            </div>
+
+            <!-- DJI H (Altitude) & D (Distance) + V.S / H.S Readout -->
+            <div class="dji-telemetry-block">
+              <div class="dji-tele-row">
+                <span class="dji-tele-symbol">H</span>
+                <strong class="dji-tele-num" id="fpv-alt-val">118.0</strong>
+                <span class="dji-tele-unit">m</span>
+                <span class="dji-tele-sep">|</span>
+                <span class="dji-tele-sub">V.S <strong id="fpv-vs-val">0.0</strong> m/s</span>
+              </div>
+              <div class="dji-tele-row">
+                <span class="dji-tele-symbol">D</span>
+                <strong class="dji-tele-num" id="fpv-dist-val">245.0</strong>
+                <span class="dji-tele-unit">m</span>
+                <span class="dji-tele-sep">|</span>
+                <span class="dji-tele-sub">H.S <strong id="fpv-spd-val">0.0</strong> m/s</span>
+              </div>
+              <div class="dji-tele-attitude">
+                <span id="fpv-pitch-readout">PITCH 0.0°</span>
+                <span id="fpv-roll-readout">ROLL 0.0°</span>
+                <span id="fpv-gimbal-readout">GIMBAL -35°</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom-Center: Dual DJI Virtual RC Joysticks -->
+          <div class="fpv-sticks-group">
+            <div class="fpv-stick-pad" id="fpv-stick-left" title="↑/↓ 控制高低 · Q/E 控制转向">
+              <div class="fpv-stick-crosshair"></div>
+              <div class="fpv-stick-knob" id="fpv-knob-left"></div>
+              <span class="fpv-stick-label" data-i18n-zh="升降 ↑↓ · 转向 QE" data-i18n-en="ALT ↑↓ · YAW QE">升降 ↑↓ · 转向 QE</span>
+            </div>
+            <div class="fpv-stick-pad" id="fpv-stick-right" title="W/A/S/D 控制前后左右">
+              <div class="fpv-stick-crosshair"></div>
+              <div class="fpv-stick-knob" id="fpv-knob-right"></div>
+              <span class="fpv-stick-label" data-i18n-zh="前后左右 WASD" data-i18n-en="MOVE WASD">前后左右 WASD</span>
+            </div>
+          </div>
+
+          <!-- Bottom-Right: Camera Exposure Info + "查看如何控制无人机" Button -->
+          <div class="dji-bottom-right">
+            <div class="dji-exposure-strip" aria-hidden="true">
+              <span>ISO <strong>100</strong></span>
+              <span>SHUT <strong>1/240</strong></span>
+              <span>f/<strong>2.8</strong></span>
+              <span>EV <strong>0.0</strong></span>
+              <span class="dji-ael-tag">AE-L</span>
+            </div>
+
+            <button type="button" class="dji-help-trigger-btn" id="fpv-help-btn">
+              <span class="dji-help-icon">?</span>
+              <span data-i18n-zh="如何控制无人机" data-i18n-en="HOW TO CONTROL DRONE">如何控制无人机</span>
+            </button>
+          </div>
+        </footer>
+
+        <!-- ================= 6. HOW TO CONTROL DRONE OVERLAY CARD (Opens via Bottom-Right Button) ================= -->
+        <div class="dji-controls-overlay" id="fpv-controls-modal" aria-hidden="true">
+          <div class="dji-controls-panel" role="dialog" aria-label="无人机操控说明">
+            <div class="dji-controls-header">
+              <div>
+                <span class="dji-controls-eyebrow">DJI RC PRO · FLIGHT CONTROL MANUAL</span>
+                <h3 class="dji-controls-title" data-i18n-zh="如何控制无人机 · 键盘与摇杆指南" data-i18n-en="How to Control the Drone · Flight Controls">如何控制无人机 · 键盘与摇杆指南</h3>
+              </div>
+              <button type="button" class="dji-controls-close" id="fpv-controls-close" aria-label="关闭操控说明">&times;</button>
+            </div>
+
+            <div class="dji-controls-grid">
+              <!-- Control Group 1: WASD -->
+              <div class="dji-control-card">
+                <div class="dji-keycap-cluster">
+                  <div class="dji-keycap-row">
+                    <kbd class="dji-key">W</kbd>
+                  </div>
+                  <div class="dji-keycap-row">
+                    <kbd class="dji-key">A</kbd>
+                    <kbd class="dji-key">S</kbd>
+                    <kbd class="dji-key">D</kbd>
+                  </div>
+                </div>
+                <div class="dji-control-info">
+                  <strong data-i18n-zh="W / A / S / D — 控制前后左右" data-i18n-en="W / A / S / D — Forward / Back / Left / Right">W / A / S / D — 控制前后左右</strong>
+                  <p data-i18n-zh="按 W 向前飞行、S 向后倒飞、A 向左横移、D 向右横移（对应右侧俯仰与横滚摇杆）。" data-i18n-en="Press W to pitch forward, S to fly backward, A to bank left, and D to bank right (Right Stick).">按 W 向前飞行、S 向后倒飞、A 向左横移、D 向右横移（对应右侧俯仰与横滚摇杆）。</p>
+                </div>
+              </div>
+
+              <!-- Control Group 2: Q / E -->
+              <div class="dji-control-card">
+                <div class="dji-keycap-cluster">
+                  <div class="dji-keycap-row">
+                    <kbd class="dji-key">Q</kbd>
+                    <kbd class="dji-key">E</kbd>
+                  </div>
+                </div>
+                <div class="dji-control-info">
+                  <strong data-i18n-zh="Q / E — 控制机头左右转向" data-i18n-en="Q / E — Yaw Rotate Left & Right">Q / E — 控制机头左右转向</strong>
+                  <p data-i18n-zh="按 Q 键机头向左偏航旋转，按 E 键机头向右偏航旋转，顶部罗盘与左下角姿态球同步转动。" data-i18n-en="Press Q to yaw counter-clockwise (left) and E to yaw clockwise (right), rotating the compass & radar.">按 Q 键机头向左偏航旋转，按 E 键机头向右偏航旋转，顶部罗盘与左下角姿态球同步转动。</p>
+                </div>
+              </div>
+
+              <!-- Control Group 3: Up / Down Arrows -->
+              <div class="dji-control-card">
+                <div class="dji-keycap-cluster">
+                  <div class="dji-keycap-row">
+                    <kbd class="dji-key">↑</kbd>
+                  </div>
+                  <div class="dji-keycap-row">
+                    <kbd class="dji-key">↓</kbd>
+                  </div>
+                </div>
+                <div class="dji-control-info">
+                  <strong data-i18n-zh="↑ / ↓ 方向键 — 控制飞行高低" data-i18n-en="↑ / ↓ Arrow Keys — Climb & Descend Altitude">↑ / ↓ 方向键 — 控制飞行高低</strong>
+                  <p data-i18n-zh="按 ↑ 上方向键拉升高度 (H)，按 ↓ 下方向键降低高度，左下角高度表与垂直速度 V.S 实时变化。" data-i18n-en="Press Up Arrow ↑ to climb higher and Down Arrow ↓ to descend (updates Altitude H & Vertical Speed V.S).">按 ↑ 上方向键拉升高度 (H)，按 ↓ 下方向键降低高度，左下角高度表与垂直速度 V.S 实时变化。</p>
+                </div>
+              </div>
+
+              <!-- Control Group 4: Mouse & Gimbal -->
+              <div class="dji-control-card">
+                <div class="dji-keycap-cluster">
+                  <div class="dji-keycap-row">
+                    <span class="dji-mouse-badge">🖱 摇杆 / 云台</span>
+                  </div>
+                </div>
+                <div class="dji-control-info">
+                  <strong data-i18n-zh="虚拟摇杆 · 云台俯仰 · 航拍快门" data-i18n-en="Virtual Joysticks · Gimbal · Shutter">虚拟摇杆 · 云台俯仰 · 航拍快门</strong>
+                  <p data-i18n-zh="也可直接用鼠标拖拽底部双摇杆；点击右侧可切换云台俯仰角（-35° / -90° / 0°）或按下快门拍照。" data-i18n-en="Drag the dual on-screen joysticks with your mouse, toggle gimbal pitch (-35°/-90°/0°), or press Shutter to capture.">也可直接用鼠标拖拽底部双摇杆；点击右侧可切换云台俯仰角（-35° / -90° / 0°）或按下快门拍照。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="dji-controls-footer">
+              <span class="dji-controls-tip" data-i18n-zh="提示：可在左侧切换 4 个真实航拍地点，顶部可切换 C 平稳 / N 普通 / S 运动三档速度" data-i18n-en="Tip: Switch between 4 aerial locations on the left, or toggle C / N / S flight speed modes at the top.">提示：可在左侧切换 4 个真实航拍地点，顶部可切换 C 平稳 / N 普通 / S 运动三档速度</span>
+              <button type="button" class="dji-controls-ok-btn" id="fpv-controls-ok" data-i18n-zh="开始飞行" data-i18n-en="RESUME FLIGHT">开始飞行</button>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Bottom Interactive Flight Deck (Dual Joysticks + Scene Switcher + Gimbal & Shutter) -->
-      <footer class="fpv-flight-deck">
-        <!-- Left Stick: Throttle (ALT) & Yaw + Right Stick: Pitch & Roll -->
-        <div class="fpv-sticks-group">
-          <div class="fpv-stick-pad" id="fpv-stick-left" title="拖拽或按 W/S 升降高度 · A/D 偏航转向">
-            <div class="fpv-stick-knob" id="fpv-knob-left"></div>
-            <span class="fpv-stick-label">ALT / YAW (WASD)</span>
-          </div>
-          <div class="fpv-stick-pad" id="fpv-stick-right" title="拖拽或在画面内移动鼠标 / 方向键控制俯仰与横滚">
-            <div class="fpv-stick-knob" id="fpv-knob-right"></div>
-            <span class="fpv-stick-label">PITCH / ROLL (↑↓←→)</span>
-          </div>
-        </div>
-
-        <!-- Aerial Location Switcher -->
-        <div class="fpv-scenes-bar" role="tablist" aria-label="Switch FPV Aerial Scene">
-          <button type="button" class="fpv-scene-btn is-active" data-fpv-src="Project pictures/project 4a.jpg" data-fpv-alt="118">
-            01 · 西安中轴线
-          </button>
-          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/Project 2.jpg" data-fpv-alt="120">
-            02 · 甘肃丹霞
-          </button>
-          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 5.jpg" data-fpv-alt="96">
-            03 · 川西九寨沟
-          </button>
-          <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 7.jpg" data-fpv-alt="105">
-            04 · 郑州龙湖
-          </button>
-        </div>
-
-        <!-- Gimbal Angle Toggle & Shutter Button -->
-        <div class="fpv-actions-group">
-          <button type="button" class="fpv-gimbal-btn" id="fpv-gimbal-btn" data-i18n-zh="云台视角 -35°" data-i18n-en="GIMBAL -35°">
-            云台视角 -35°
-          </button>
-          <button type="button" class="fpv-shutter-btn" id="fpv-shutter-btn">
-            <span class="fpv-shutter-dot"></span>
-            <span data-i18n-zh="航拍快门" data-i18n-en="SHUTTER">航拍快门</span>
-          </button>
-        </div>
-      </footer>
     </div>
   </div>
 

@@ -1881,27 +1881,37 @@ function initHelpPageInteractions() {
 }
 
 /**
- * 8. Drone First-Person View (FPV) Interactive Flight Card (#drone-fpv-modal)
+ * 8. DJI Fly / DJI RC Pro First-Person View (FPV) Interactive Flight Screen (#drone-fpv-modal)
  *    - Opens when clicking the DJI Drone on the About Page
- *    - Dual virtual joysticks + mouse viewport attitude control + WASD / Arrow keys
- *    - Real-time artificial horizon, pitch ladder, compass tape, speed/altitude telemetry,
- *      4 aerial scene switchers, gimbal angle toggle, and RAW shutter flash capture
+ *    - Controls:
+ *        * W / A / S / D -> Forward / Backward / Strafe Left / Strafe Right (前后左右)
+ *        * Q / E         -> Yaw Rotate Left / Right (左右转向)
+ *        * ↑ / ↓ Arrows  -> Climb / Descend Altitude (控制高低)
+ *        * Dual virtual DJI RC joysticks + Gimbal pitch toggle + Shutter capture
+ *        * Bottom-right button (#fpv-help-btn) opens the Drone Control Guide (#fpv-controls-modal)
  */
 function initDroneFpvCard() {
   const modal = document.getElementById('drone-fpv-modal');
   if (!modal) return;
 
   const closeBtn = document.getElementById('fpv-close-btn');
-  const viewport = document.getElementById('fpv-viewport');
   const worldPlane = document.getElementById('fpv-world-plane');
   const worldImg = document.getElementById('fpv-world-img');
   const horizonGroup = document.getElementById('fpv-horizon-group');
   const compassTrack = document.getElementById('fpv-compass-track');
+  const headingVal = document.getElementById('fpv-heading-val');
+
   const spdVal = document.getElementById('fpv-spd-val');
+  const vsVal = document.getElementById('fpv-vs-val');
   const altVal = document.getElementById('fpv-alt-val');
+  const distVal = document.getElementById('fpv-dist-val');
   const pitchReadout = document.getElementById('fpv-pitch-readout');
   const rollReadout = document.getElementById('fpv-roll-readout');
   const gimbalReadout = document.getElementById('fpv-gimbal-readout');
+
+  const radarCompass = document.getElementById('fpv-radar-compass');
+  const radarHorizon = document.getElementById('fpv-radar-horizon');
+
   const shutterFlash = document.getElementById('fpv-shutter-flash');
   const captureBadge = document.getElementById('fpv-capture-badge');
 
@@ -1912,35 +1922,71 @@ function initDroneFpvCard() {
 
   const modeBtns = modal.querySelectorAll('.fpv-mode-btn');
   const sceneBtns = modal.querySelectorAll('.fpv-scene-btn');
+  const rthBtn = document.getElementById('fpv-rth-btn');
   const gimbalBtn = document.getElementById('fpv-gimbal-btn');
   const shutterBtn = document.getElementById('fpv-shutter-btn');
+
+  // Bottom-right "How to Control Drone" button & modal
+  const helpBtn = document.getElementById('fpv-help-btn');
+  const controlsModal = document.getElementById('fpv-controls-modal');
+  const controlsCloseBtn = document.getElementById('fpv-controls-close');
+  const controlsOkBtn = document.getElementById('fpv-controls-ok');
 
   let isActive = false;
   let flightMode = 'normal'; // cine | normal | sport
   const modeMultipliers = { cine: 0.55, normal: 1.0, sport: 1.65 };
 
-  // Normalized control inputs (-1 to +1)
-  let leftX = 0;  // Yaw rate
-  let leftY = 0;  // Throttle (Altitude climb/descent)
-  let rightX = 0; // Roll & lateral pan
-  let rightY = 0; // Pitch & forward/backward surge
-  let viewportAimX = 0;
-  let viewportAimY = 0;
+  // Normalized joystick inputs (-1 to +1)
+  let leftX = 0;  // Yaw rate (Q/E)
+  let leftY = 0;  // Throttle / Altitude (↑/↓)
+  let rightX = 0; // Roll / Strafe Left-Right (A/D)
+  let rightY = 0; // Pitch / Forward-Backward (W/S)
 
   // Integrated flight state
   let currentRoll = 0;
   let currentPitch = 0;
   let headingDeg = 35;
-  let altitude = 118;
+  let altitude = 118.0;
+  let distance = 245.0;
   let panX = 0;
   let panY = 0;
-  let zoomScale = 1.08;
+  let zoomScale = 1.12;
 
   const gimbalPresets = [-35, -90, 0];
   let gimbalIndex = 0;
   let captureTimer = null;
 
   const keysPressed = {};
+
+  function openControlsGuide() {
+    if (!controlsModal) return;
+    controlsModal.classList.add('is-open');
+    controlsModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeControlsGuide() {
+    if (!controlsModal) return;
+    controlsModal.classList.remove('is-open');
+    controlsModal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (helpBtn) {
+    helpBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openControlsGuide();
+    });
+  }
+  if (controlsCloseBtn) {
+    controlsCloseBtn.addEventListener('click', closeControlsGuide);
+  }
+  if (controlsOkBtn) {
+    controlsOkBtn.addEventListener('click', closeControlsGuide);
+  }
+  if (controlsModal) {
+    controlsModal.addEventListener('click', (e) => {
+      if (e.target === controlsModal) closeControlsGuide();
+    });
+  }
 
   function openModal() {
     isActive = true;
@@ -1951,11 +1997,11 @@ function initDroneFpvCard() {
 
   function closeModal() {
     isActive = false;
+    closeControlsGuide();
     modal.classList.remove('is-active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    viewportAimX = 0;
-    viewportAimY = 0;
+    Object.keys(keysPressed).forEach((k) => delete keysPressed[k]);
   }
 
   openDroneFpvCardFn = openModal;
@@ -1966,6 +2012,20 @@ function initDroneFpvCard() {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
+
+  // Hover / RTH Reset Button
+  if (rthBtn) {
+    rthBtn.addEventListener('click', () => {
+      panX = 0;
+      panY = 0;
+      currentRoll = 0;
+      currentPitch = 0;
+      headingDeg = 35;
+      altitude = 118.0;
+      distance = 245.0;
+      zoomScale = 1.12;
+    });
+  }
 
   // Flight Mode Switcher (CINE / NORMAL / SPORT)
   modeBtns.forEach((btn) => {
@@ -1991,6 +2051,7 @@ function initDroneFpvCard() {
       altitude = baseAlt;
       panX = 0;
       panY = 0;
+      zoomScale = 1.12;
     });
   });
 
@@ -2002,7 +2063,7 @@ function initDroneFpvCard() {
       gimbalReadout.textContent = `GIMBAL ${angle}°`;
     }
     if (gimbalBtn) {
-      const zhLabel = `云台视角 ${angle}°`;
+      const zhLabel = `云台 ${angle}°`;
       const enLabel = `GIMBAL ${angle}°`;
       gimbalBtn.setAttribute('data-i18n-zh', zhLabel);
       gimbalBtn.setAttribute('data-i18n-en', enLabel);
@@ -2034,27 +2095,11 @@ function initDroneFpvCard() {
     });
   }
 
-  // Interactive Viewport Mouse Attitude Control
-  if (viewport) {
-    viewport.addEventListener('mousemove', (e) => {
-      if (!isActive) return;
-      const rect = viewport.getBoundingClientRect();
-      const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      viewportAimX = Math.max(-1, Math.min(1, nx));
-      viewportAimY = Math.max(-1, Math.min(1, ny));
-    });
-    viewport.addEventListener('mouseleave', () => {
-      viewportAimX = 0;
-      viewportAimY = 0;
-    });
-  }
-
   // Virtual Joystick Helper
   function bindVirtualStick(padEl, knobEl, onMove) {
     if (!padEl || !knobEl) return;
     let dragging = false;
-    const maxRadius = 21;
+    const maxRadius = 20;
 
     function updateFromPointer(clientX, clientY) {
       const rect = padEl.getBoundingClientRect();
@@ -2100,15 +2145,22 @@ function initDroneFpvCard() {
     rightY = ny;
   });
 
-  // Keyboard Flight Controls (WASD + Arrow Keys + Escape)
+  // Keyboard Flight Controls:
+  //   W / A / S / D -> Forward / Left / Backward / Right (前后左右)
+  //   Q / E         -> Yaw Rotate Left / Right (转向)
+  //   ArrowUp / Down-> Altitude Up / Down (高低)
   window.addEventListener('keydown', (e) => {
     if (!isActive) return;
     if (e.key === 'Escape') {
-      closeModal();
+      if (controlsModal && controlsModal.classList.contains('is-open')) {
+        closeControlsGuide();
+      } else {
+        closeModal();
+      }
       return;
     }
     const k = e.key.toLowerCase();
-    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) {
+    if (['w', 'a', 's', 'd', 'q', 'e', 'arrowup', 'arrowdown'].includes(k)) {
       e.preventDefault();
       keysPressed[k] = true;
     }
@@ -2128,62 +2180,86 @@ function initDroneFpvCard() {
     if (isActive) {
       const mult = modeMultipliers[flightMode] || 1.0;
 
-      const keyLeftY = (keysPressed['s'] ? 1 : 0) - (keysPressed['w'] ? 1 : 0);
-      const keyLeftX = (keysPressed['d'] ? 1 : 0) - (keysPressed['a'] ? 1 : 0);
-      const keyRightY = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
-      const keyRightX = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
+      // Left Stick: Up/Down Arrows = Altitude (高低), Q/E = Yaw (转向)
+      const keyAltY = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
+      const keyYawX = (keysPressed['e'] ? 1 : 0) - (keysPressed['q'] ? 1 : 0);
 
-      const effLeftX = Math.max(-1, Math.min(1, leftX + keyLeftX));
-      const effLeftY = Math.max(-1, Math.min(1, leftY + keyLeftY));
-      const effRightX = Math.max(-1, Math.min(1, rightX + keyRightX + viewportAimX * 0.65));
-      const effRightY = Math.max(-1, Math.min(1, rightY + keyRightY + viewportAimY * 0.65));
+      // Right Stick: W/S = Forward/Back (前后), A/D = Left/Right (左右)
+      const keyMoveY = (keysPressed['s'] ? 1 : 0) - (keysPressed['w'] ? 1 : 0);
+      const keyMoveX = (keysPressed['d'] ? 1 : 0) - (keysPressed['a'] ? 1 : 0);
 
-      // Reflect keyboard/viewport inputs on stick knobs when not manually dragging
+      const effLeftX = Math.max(-1, Math.min(1, leftX + keyYawX));
+      const effLeftY = Math.max(-1, Math.min(1, leftY + keyAltY));
+      const effRightX = Math.max(-1, Math.min(1, rightX + keyMoveX));
+      const effRightY = Math.max(-1, Math.min(1, rightY + keyMoveY));
+
+      // Reflect keyboard inputs on the DJI virtual joystick knobs when not manually dragging
       if (knobLeft && leftX === 0 && leftY === 0) {
-        knobLeft.style.transform = `translate3d(${(keyLeftX * 16).toFixed(1)}px, ${(keyLeftY * 16).toFixed(1)}px, 0)`;
+        knobLeft.style.transform = `translate3d(${(effLeftX * 16).toFixed(1)}px, ${(effLeftY * 16).toFixed(1)}px, 0)`;
       }
       if (knobRight && rightX === 0 && rightY === 0) {
         knobRight.style.transform = `translate3d(${(effRightX * 16).toFixed(1)}px, ${(effRightY * 16).toFixed(1)}px, 0)`;
       }
 
-      const targetRoll = effRightX * 22 * mult;
+      // Attitude angles (Pitch & Roll) driven by WASD / Right Stick
+      const targetRoll = effRightX * 20 * mult;
       const targetPitch = -effRightY * 16 * mult;
 
-      currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 8.5);
-      currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 8.5);
+      currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 9);
+      currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 9);
 
-      headingDeg = (headingDeg + effLeftX * 42 * mult * dt + 360) % 360;
-      altitude = Math.max(15, Math.min(495, altitude - effLeftY * 26 * mult * dt));
+      // Heading (Yaw) driven by Q/E
+      headingDeg = (headingDeg + effLeftX * 52 * mult * dt + 360) % 360;
 
-      panX = Math.max(-75, Math.min(75, panX - (effRightX * 36 + effLeftX * 22) * mult * dt));
-      panY = Math.max(-55, Math.min(55, panY - effRightY * 28 * mult * dt));
+      // Altitude (H) driven by Up/Down Arrow
+      const verticalSpeed = -effLeftY * 6.5 * mult;
+      altitude = Math.max(12, Math.min(500, altitude + verticalSpeed * dt));
+
+      // Horizontal translation & forward zoom driven by WASD + QE
+      panX = Math.max(-95, Math.min(95, panX - (effRightX * 52 + effLeftX * 38) * mult * dt));
+      panY = Math.max(-70, Math.min(70, panY - effRightY * 44 * mult * dt));
+
+      // Forward/backward (W/S) also smoothly modulates forward zoom & distance D
+      const forwardRate = -effRightY * 14.5 * mult;
+      const strafeRate = effRightX * 11.2 * mult;
+      const horizontalSpeed = Math.hypot(forwardRate, strafeRate);
+      distance = Math.max(10, Math.min(2800, distance + forwardRate * dt));
 
       const gimbalOffsetPitch = (gimbalPresets[gimbalIndex] + 35) * 0.14;
-      const targetZoom = 1.12 + Math.max(-0.04, Math.min(0.14, (120 - altitude) * 0.0008));
-      zoomScale += (targetZoom - zoomScale) * Math.min(1, dt * 5);
+      const targetZoom =
+        1.14 +
+        Math.max(-0.08, Math.min(0.18, -panY * 0.0018 + (118 - altitude) * 0.0007));
+      zoomScale += (targetZoom - zoomScale) * Math.min(1, dt * 6);
 
       if (worldPlane) {
         worldPlane.style.transform = `translate3d(${panX.toFixed(1)}px, ${(panY + gimbalOffsetPitch * 2.2).toFixed(1)}px, 0) rotateZ(${(-currentRoll * 0.72).toFixed(2)}deg) rotateX(${(currentPitch * 0.65 + gimbalOffsetPitch).toFixed(2)}deg) scale(${zoomScale.toFixed(3)})`;
       }
 
       if (horizonGroup) {
-        horizonGroup.style.transform = `translate3d(0, ${(currentPitch * 2.6).toFixed(1)}px, 0) rotate(${(-currentRoll).toFixed(2)}deg)`;
+        horizonGroup.style.transform = `translate3d(0, ${(currentPitch * 2.5).toFixed(1)}px, 0) rotate(${(-currentRoll).toFixed(2)}deg)`;
       }
 
       if (compassTrack) {
         const compassShift = -((headingDeg / 360) * 320);
         compassTrack.style.transform = `translate3d(${compassShift.toFixed(1)}px, 0, 0)`;
       }
+      if (headingVal) {
+        headingVal.textContent = `${Math.round(headingDeg).toString().padStart(3, '0')}°`;
+      }
 
-      const baseCruise = flightMode === 'sport' ? 19.4 : flightMode === 'cine' ? 6.8 : 12.6;
-      const liveSpeed =
-        baseCruise +
-        Math.hypot(effRightX, effRightY) * 8.4 * mult +
-        Math.abs(effLeftY) * 3.2 +
-        Math.sin(now * 0.003) * 0.3;
+      // Update Bottom-Left DJI Attitude Radar Ball
+      if (radarCompass) {
+        radarCompass.style.transform = `rotate(${(-headingDeg).toFixed(1)}deg)`;
+      }
+      if (radarHorizon) {
+        radarHorizon.style.transform = `translateY(${(currentPitch * 0.9).toFixed(1)}px) rotate(${(-currentRoll).toFixed(1)}deg)`;
+      }
 
-      if (spdVal) spdVal.textContent = liveSpeed.toFixed(1);
-      if (altVal) altVal.textContent = Math.round(altitude).toString();
+      // Update DJI Telemetry Readouts (H, D, V.S, H.S, Pitch, Roll)
+      if (altVal) altVal.textContent = altitude.toFixed(1);
+      if (vsVal) vsVal.textContent = verticalSpeed.toFixed(1);
+      if (distVal) distVal.textContent = distance.toFixed(1);
+      if (spdVal) spdVal.textContent = horizontalSpeed.toFixed(1);
       if (pitchReadout) pitchReadout.textContent = `PITCH ${currentPitch.toFixed(1)}°`;
       if (rollReadout) rollReadout.textContent = `ROLL ${currentRoll.toFixed(1)}°`;
     }
