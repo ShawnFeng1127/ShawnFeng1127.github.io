@@ -447,6 +447,158 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   color: #0B0F14;
 }
 
+/* 3P / 1P View Mode Switcher Button (Press C) */
+.dji-view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: rgba(240, 123, 50, 0.22);
+  border: 1px solid rgba(240, 123, 50, 0.72);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dji-view-toggle-btn:hover {
+  background: rgba(240, 123, 50, 0.42);
+}
+
+.dji-view-key {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #F07B32;
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+/* Crash State Top Status Pill */
+.drone-fpv-card.is-crashed .dji-flight-status {
+  background: rgba(127, 29, 29, 0.86);
+  border-color: #EF4444;
+}
+
+.drone-fpv-card.is-crashed .fpv-live-dot {
+  background: #EF4444;
+  box-shadow: 0 0 10px #EF4444;
+}
+
+.drone-fpv-card.is-crashed .dji-status-text {
+  color: #FCA5A5;
+}
+
+/* Consolidated Environment & Weather Dropdown + Random Weather Button */
+.dji-env-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dji-env-trigger-btn,
+.dji-env-random-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  background: rgba(12, 18, 26, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.dji-env-trigger-btn:hover,
+.dji-env-trigger-btn.is-open {
+  background: rgba(240, 123, 50, 0.28);
+  border-color: #F07B32;
+}
+
+.dji-env-random-btn {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.58);
+}
+
+.dji-env-random-btn:hover {
+  background: rgba(56, 189, 248, 0.36);
+  border-color: #38BDF8;
+  transform: translateY(-1px);
+}
+
+.dji-env-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(8, 12, 18, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.68);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.98);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dji-env-popover.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.dji-env-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dji-env-label {
+  width: 34px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.dji-env-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(241, 240, 235, 0.82);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.dji-env-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+}
+
+.dji-env-btn.is-active {
+  background: rgba(240, 123, 50, 0.35);
+  border-color: #F07B32;
+  color: #FFFFFF;
+}
+
 /* Compass Tape in Top Bar */
 .fpv-compass-tape {
   position: relative;
@@ -701,10 +853,87 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   border: 1.5px solid #F07B32;
 }
 
+/* Crash Alert Banner */
+.dji-crash-banner {
+  position: absolute;
+  top: 112px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  z-index: 16;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.94), rgba(69, 10, 10, 0.96));
+  border: 1.5px solid #EF4444;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.68);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drone-fpv-card.is-crashed .dji-crash-banner {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dji-crash-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dji-crash-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dji-crash-text strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.dji-crash-text span {
+  font-size: 11px;
+  color: rgba(254, 202, 202, 0.92);
+}
+
+.dji-crash-retry-btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: #FFFFFF;
+  color: #7F1D1D;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.dji-crash-retry-btn:hover {
+  background: #FEF2F2;
+  transform: scale(1.04);
+}
+
 /* Capture Toast Badge */
 .fpv-capture-badge {
   position: absolute;
-  top: 64px;
+  top: 102px;
   left: 50%;
   z-index: 12;
   transform: translateX(-50%) translateY(-10px);
@@ -727,22 +956,101 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   transform: translateX(-50%) translateY(0);
 }
 
-/* ================= 4. RIGHT DJI CAMERA & SHUTTER DOCK ================= */
+/* ================= 4. RIGHT GIMBAL DEGREE LINE (Unboxed Minimalist Scale) ================= */
 .dji-right-dock {
   position: absolute;
-  right: 18px;
+  right: 22px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 8;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.dji-gimbal-scale-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  width: auto;
+}
+
+.dji-gimbal-scale-track {
+  position: relative;
+  width: 68px;
+  height: 150px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.dji-gimbal-tick {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  font-variant-numeric: tabular-nums;
+}
+
+.dji-gimbal-tick::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  width: 5px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.dji-gimbal-thumb {
+  position: absolute;
+  right: -8px;
+  transform: translateY(-50%);
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 10px;
-  border-radius: 18px;
-  background: rgba(10, 14, 20, 0.66);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  gap: 4px;
+  color: #F07B32;
+  font-size: 10px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.92));
+  transition: top 0.08s ease-out;
+}
+
+.dji-gimbal-angle-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: #F07B32;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dji-gimbal-thumb-arrow {
+  font-size: 9px;
+  color: #F07B32;
+}
+
+/* First-Person (1P) Mode: Only Show Gimbal Pitch Angle (Hide Body Pitch/Roll Readouts & Center Horizon) */
+.drone-fpv-card.is-first-person #fpv-pitch-readout,
+.drone-fpv-card.is-first-person #fpv-roll-readout,
+.drone-fpv-card.is-first-person .fpv-center-reticle {
+  display: none;
+}
+
+.drone-fpv-card.is-first-person .dji-gimbal-scale-track {
+  border-right-color: rgba(240, 123, 50, 0.85);
 }
 
 .dji-cam-format {

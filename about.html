@@ -44,15 +44,10 @@
       </nav>
     </header>
 
-    <!-- Main About Content (Minimalist Editorial Layout — Small Bio Text Removed) -->
+    <!-- Main About Content (Minimalist Editorial Layout — Clean & Direct) -->
     <main class="about-hero-grid">
       <!-- Left Editorial Column -->
       <section class="about-editorial">
-        <div class="eyebrow-wrapper">
-          <div class="eyebrow-line"></div>
-          <span class="eyebrow-text" data-i18n-zh="关于我 / 个人简介" data-i18n-en="ABOUT / PROFILE">ABOUT / PROFILE</span>
-        </div>
-
         <h1 class="about-headline">
           EXPLORE WITH<br>
           CURIOSITY.<br>
@@ -81,18 +76,9 @@
       </aside>
     </main>
 
-    <!-- Bottom Liquid Glass Guidance Bar to Projects Detail Page -->
-    <div class="guidance-bar-container">
-      <a href="projects detail.html" class="guidance-bar" aria-label="Continue to Photography Work">
-        <span class="guidance-arrow">↓</span>
-        <span class="guidance-hint" data-i18n-zh="02 / 摄影作品" data-i18n-en="02 / PHOTOGRAPHY WORK">02 / PHOTOGRAPHY WORK</span>
-      </a>
-    </div>
-
     <!-- Footer -->
     <footer class="page-footer">
       <span>SHAWN FENG</span>
-      <a href="home page.html" data-i18n-zh="← 返回首页" data-i18n-en="← HOME">← HOME</a>
       <span>PORTFOLIO / 2026</span>
     </footer>
   </div>
@@ -110,19 +96,55 @@
         <!-- Camera Shutter Flash Overlay -->
         <div class="fpv-shutter-flash" id="fpv-shutter-flash"></div>
 
-        <!-- ================= 1. TOP DJI FLY STATUS BAR ================= -->
+        <!-- ================= 1. TOP HUD STATUS BAR ================= -->
         <header class="dji-top-hud">
           <div class="dji-top-left">
-            <span class="dji-brand-pill">DJI FLY</span>
-            <div class="dji-flight-status">
-              <span class="fpv-live-dot"></span>
-              <span class="dji-status-text" data-i18n-zh="正常飞行 (GPS)" data-i18n-en="In Flight (GPS)">正常飞行 (GPS)</span>
+            <div class="dji-flight-status" id="fpv-flight-status">
+              <span class="fpv-live-dot" id="fpv-live-dot"></span>
+              <span class="dji-status-text" id="fpv-status-text" data-i18n-zh="正常飞行 (GPS)" data-i18n-en="In Flight (GPS)">正常飞行 (GPS)</span>
             </div>
-            <!-- C / N / S Flight Mode Switcher -->
-            <div class="fpv-mode-switch" role="group" aria-label="DJI Flight Mode">
-              <button type="button" class="fpv-mode-btn" data-fpv-mode="cine" title="平稳档 Cine">C 平稳</button>
-              <button type="button" class="fpv-mode-btn is-active" data-fpv-mode="normal" title="普通档 Normal">N 普通</button>
-              <button type="button" class="fpv-mode-btn" data-fpv-mode="sport" title="运动档 Sport">S 运动</button>
+            <!-- 3P / 1P Camera View Switcher (Press C) -->
+            <button type="button" class="dji-view-toggle-btn" id="fpv-view-btn" title="按 C 键切换第一人称 / 第三人称视角">
+              <span class="dji-view-key">C</span>
+              <span id="fpv-view-label" data-i18n-zh="第三人称" data-i18n-en="3RD PERSON">第三人称</span>
+            </button>
+
+            <!-- Consolidated Environment & Weather Dropdown Trigger -->
+            <div class="dji-env-dropdown-wrap" id="fpv-env-dropdown-wrap">
+              <button type="button" class="dji-env-trigger-btn" id="fpv-env-toggle-btn" aria-expanded="false" title="点击展开时间、天气与季节设置">
+                <span id="fpv-env-summary" data-i18n-zh="🌇 环境与天气 ▾" data-i18n-en="🌇 ENV & WEATHER ▾">🌇 环境与天气 ▾</span>
+              </button>
+
+              <!-- Random Weather & Time Button -->
+              <button type="button" class="dji-env-random-btn" id="fpv-env-random-btn" title="随机切换天气、时间与季节">
+                <span data-i18n-zh="🎲 随机天气" data-i18n-en="🎲 RANDOM">🎲 随机天气</span>
+              </button>
+
+              <!-- Popover Settings Panel (Only visible when #fpv-env-toggle-btn is clicked) -->
+              <div class="dji-env-popover" id="fpv-env-popover" aria-hidden="true">
+                <div class="dji-env-group" role="group" aria-label="时间切换">
+                  <span class="dji-env-label" data-i18n-zh="时间" data-i18n-en="TIME">时间</span>
+                  <button type="button" class="dji-env-btn" data-env-time="day" data-i18n-zh="☀ 白昼" data-i18n-en="☀ DAY">☀ 白昼</button>
+                  <button type="button" class="dji-env-btn is-active" data-env-time="sunset" data-i18n-zh="🌇 黄昏" data-i18n-en="🌇 SUNSET">🌇 黄昏</button>
+                  <button type="button" class="dji-env-btn" data-env-time="night" data-i18n-zh="🌙 夜晚" data-i18n-en="🌙 NIGHT">🌙 夜晚</button>
+                </div>
+
+                <div class="dji-env-group" role="group" aria-label="天气切换">
+                  <span class="dji-env-label" data-i18n-zh="天气" data-i18n-en="WEATHER">天气</span>
+                  <button type="button" class="dji-env-btn is-active" data-env-weather="clear" data-i18n-zh="☀ 晴" data-i18n-en="☀ CLEAR">☀ 晴</button>
+                  <button type="button" class="dji-env-btn" data-env-weather="rain" data-i18n-zh="🌧 雨" data-i18n-en="🌧 RAIN">🌧 雨</button>
+                  <button type="button" class="dji-env-btn" data-env-weather="snow" data-i18n-zh="❄ 雪" data-i18n-en="❄ SNOW">❄ 雪</button>
+                  <button type="button" class="dji-env-btn" data-env-weather="fog" data-i18n-zh="🌫 雾" data-i18n-en="🌫 FOG">🌫 雾</button>
+                </div>
+
+                <div class="dji-env-group" role="group" aria-label="季节切换">
+                  <span class="dji-env-label" data-i18n-zh="季节" data-i18n-en="SEASON">季节</span>
+                  <button type="button" class="dji-env-btn" data-env-season="spring" data-i18n-zh="🌱 春" data-i18n-en="🌱 SPR">🌱 春</button>
+                  <button type="button" class="dji-env-btn is-active" data-env-season="summer" data-i18n-zh="🌿 夏" data-i18n-en="🌿 SUM">🌿 夏</button>
+                  <button type="button" class="dji-env-btn" data-env-season="autumn" data-i18n-zh="🍁 秋" data-i18n-en="🍁 AUT">🍁 秋</button>
+                  <button type="button" class="dji-env-btn" data-env-season="winter" data-i18n-zh="⛄ 冬" data-i18n-en="⛄ WIN">⛄ 冬</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -131,25 +153,22 @@
             <div class="fpv-compass-track" id="fpv-compass-track">
               <span>NW 315°</span><span>N 0°</span><span>NE 45°</span><span>E 90°</span><span>SE 135°</span><span>S 180°</span><span>SW 225°</span><span>W 270°</span><span>NW 315°</span><span>N 0°</span><span>NE 45°</span>
             </div>
-            <div class="fpv-compass-Lubber">▼ <span id="fpv-heading-val">035°</span></div>
+            <div class="fpv-compass-Lubber">▼ <span id="fpv-heading-val">000°</span></div>
           </div>
 
-          <!-- Top-Right DJI Telemetry Icons (APAS, Battery, RC, Satellites, Close) -->
+          <!-- Top-Right Telemetry & Close -->
           <div class="dji-top-right">
-            <span class="dji-telemetry-pill" title="全向避障已开启">◎ APAS 5.0</span>
             <span class="dji-telemetry-pill dji-bat-pill" title="智能飞行电池剩余电量">
               <span class="dji-bat-icon">96%</span>
-              <span class="dji-bat-time">38'12"</span>
             </span>
-            <span class="dji-telemetry-pill" title="O4 图传信号">RC ▂▄▆█</span>
             <span class="dji-telemetry-pill" title="GNSS 卫星数量">🛰 28</span>
-            <button type="button" class="fpv-close-btn" id="fpv-close-btn" aria-label="退出无人机第一视角">&times;</button>
+            <button type="button" class="fpv-close-btn" id="fpv-close-btn" aria-label="退出无人机视角">&times;</button>
           </div>
         </header>
 
         <!-- ================= 2. LEFT DJI DOCK (Hover Reset & 3 Minimalist 3D Scenes) ================= -->
         <aside class="dji-left-dock">
-          <button type="button" class="dji-rth-btn" id="fpv-rth-btn" title="悬停归位 / 重置机位">
+          <button type="button" class="dji-rth-btn" id="fpv-rth-btn" title="悬停归位 / 重置机位 (R)">
             <span class="dji-rth-icon">H</span>
             <span class="dji-rth-label" data-i18n-zh="返航复位" data-i18n-en="HOME RESET">返航复位</span>
           </button>
@@ -167,11 +186,21 @@
           </div>
         </aside>
 
-        <!-- ================= 3. SUBTLE HORIZON INDICATOR ================= -->
+        <!-- ================= 3. SUBTLE HORIZON & CRASH ALERT BANNER ================= -->
         <div class="fpv-center-reticle" aria-hidden="true">
           <div class="fpv-horizon-group" id="fpv-horizon-group">
             <div class="fpv-horizon-line"></div>
           </div>
+        </div>
+
+        <!-- Crash Alert Banner (Shown when drone collides with buildings / mountains / trees / ground) -->
+        <div class="dji-crash-banner" id="fpv-crash-banner" aria-live="polite">
+          <div class="dji-crash-icon">⚠</div>
+          <div class="dji-crash-text">
+            <strong id="fpv-crash-title" data-i18n-zh="发生碰撞 · 无人机已坠毁" data-i18n-en="COLLISION DETECTED · DRONE CRASHED">发生碰撞 · 无人机已坠毁</strong>
+            <span id="fpv-crash-desc" data-i18n-zh="检测到机身与障碍物发生碰撞，动力电机已紧急锁死" data-i18n-en="Obstacle impact detected. Motors emergency locked.">检测到机身与障碍物发生碰撞，动力电机已紧急锁死</span>
+          </div>
+          <button type="button" class="dji-crash-retry-btn" id="fpv-crash-retry-btn" data-i18n-zh="↻ 重新起飞 (R)" data-i18n-en="↻ RELAUNCH (R)">↻ 重新起飞 (R)</button>
         </div>
 
         <!-- Captured Photo Toast Badge inside FPV -->
@@ -179,29 +208,28 @@
           ✓ DNG RAW + 4K D-LOG M 已抓拍保存
         </div>
 
-        <!-- ================= 4. RIGHT DJI CAMERA & SHUTTER DOCK ================= -->
-        <aside class="dji-right-dock">
-          <div class="dji-cam-format">
-            <span class="dji-format-tag">RAW</span>
-            <span class="dji-format-res">48MP · D-Log M</span>
+        <!-- ================= 4. RIGHT GIMBAL DEGREE LINE (Unboxed Minimalist Scale) ================= -->
+        <aside class="dji-right-dock" title="滚动鼠标滚轮调节云台俯仰角 (-90° ~ +20°)">
+          <div class="dji-gimbal-scale-wrap">
+            <div class="dji-gimbal-scale-track" id="fpv-gimbal-track">
+              <span class="dji-gimbal-tick" style="top: 0%">+20°</span>
+              <span class="dji-gimbal-tick" style="top: 18.2%">0°</span>
+              <span class="dji-gimbal-tick" style="top: 45.5%">-30°</span>
+              <span class="dji-gimbal-tick" style="top: 72.7%">-60°</span>
+              <span class="dji-gimbal-tick" style="top: 100%">-90°</span>
+              <div class="dji-gimbal-thumb" id="fpv-gimbal-thumb" style="top: 38.2%">
+                <strong class="dji-gimbal-angle-val" id="fpv-gimbal-angle-badge">-22°</strong>
+                <span class="dji-gimbal-thumb-arrow">◀</span>
+              </div>
+            </div>
           </div>
-
-          <button type="button" class="fpv-gimbal-btn" id="fpv-gimbal-btn" data-i18n-zh="云台 -35°" data-i18n-en="GIMBAL -35°">
-            云台 -35°
-          </button>
-
-          <!-- Authentic DJI Circular Shutter Button -->
-          <button type="button" class="dji-shutter-ring" id="fpv-shutter-btn" aria-label="航拍快门拍照" title="点击拍摄航拍照片">
-            <span class="dji-shutter-core"></span>
-          </button>
-          <span class="dji-shutter-caption" data-i18n-zh="拍照" data-i18n-en="PHOTO">拍照</span>
         </aside>
 
-        <!-- ================= 5. BOTTOM DJI FLY HUD (Attitude Ball, Telemetry, Sticks, Controls Guide Button) ================= -->
+        <!-- ================= 5. BOTTOM HUD (Attitude Ball, Telemetry, Controls Guide Button) ================= -->
         <footer class="dji-bottom-hud">
-          <!-- Bottom-Left: Iconic DJI Attitude Radar + H / D Telemetry -->
+          <!-- Bottom-Left: Attitude Radar Ball + H / D Telemetry -->
           <div class="dji-bottom-left">
-            <!-- DJI Attitude & Orientation Radar Ball -->
+            <!-- Attitude & Orientation Radar Ball (保留姿态球) -->
             <div class="dji-attitude-radar" aria-hidden="true">
               <div class="dji-radar-compass" id="fpv-radar-compass">
                 <span class="dji-radar-north">N</span>
@@ -209,7 +237,7 @@
               <div class="dji-radar-sphere">
                 <div class="dji-radar-horizon" id="fpv-radar-horizon"></div>
                 <div class="dji-radar-center-line"></div>
-                <!-- Center DJI Aircraft Arrow -->
+                <!-- Center Aircraft Arrow -->
                 <svg class="dji-radar-aircraft" id="fpv-radar-aircraft" viewBox="0 0 24 24">
                   <path d="M12 3 L19 19 L12 15.5 L5 19 Z" fill="#F07B32" stroke="#FFFFFF" stroke-width="1.2" />
                 </svg>
@@ -217,7 +245,7 @@
               </div>
             </div>
 
-            <!-- DJI H (Altitude) & D (Distance) + V.S / H.S Readout -->
+            <!-- H (Altitude) & D (Distance) + V.S / H.S Readout -->
             <div class="dji-telemetry-block">
               <div class="dji-tele-row">
                 <span class="dji-tele-symbol">H</span>
@@ -236,35 +264,13 @@
               <div class="dji-tele-attitude">
                 <span id="fpv-pitch-readout">PITCH 0.0°</span>
                 <span id="fpv-roll-readout">ROLL 0.0°</span>
-                <span id="fpv-gimbal-readout">GIMBAL -35°</span>
+                <span id="fpv-gimbal-readout">GIMBAL -22°</span>
               </div>
             </div>
           </div>
 
-          <!-- Bottom-Center: Dual DJI Virtual RC Joysticks -->
-          <div class="fpv-sticks-group">
-            <div class="fpv-stick-pad" id="fpv-stick-left" title="↑/↓ 控制高低 · Q/E 控制转向">
-              <div class="fpv-stick-crosshair"></div>
-              <div class="fpv-stick-knob" id="fpv-knob-left"></div>
-              <span class="fpv-stick-label" data-i18n-zh="升降 ↑↓ · 转向 QE" data-i18n-en="ALT ↑↓ · YAW QE">升降 ↑↓ · 转向 QE</span>
-            </div>
-            <div class="fpv-stick-pad" id="fpv-stick-right" title="W/A/S/D 控制前后左右">
-              <div class="fpv-stick-crosshair"></div>
-              <div class="fpv-stick-knob" id="fpv-knob-right"></div>
-              <span class="fpv-stick-label" data-i18n-zh="前后左右 WASD" data-i18n-en="MOVE WASD">前后左右 WASD</span>
-            </div>
-          </div>
-
-          <!-- Bottom-Right: Camera Exposure Info + "查看如何控制无人机" Button -->
+          <!-- Bottom-Right: "查看如何控制无人机" Button -->
           <div class="dji-bottom-right">
-            <div class="dji-exposure-strip" aria-hidden="true">
-              <span>ISO <strong>100</strong></span>
-              <span>SHUT <strong>1/240</strong></span>
-              <span>f/<strong>2.8</strong></span>
-              <span>EV <strong>0.0</strong></span>
-              <span class="dji-ael-tag">AE-L</span>
-            </div>
-
             <button type="button" class="dji-help-trigger-btn" id="fpv-help-btn">
               <span class="dji-help-icon">?</span>
               <span data-i18n-zh="如何控制无人机" data-i18n-en="HOW TO CONTROL DRONE">如何控制无人机</span>
@@ -277,8 +283,8 @@
           <div class="dji-controls-panel" role="dialog" aria-label="无人机操控说明">
             <div class="dji-controls-header">
               <div>
-                <span class="dji-controls-eyebrow">DJI RC PRO · FLIGHT CONTROL MANUAL</span>
-                <h3 class="dji-controls-title" data-i18n-zh="如何控制无人机 · 键盘与摇杆指南" data-i18n-en="How to Control the Drone · Flight Controls">如何控制无人机 · 键盘与摇杆指南</h3>
+                <span class="dji-controls-eyebrow">FLIGHT CONTROL MANUAL</span>
+                <h3 class="dji-controls-title" data-i18n-zh="如何控制无人机 · 飞行操控指南" data-i18n-en="How to Control the Drone · Flight Controls">如何控制无人机 · 飞行操控指南</h3>
               </div>
               <button type="button" class="dji-controls-close" id="fpv-controls-close" aria-label="关闭操控说明">&times;</button>
             </div>
@@ -332,22 +338,23 @@
                 </div>
               </div>
 
-              <!-- Control Group 4: Mouse & Gimbal -->
+              <!-- Control Group 4: C Key & Mouse Wheel Gimbal -->
               <div class="dji-control-card">
                 <div class="dji-keycap-cluster">
                   <div class="dji-keycap-row">
-                    <span class="dji-mouse-badge">🖱 摇杆 / 云台</span>
+                    <kbd class="dji-key">C</kbd>
+                    <span class="dji-mouse-badge">🖱 滚轮</span>
                   </div>
                 </div>
                 <div class="dji-control-info">
-                  <strong data-i18n-zh="虚拟摇杆 · 云台俯仰 · 航拍快门" data-i18n-en="Virtual Joysticks · Gimbal · Shutter">虚拟摇杆 · 云台俯仰 · 航拍快门</strong>
-                  <p data-i18n-zh="也可直接用鼠标拖拽底部双摇杆；点击右侧可切换云台俯仰角（-35° / -90° / 0°）或按下快门拍照。" data-i18n-en="Drag the dual on-screen joysticks with your mouse, toggle gimbal pitch (-35°/-90°/0°), or press Shutter to capture.">也可直接用鼠标拖拽底部双摇杆；点击右侧可切换云台俯仰角（-35° / -90° / 0°）或按下快门拍照。</p>
+                  <strong data-i18n-zh="C 键切换第一人称 · 滚轮调节云台俯仰角" data-i18n-en="Press C for 1st-Person · Scroll Wheel for Gimbal">C 键切换第一人称 · 滚轮调节云台俯仰角</strong>
+                  <p data-i18n-zh="按 C 键切换第三人称/第一人称（第一人称仅显示大疆云台俯仰角）；滚动鼠标滚轮可无级调节云台角度（-90° 俯拍 ~ +20°）。碰到建筑或山体将触发坠毁，按 R 键可重新起飞。" data-i18n-en="Press C to toggle 3rd/1st-person view (1st-person shows only DJI gimbal pitch); scroll mouse wheel to adjust gimbal (-90° to +20°). Colliding with obstacles crashes the drone (press R to relaunch).">按 C 键切换第三人称/第一人称（第一人称仅显示大疆云台俯仰角）；滚动鼠标滚轮可无级调节云台角度（-90° 俯拍 ~ +20°）。碰到建筑或山体将触发坠毁，按 R 键可重新起飞。</p>
                 </div>
               </div>
             </div>
 
             <div class="dji-controls-footer">
-              <span class="dji-controls-tip" data-i18n-zh="提示：左侧可切换「01 几何城市 / 02 几何山川 / 03 几何草原」三大立体 3D 场景，顶部可切换 C / N / S 三档速度" data-i18n-en="Tip: Switch between 01 3D City, 02 3D Mountains, and 03 3D Grassland on the left, or C / N / S flight modes at the top.">提示：左侧可切换「01 几何城市 / 02 几何山川 / 03 几何草原」三大立体 3D 场景，顶部可切换 C / N / S 三档速度</span>
+              <span class="dji-controls-tip" data-i18n-zh="提示：顶部环境栏可自由切换「时间（白昼/黄昏/夜晚）· 天气（晴/雨/雪/雾）· 季节（春/夏/秋/冬）」，左侧可切换城市/山川/草原三大 3D 地图" data-i18n-en="Tip: Freely switch Time (Day/Sunset/Night), Weather (Clear/Rain/Snow/Fog), and Season (Spring/Summer/Autumn/Winter) at the top bar.">提示：顶部环境栏可自由切换「时间（白昼/黄昏/夜晚）· 天气（晴/雨/雪/雾）· 季节（春/夏/秋/冬）」，左侧可切换城市/山川/草原三大 3D 地图</span>
               <button type="button" class="dji-controls-ok-btn" id="fpv-controls-ok" data-i18n-zh="开始飞行" data-i18n-en="RESUME FLIGHT">开始飞行</button>
             </div>
           </div>

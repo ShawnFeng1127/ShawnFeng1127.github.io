@@ -694,26 +694,41 @@ function initInfiniteRingGallery() {
     });
   }
 
-  // High-Sensitivity Mouse Wheel -> Silky Horizontal Ring Switching (ONLY when cursor is over the gallery)
+  // Horizontal wheel / trackpad swipe / Shift + Wheel scrolls the gallery horizontally;
+  // Vertical wheel bubbles up to window to seamlessly browse between website pages!
   const modal = document.getElementById('project-lightbox');
   viewport.addEventListener(
     'wheel',
     (e) => {
       if (modal && modal.classList.contains('is-active')) return;
-      e.preventDefault();
-      e.stopPropagation();
 
-      let rawDelta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (e.deltaMode === 1) {
-        rawDelta *= 36;
-      } else if (e.deltaMode === 2) {
-        rawDelta *= 360;
+      const isHorizontalScroll = Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.7 || e.shiftKey;
+      if (isHorizontalScroll) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let rawDelta = e.shiftKey ? e.deltaY : e.deltaX;
+        if (e.deltaMode === 1) {
+          rawDelta *= 36;
+        } else if (e.deltaMode === 2) {
+          rawDelta *= 360;
+        }
+
+        targetOffset += rawDelta * 2.8;
       }
-
-      targetOffset += rawDelta * 3.2;
     },
     { passive: false }
   );
+
+  // Keyboard Left / Right Arrows to slide the gallery when lightbox is closed
+  window.addEventListener('keydown', (e) => {
+    if (modal && modal.classList.contains('is-active')) return;
+    if (e.key === 'ArrowRight') {
+      targetOffset += buttonStep;
+    } else if (e.key === 'ArrowLeft') {
+      targetOffset -= buttonStep;
+    }
+  });
 
   // Mouse Drag with Release Momentum
   let isDragging = false;
@@ -1282,7 +1297,7 @@ function initScrollAndKeyGuidance() {
     'wheel',
     (e) => {
       // Cooldown right after page load so leftover wheel inertia doesn't skip a page
-      if (performance.now() - pageLoadTime < 650 || isNavigatingPage) return;
+      if (performance.now() - pageLoadTime < 500 || isNavigatingPage) return;
       if (modal && modal.classList.contains('is-active')) return;
       const helpModal = document.getElementById('help-detail-modal');
       if (helpModal && helpModal.classList.contains('is-active')) return;
@@ -1291,8 +1306,6 @@ function initScrollAndKeyGuidance() {
       const droneFpvModal = document.getElementById('drone-fpv-modal');
       if (droneFpvModal && droneFpvModal.classList.contains('is-active')) return;
       if (document.getElementById('site-intro-overlay')) return;
-      // Ignore if cursor is inside the horizontal gallery viewport
-      if (galleryViewport && galleryViewport.contains(e.target)) return;
 
       let dy = e.deltaY;
       if (e.deltaMode === 1) dy *= 36;
@@ -1315,8 +1328,8 @@ function initScrollAndKeyGuidance() {
       if (dy > 0 && scrollTop >= maxScroll - 4) {
         downOverflowAccum += dy;
         upOverflowAccum = 0;
-        setGuidanceCharge(downOverflowAccum / 150);
-        if (downOverflowAccum >= 150 && nextPage) {
+        setGuidanceCharge(downOverflowAccum / 100);
+        if (downOverflowAccum >= 100 && nextPage) {
           downOverflowAccum = 0;
           setGuidanceCharge(1);
           navigateToPage(nextPage, null, 'down');
@@ -1326,8 +1339,8 @@ function initScrollAndKeyGuidance() {
       else if (dy < 0 && scrollTop <= 4) {
         upOverflowAccum += Math.abs(dy);
         downOverflowAccum = 0;
-        setGuidanceCharge(upOverflowAccum / 150);
-        if (upOverflowAccum >= 150 && prevPage) {
+        setGuidanceCharge(upOverflowAccum / 100);
+        if (upOverflowAccum >= 100 && prevPage) {
           upOverflowAccum = 0;
           setGuidanceCharge(1);
           navigateToPage(prevPage, null, 'up');
@@ -1899,10 +1912,15 @@ function initDroneFpvCard() {
   const modal = document.getElementById('drone-fpv-modal');
   if (!modal) return;
 
+  const cardEl = document.getElementById('drone-fpv-card');
   const canvas = document.getElementById('fpv-3d-canvas');
   const ctx = canvas ? canvas.getContext('2d') : null;
 
   const closeBtn = document.getElementById('fpv-close-btn');
+  const statusTextEl = document.getElementById('fpv-status-text');
+  const viewBtn = document.getElementById('fpv-view-btn');
+  const viewLabel = document.getElementById('fpv-view-label');
+
   const horizonGroup = document.getElementById('fpv-horizon-group');
   const compassTrack = document.getElementById('fpv-compass-track');
   const headingVal = document.getElementById('fpv-heading-val');
@@ -1914,9 +1932,15 @@ function initDroneFpvCard() {
   const pitchReadout = document.getElementById('fpv-pitch-readout');
   const rollReadout = document.getElementById('fpv-roll-readout');
   const gimbalReadout = document.getElementById('fpv-gimbal-readout');
+  const gimbalAngleBadge = document.getElementById('fpv-gimbal-angle-badge');
+  const gimbalThumb = document.getElementById('fpv-gimbal-thumb');
 
   const radarCompass = document.getElementById('fpv-radar-compass');
   const radarHorizon = document.getElementById('fpv-radar-horizon');
+
+  const crashTitleEl = document.getElementById('fpv-crash-title');
+  const crashDescEl = document.getElementById('fpv-crash-desc');
+  const crashRetryBtn = document.getElementById('fpv-crash-retry-btn');
 
   const shutterFlash = document.getElementById('fpv-shutter-flash');
   const captureBadge = document.getElementById('fpv-capture-badge');
@@ -1928,6 +1952,16 @@ function initDroneFpvCard() {
 
   const modeBtns = modal.querySelectorAll('.fpv-mode-btn');
   const sceneBtns = modal.querySelectorAll('.fpv-scene-btn');
+  const timeBtns = modal.querySelectorAll('[data-env-time]');
+  const weatherBtns = modal.querySelectorAll('[data-env-weather]');
+  const seasonBtns = modal.querySelectorAll('[data-env-season]');
+
+  const envDropdownWrap = document.getElementById('fpv-env-dropdown-wrap');
+  const envToggleBtn = document.getElementById('fpv-env-toggle-btn');
+  const envSummaryEl = document.getElementById('fpv-env-summary');
+  const envPopover = document.getElementById('fpv-env-popover');
+  const envRandomBtn = document.getElementById('fpv-env-random-btn');
+
   const rthBtn = document.getElementById('fpv-rth-btn');
   const gimbalBtn = document.getElementById('fpv-gimbal-btn');
   const shutterBtn = document.getElementById('fpv-shutter-btn');
@@ -1942,13 +1976,31 @@ function initDroneFpvCard() {
   let flightMode = 'normal';   // 'cine' | 'normal' | 'sport'
   const modeMultipliers = { cine: 0.6, normal: 1.0, sport: 1.65 };
 
+  // Environment & Lighting State (Time / Weather / Season)
+  let envTime = 'sunset';     // 'day' | 'sunset' | 'night'
+  let envWeather = 'clear';   // 'clear' | 'rain' | 'snow' | 'fog'
+  let envSeason = 'summer';   // 'spring' | 'summer' | 'autumn' | 'winter'
+
+  // Camera View State (3rd-Person vs 1st-Person toggled via 'C')
+  let isFirstPerson = false;
+
+  // Gimbal Pitch Angle (-90° top-down to +20° upward, controlled via Mouse Wheel)
+  let gimbalAngleDeg = -22;
+  const gimbalPresets = [-22, -45, -90, 0];
+  let gimbalPresetIdx = 0;
+
+  // Crash & Collision State
+  let isCrashed = false;
+  let crashShakeTime = 0;
+  let crashDebris = [];
+
   // Normalized joystick inputs (-1 to +1)
   let leftX = 0;  // Yaw rate (Q/E)
   let leftY = 0;  // Throttle / Altitude (↑/↓)
   let rightX = 0; // Roll / Strafe Left-Right (A/D)
   let rightY = 0; // Pitch / Forward-Backward (W/S)
 
-  // 3D Drone World State
+  // 3D Drone World State & Inertial Physics
   const WRAP_SIZE = 760;
   const HALF_WRAP = WRAP_SIZE / 2;
   let droneX = 0;
@@ -1957,21 +2009,40 @@ function initDroneFpvCard() {
   let vxWorld = 0;
   let vzWorld = 0;
   let vyWorld = 0;
+  let yawVel = 0;  // Rotational angular velocity (deg/s) for smooth yaw inertia
 
   let headingDeg = 0;
   let currentRoll = 0;  // degrees
   let currentPitch = 0; // degrees
   let rotorPhase = 0;
 
-  const gimbalPresets = [-25, -45, -12];
-  let gimbalIndex = 0;
   let captureTimer = null;
   const keysPressed = {};
 
   // =========================================================================
+  // High-Density 3D Weather Particles (520 Snowflakes / Raindrops) & Starfield
+  // =========================================================================
+  const weatherParticles = Array.from({ length: 520 }, () => ({
+    x: (Math.random() - 0.5) * 210,
+    y: Math.random() * 125,
+    z: (Math.random() - 0.5) * 210,
+    speed: 24 + Math.random() * 22,
+    drift: Math.random() * Math.PI * 2,
+    driftZ: Math.random() * Math.PI * 2,
+    sizeScale: 0.65 + Math.random() * 1.15
+  }));
+
+  const starField = Array.from({ length: 110 }, () => ({
+    az: Math.random() * Math.PI * 2,
+    el: 0.08 + Math.random() * 0.72,
+    size: 1 + Math.random() * 1.7,
+    phase: Math.random() * Math.PI * 2
+  }));
+
+  // =========================================================================
   // 3D Geometry Builders (Minimalist Low-Poly Architectural & Natural Meshes)
   // =========================================================================
-  function createBoxFaces(cx, baseY, cz, w, h, d, sideRgb, topRgb, accentRoof) {
+  function createBoxFaces(cx, baseY, cz, w, h, d, sideRgb, topRgb, accentRoof, emissiveSide, alphaVal) {
     const hw = w / 2;
     const hd = d / 2;
     const y0 = baseY;
@@ -1987,17 +2058,32 @@ function initDroneFpvCard() {
     const v111 = [cx + hw, y1, cz + hd];
     const v011 = [cx - hw, y1, cz + hd];
 
+    const em = emissiveSide || 0;
+    const al = alphaVal !== undefined ? alphaVal : 1;
     const faces = [
-      { verts: [v001, v101, v111, v011], rgb: sideRgb }, // +Z Front
-      { verts: [v100, v000, v010, v110], rgb: sideRgb }, // -Z Back
-      { verts: [v101, v100, v110, v111], rgb: sideRgb }, // +X Right
-      { verts: [v000, v001, v011, v010], rgb: sideRgb }, // -X Left
-      { verts: [v011, v111, v110, v010], rgb: topRgb || sideRgb } // +Y Top
+      { verts: [v001, v101, v111, v011], rgb: sideRgb, emissive: em, alpha: al }, // +Z Front
+      { verts: [v100, v000, v010, v110], rgb: sideRgb, emissive: em, alpha: al }, // -Z Back
+      { verts: [v101, v100, v110, v111], rgb: sideRgb, emissive: em, alpha: al }, // +X Right
+      { verts: [v000, v001, v011, v010], rgb: sideRgb, emissive: em, alpha: al }, // -X Left
+      { verts: [v011, v111, v110, v010], rgb: topRgb || sideRgb, emissive: em * 0.5, alpha: al } // +Y Top
     ];
+    if (al < 1) {
+      // Include underside for translucent volumetric clouds
+      faces.push({
+        verts: [v000, v100, v101, v001],
+        rgb: [
+          Math.max(0, sideRgb[0] - 28),
+          Math.max(0, sideRgb[1] - 28),
+          Math.max(0, sideRgb[2] - 24)
+        ],
+        emissive: em * 0.2,
+        alpha: al * 0.92
+      });
+    }
 
     if (accentRoof) {
-      const rw = hw * 0.62;
-      const rd = hd * 0.62;
+      const rw = hw * 0.66;
+      const rd = hd * 0.66;
       const ry = y1 + 0.35;
       faces.push({
         verts: [
@@ -2007,14 +2093,14 @@ function initDroneFpvCard() {
           [cx - rw, ry, cz - rd]
         ],
         rgb: accentRoof,
-        emissive: 0.25,
+        emissive: 0.48,
         doubleSided: true
       });
     }
     return faces;
   }
 
-  function createPyramidFaces(cx, baseY, cz, radius, h, sides, baseRgb, capRgb, capRatio, rotOffset) {
+  function createPyramidFaces(cx, baseY, cz, radius, h, sides, baseRgb, capRgb, capRatio, rotOffset, emissiveCap) {
     const faces = [];
     const rot = rotOffset || 0;
     const ring0 = [];
@@ -2039,7 +2125,8 @@ function initDroneFpvCard() {
         });
         faces.push({
           verts: [ringMid[next], ringMid[i], apex],
-          rgb: capRgb
+          rgb: capRgb,
+          emissive: emissiveCap || 0
         });
       }
     } else {
@@ -2047,17 +2134,20 @@ function initDroneFpvCard() {
         const next = (i + 1) % sides;
         faces.push({
           verts: [ring0[next], ring0[i], apex],
-          rgb: baseRgb
+          rgb: baseRgb,
+          emissive: emissiveCap || 0
         });
       }
     }
     return faces;
   }
 
-  function createPrismFaces(cx, baseY, cz, radius, h, sides, sideRgb, topRgb) {
+  function createPrismFaces(cx, baseY, cz, radius, h, sides, sideRgb, topRgb, emissiveVal, alphaVal) {
     const faces = [];
     const bot = [];
     const top = [];
+    const em = emissiveVal || 0;
+    const al = alphaVal !== undefined ? alphaVal : 1;
     for (let i = 0; i < sides; i++) {
       const a = (i / sides) * Math.PI * 2;
       const x = cx + Math.cos(a) * radius;
@@ -2069,17 +2159,122 @@ function initDroneFpvCard() {
       const next = (i + 1) % sides;
       faces.push({
         verts: [bot[next], bot[i], top[i], top[next]],
-        rgb: sideRgb
+        rgb: sideRgb,
+        emissive: em,
+        alpha: al
       });
     }
     faces.push({
       verts: top,
-      rgb: topRgb || sideRgb
+      rgb: topRgb || sideRgb,
+      emissive: em * 0.7,
+      alpha: al
     });
     return faces;
   }
 
-  // Deterministic pseudo-random generator for clean geometric layout
+  function createGroundShadowQuad(cx, cz, rx, rz, sunOffsetX, sunOffsetZ, alpha) {
+    const sx = cx + sunOffsetX;
+    const sz = cz + sunOffsetZ;
+    return {
+      verts: [
+        [sx - rx, 0.12, sz + rz],
+        [sx + rx, 0.12, sz + rz],
+        [sx + rx, 0.12, sz - rz],
+        [sx - rx, 0.12, sz - rz]
+      ],
+      rgb: [4, 7, 12],
+      alpha: alpha || 0.28,
+      doubleSided: true,
+      emissive: 0
+    };
+  }
+
+  // Multi-Layered 3D Volumetric Cumulus Cloud Cluster (体积云)
+  function createVolumetricCloudCluster(cx, cy, cz, scale, timeOfDay, rng) {
+    let sideCol = [206, 222, 238];
+    let topCol = [248, 252, 255];
+    let underCol = [162, 182, 206];
+    let em = 0.08;
+
+    if (timeOfDay === 'sunset') {
+      sideCol = [232, 156, 124];
+      topCol = [255, 214, 172];
+      underCol = [138, 96, 114];
+      em = 0.24;
+    } else if (timeOfDay === 'night') {
+      sideCol = [48, 66, 92];
+      topCol = [84, 108, 142];
+      underCol = [28, 40, 58];
+      em = 0.12;
+    }
+
+    const w0 = (38 + rng() * 26) * scale;
+    const d0 = (26 + rng() * 18) * scale;
+    const h0 = (9 + rng() * 6) * scale;
+
+    const faces = [
+      // 1. Wide Lower Cumulus Anvil Base
+      ...createBoxFaces(cx, cy - h0 * 0.35, cz, w0 * 1.25, h0 * 0.55, d0 * 1.2, underCol, sideCol, null, em * 0.6, 0.72),
+      // 2. Main Central Volumetric Core
+      ...createBoxFaces(cx, cy, cz, w0, h0, d0, sideCol, topCol, null, em, 0.84),
+      // 3. Upper Sunlit Cumulus Dome
+      ...createBoxFaces(cx - w0 * 0.08, cy + h0 * 0.75, cz + d0 * 0.05, w0 * 0.62, h0 * 0.72, d0 * 0.62, topCol, [255, 255, 255], null, em * 1.3, 0.88),
+      // 4. Flanking Billow Lobe Left
+      ...createBoxFaces(cx - w0 * 0.48, cy + h0 * 0.12, cz - d0 * 0.15, w0 * 0.58, h0 * 0.68, d0 * 0.66, sideCol, topCol, null, em * 0.9, 0.78),
+      // 5. Flanking Billow Lobe Right
+      ...createBoxFaces(cx + w0 * 0.46, cy + h0 * 0.08, cz + d0 * 0.18, w0 * 0.54, h0 * 0.62, d0 * 0.6, sideCol, topCol, null, em * 0.9, 0.78),
+      // 6. Soft Outer Mist Halo Skirt
+      {
+        verts: [
+          [cx - w0 * 0.85, cy - h0 * 0.1, cz + d0 * 0.8],
+          [cx + w0 * 0.85, cy - h0 * 0.1, cz + d0 * 0.8],
+          [cx + w0 * 0.85, cy - h0 * 0.1, cz - d0 * 0.8],
+          [cx - w0 * 0.85, cy - h0 * 0.1, cz - d0 * 0.8]
+        ],
+        rgb: topCol,
+        alpha: 0.34,
+        doubleSided: true,
+        emissive: em
+      }
+    ];
+
+    return {
+      cx,
+      cz,
+      isCloud: true,
+      driftSpeed: 2.2 + rng() * 2.4,
+      colliders: [],
+      faces
+    };
+  }
+
+  // 3D Low-Altitude Volumetric Mist Sheet (体积雾层)
+  function createVolumetricMistLayer(cx, y, cz, w, d, rgb, alpha) {
+    const hw = w / 2;
+    const hd = d / 2;
+    return {
+      cx,
+      cz,
+      isMist: true,
+      colliders: [],
+      faces: [
+        {
+          verts: [
+            [cx - hw, y, cz + hd],
+            [cx + hw, y, cz + hd],
+            [cx + hw, y, cz - hd],
+            [cx - hw, y, cz - hd]
+          ],
+          rgb,
+          alpha,
+          doubleSided: true,
+          emissive: 0.18
+        }
+      ]
+    };
+  }
+
   function makeRng(seed) {
     let s = seed;
     return function () {
@@ -2088,41 +2283,227 @@ function initDroneFpvCard() {
     };
   }
 
-  // Build the 3 Minimalist 3D Scenes
-  function buildScenes() {
+  // =========================================================================
+  // Build the 3 Minimalist 3D Scenes (Landmarks, Ultra-High Snow Peaks, Volumetric Clouds)
+  // =========================================================================
+  function buildScenes(season, timeOfDay) {
     const scenes = {};
+    const isWinter = season === 'winter';
+    const isAutumn = season === 'autumn';
+    const isSpring = season === 'spring';
+    const isNight = timeOfDay === 'night';
 
     // =======================================================================
-    // SCENE 01: 几何城市 (Minimalist Architectural 3D Metropolis)
+    // SCENE 01: 几何城市 (Minimalist Architectural 3D Metropolis + 3 Iconic Landmarks)
     // =======================================================================
     const cityObjects = [];
     const rngCity = makeRng(104729);
     const cityPalettes = [
-      { side: [56, 74, 96], top: [88, 112, 140], accent: [240, 123, 50] },
-      { side: [72, 86, 104], top: [110, 128, 150], accent: [56, 189, 248] },
-      { side: [44, 58, 76], top: [74, 94, 118], accent: null },
-      { side: [92, 102, 116], top: [138, 150, 166], accent: [245, 185, 135] }
+      {
+        side: [56, 74, 96],
+        top: isWinter ? [225, 235, 246] : [88, 112, 140],
+        accent: [240, 123, 50]
+      },
+      {
+        side: [72, 86, 104],
+        top: isWinter ? [232, 240, 250] : [110, 128, 150],
+        accent: [56, 189, 248]
+      },
+      {
+        side: [44, 58, 76],
+        top: isWinter ? [218, 228, 240] : [74, 94, 118],
+        accent: isNight ? [250, 204, 21] : null
+      },
+      {
+        side: [92, 102, 116],
+        top: isWinter ? [238, 244, 252] : [138, 150, 166],
+        accent: [245, 185, 135]
+      }
     ];
 
-    // Grid of architectural towers leaving a grand central boulevard along X=0 and Z=0
+    // Glowing boulevard light strips along X=0 and Z=0
+    for (let bz = -340; bz <= 340; bz += 48) {
+      cityObjects.push({
+        cx: 0,
+        cz: bz,
+        colliders: [],
+        faces: [
+          {
+            verts: [
+              [-2.2, 0.18, bz - 14],
+              [2.2, 0.18, bz - 14],
+              [2.2, 0.18, bz + 14],
+              [-2.2, 0.18, bz + 14]
+            ],
+            rgb: isNight ? [255, 170, 85] : [240, 123, 50],
+            emissive: isNight ? 0.85 : 0.35,
+            doubleSided: true
+          }
+        ]
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // ICONIC CITY LANDMARK 01: 双子星云端连廊大厦 (Nexus Twin Skybridge Towers)
+    // Distinct turquoise-cyan & radiant gold glass towers connected by a high skybridge
+    // -----------------------------------------------------------------------
+    {
+      const lx = -72;
+      const lz = -86;
+      const t1x = lx - 17;
+      const t2x = lx + 17;
+      const twinSide = [34, 126, 176];
+      const twinTop = [148, 226, 255];
+      const goldBand = [255, 192, 78];
+      const cyanGlow = [56, 218, 255];
+
+      const twinFaces = [
+        createGroundShadowQuad(lx, lz, 38, 24, -26, 20, 0.36),
+        // Grand Podium Base
+        ...createBoxFaces(lx, 0, lz, 58, 14, 30, [42, 64, 92], [88, 132, 176], goldBand, 0.25),
+        // West Tower & East Tower (148m main shafts)
+        ...createBoxFaces(t1x, 14, lz, 18, 134, 18, twinSide, twinTop, null, isNight ? 0.42 : 0.22),
+        ...createBoxFaces(t2x, 14, lz, 18, 134, 18, twinSide, twinTop, null, isNight ? 0.42 : 0.22),
+        // Glowing Horizon Light Rings along both towers
+        ...createBoxFaces(t1x, 56, lz, 19.2, 3, 19.2, cyanGlow, cyanGlow, null, 0.88),
+        ...createBoxFaces(t2x, 56, lz, 19.2, 3, 19.2, cyanGlow, cyanGlow, null, 0.88),
+        ...createBoxFaces(t1x, 126, lz, 19.2, 3, 19.2, goldBand, goldBand, null, 0.88),
+        ...createBoxFaces(t2x, 126, lz, 19.2, 3, 19.2, goldBand, goldBand, null, 0.88),
+        // High-Altitude Suspended Skybridge Observation Deck at Y=96..105m
+        ...createBoxFaces(lx, 96, lz, 54, 9, 12, [240, 123, 50], [255, 208, 128], cyanGlow, 0.72),
+        // Twin Diamond Crystal Crowns & Spires (reaching 178m!)
+        ...createPyramidFaces(t1x, 148, lz, 11.5, 30, 4, cyanGlow, [255, 255, 255], 0.45, Math.PI / 4, 0.85),
+        ...createPyramidFaces(t2x, 148, lz, 11.5, 30, 4, cyanGlow, [255, 255, 255], 0.45, Math.PI / 4, 0.85)
+      ];
+
+      const twinColliders = [
+        { type: 'box', cx: t1x, cz: lz, hw: 9.5, hd: 9.5, y0: 0, y1: 178, labelZh: '城市地标·双子星西塔', labelEn: 'Landmark Twin West Tower' },
+        { type: 'box', cx: t2x, cz: lz, hw: 9.5, hd: 9.5, y0: 0, y1: 178, labelZh: '城市地标·双子星东塔', labelEn: 'Landmark Twin East Tower' },
+        { type: 'box', cx: lx, cz: lz, hw: 27, hd: 6, y0: 96, y1: 105, labelZh: '城市地标·双子星百米空中连廊', labelEn: 'Landmark Skybridge' }
+      ];
+      cityObjects.push({ cx: lx, cz: lz, faces: twinFaces, colliders: twinColliders });
+    }
+
+    // -----------------------------------------------------------------------
+    // ICONIC CITY LANDMARK 02: 凌云水晶方尖碑巨塔 (The Spire / Neo-Crystal Megatower)
+    // 220m tall 5-tier stepped hexagonal gold-amber & pearl monument
+    // -----------------------------------------------------------------------
+    {
+      const sx = 78;
+      const sz = -88;
+      const goldSide = [196, 132, 54];
+      const pearlTop = [252, 236, 198];
+      const neonAmber = [255, 168, 52];
+
+      const spireFaces = [
+        createGroundShadowQuad(sx, sz, 34, 34, -36, 26, 0.38),
+        // Tier 1: Hexagonal Megabase (0..58m)
+        ...createPrismFaces(sx, 0, sz, 25, 58, 6, [142, 96, 48], pearlTop, 0.24),
+        ...createPrismFaces(sx, 56, sz, 26.2, 3.2, 6, neonAmber, neonAmber, 0.9),
+        // Tier 2: Mid Hexagonal Shaft (58..112m)
+        ...createPrismFaces(sx, 58, sz, 19.5, 54, 6, goldSide, pearlTop, 0.32),
+        ...createPrismFaces(sx, 110, sz, 20.6, 3.2, 6, [56, 218, 255], [56, 218, 255], 0.92),
+        // Tier 3: Upper Crystal Sanctuary (112..158m)
+        ...createPrismFaces(sx, 112, sz, 14, 46, 6, [224, 164, 78], [255, 246, 220], 0.42),
+        ...createPrismFaces(sx, 156, sz, 15.2, 3, 6, neonAmber, neonAmber, 0.95),
+        // Tier 4: Crown Lantern & 220m Obelisk Needle (158..220m)
+        ...createPyramidFaces(sx, 158, sz, 13.5, 62, 6, neonAmber, [255, 255, 255], 0.52, 0, 0.92)
+      ];
+
+      const spireColliders = [
+        { type: 'cone', cx: sx, cz: sz, rBase: 24, rTop: 2.5, y0: 0, y1: 220, labelZh: '城市地标·凌云水晶方尖碑巨塔', labelEn: 'Landmark Crystal Megatower' }
+      ];
+      cityObjects.push({ cx: sx, cz: sz, faces: spireFaces, colliders: spireColliders });
+    }
+
+    // -----------------------------------------------------------------------
+    // ICONIC CITY LANDMARK 03: 天穹双球观景塔 (Celestial Dual-Sphere Observation Tower)
+    // 196m futuristic needle tower with two giant glowing geometric spheres
+    // -----------------------------------------------------------------------
+    {
+      const ox = 76;
+      const oz = 84;
+      const coralSphere = [236, 88, 112];
+      const coralLight = [255, 148, 168];
+      const cyanRing = [56, 224, 255];
+
+      const pearlFaces = [
+        createGroundShadowQuad(ox, oz, 30, 30, -30, 22, 0.35),
+        // Base Podium
+        ...createPrismFaces(ox, 0, oz, 22, 18, 6, [62, 78, 104], [118, 146, 182], 0.2),
+        // Central Core Column (18..162m)
+        ...createPrismFaces(ox, 18, oz, 5.8, 144, 6, [168, 186, 210], [235, 242, 252], 0.28),
+        // Lower Giant Observation Sphere Pod (Y=62..88m)
+        ...createPyramidFaces(ox, 62, oz, 18.5, 13, 8, coralSphere, coralLight, 0.5, 0, 0.55),
+        ...createPrismFaces(ox, 73, oz, 19.8, 3.2, 8, cyanRing, cyanRing, 0.95),
+        ...createPrismFaces(ox, 65, oz, 16.5, 18, 8, coralSphere, coralLight, 0.48),
+        // Upper Observation Sphere Pod (Y=118..138m)
+        ...createPrismFaces(ox, 120, oz, 13.2, 14, 8, coralSphere, coralLight, 0.56),
+        ...createPrismFaces(ox, 125.5, oz, 14.6, 2.8, 8, [255, 206, 72], [255, 206, 72], 0.95),
+        // High-Altitude Beacon Spire (162..196m)
+        ...createPyramidFaces(ox, 162, oz, 4.5, 34, 6, cyanRing, [255, 255, 255], 0.6, 0, 0.95)
+      ];
+
+      const pearlColliders = [
+        { type: 'cone', cx: ox, cz: oz, rBase: 20, rTop: 6, y0: 0, y1: 62, labelZh: '城市地标·天穹观景塔基座', labelEn: 'Landmark Observation Tower Base' },
+        { type: 'cone', cx: ox, cz: oz, rBase: 19.5, rTop: 14, y0: 62, y1: 140, labelZh: '城市地标·天穹观景太空舱', labelEn: 'Landmark Observation Sphere' },
+        { type: 'cone', cx: ox, cz: oz, rBase: 5.5, rTop: 1.5, y0: 140, y1: 196, labelZh: '城市地标·天穹观景塔天线', labelEn: 'Landmark Tower Spire' }
+      ];
+      cityObjects.push({ cx: ox, cz: oz, faces: pearlFaces, colliders: pearlColliders });
+    }
+
+    // Grid of regular architectural towers (skipping the 3 landmark plazas)
     for (let gx = -320; gx <= 320; gx += 64) {
       for (let gz = -320; gz <= 320; gz += 64) {
         if (Math.abs(gx) < 42 || Math.abs(gz) < 42) continue;
+        // Leave open plaza space around the 3 Landmarks
+        if (
+          Math.hypot(gx - -72, gz - -86) < 58 ||
+          Math.hypot(gx - 78, gz - -88) < 56 ||
+          Math.hypot(gx - 76, gz - 84) < 56
+        ) {
+          continue;
+        }
+
         const jx = gx + (rngCity() - 0.5) * 14;
         const jz = gz + (rngCity() - 0.5) * 14;
-        const w = 18 + rngCity() * 18;
-        const d = 18 + rngCity() * 18;
+        const w = 18 + rngCity() * 16;
+        const d = 18 + rngCity() * 16;
         const distCenter = Math.hypot(gx, gz);
         const h =
           distCenter < 160
-            ? 38 + rngCity() * 68
-            : 18 + rngCity() * 44;
+            ? 32 + rngCity() * 48
+            : 18 + rngCity() * 38;
         const pal = cityPalettes[Math.floor(rngCity() * cityPalettes.length)];
-        const faces = createBoxFaces(jx, 0, jz, w, h, d, pal.side, pal.top, pal.accent);
+        const faces = [
+          createGroundShadowQuad(jx, jz, w * 0.65, d * 0.65, -h * 0.18, h * 0.14, isNight ? 0.18 : 0.32),
+          ...createBoxFaces(jx, 0, jz, w, h, d, pal.side, pal.top, pal.accent, isNight ? 0.12 : 0)
+        ];
 
-        // Stepped upper tier on tall skyscrapers
-        if (h > 58) {
-          const h2 = 14 + rngCity() * 20;
+        if (isNight || timeOfDay === 'sunset') {
+          const bandH = h * 0.62;
+          faces.push(
+            ...createBoxFaces(
+              jx,
+              bandH,
+              jz,
+              w + 0.3,
+              2.2,
+              d + 0.3,
+              [255, 196, 112],
+              [255, 196, 112],
+              null,
+              isNight ? 0.88 : 0.45
+            )
+          );
+        }
+
+        const colliders = [
+          { type: 'box', cx: jx, cz: jz, hw: w / 2, hd: d / 2, y0: 0, y1: h, labelZh: '城市摩天大楼', labelEn: 'Skyscraper' }
+        ];
+
+        if (h > 54) {
+          const h2 = 10 + rngCity() * 16;
           faces.push(
             ...createBoxFaces(
               jx,
@@ -2132,87 +2513,103 @@ function initDroneFpvCard() {
               h2,
               d * 0.62,
               pal.top,
-              [175, 190, 208],
-              [240, 123, 50]
+              isWinter ? [242, 247, 255] : [175, 190, 208],
+              [240, 123, 50],
+              isNight ? 0.25 : 0
             )
           );
-          if (rngCity() > 0.45) {
-            faces.push(
-              ...createPyramidFaces(
-                jx,
-                h + h2,
-                jz,
-                w * 0.25,
-                16,
-                4,
-                [240, 123, 50],
-                null,
-                0,
-                Math.PI / 4
-              )
-            );
-          }
+          colliders.push({
+            type: 'box',
+            cx: jx,
+            cz: jz,
+            hw: (w * 0.62) / 2,
+            hd: (d * 0.62) / 2,
+            y0: h,
+            y1: h + h2,
+            labelZh: '摩天楼塔冠',
+            labelEn: 'Tower Crown'
+          });
         }
-        cityObjects.push({ cx: jx, cz: jz, faces });
+        cityObjects.push({ cx: jx, cz: jz, faces, colliders });
       }
     }
 
     // Central Boulevard Geometric Ring Gateways
     [-180, 0, 180].forEach((zp) => {
       const gateFaces = [
-        ...createBoxFaces(-26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120]),
-        ...createBoxFaces(26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120]),
-        ...createBoxFaces(0, 48, zp, 60, 7, 7, [235, 145, 80], [255, 200, 150], [56, 189, 248])
+        ...createBoxFaces(-26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120], null, isNight ? 0.35 : 0.1),
+        ...createBoxFaces(26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120], null, isNight ? 0.35 : 0.1),
+        ...createBoxFaces(0, 48, zp, 60, 7, 7, [235, 145, 80], [255, 200, 150], [56, 189, 248], isNight ? 0.45 : 0.15)
       ];
-      cityObjects.push({ cx: 0, cz: zp, faces: gateFaces });
+      const gateColliders = [
+        { type: 'box', cx: -26, cz: zp, hw: 3.5, hd: 3.5, y0: 0, y1: 54, labelZh: '中央大道门廊立柱', labelEn: 'Gateway Pillar' },
+        { type: 'box', cx: 26, cz: zp, hw: 3.5, hd: 3.5, y0: 0, y1: 54, labelZh: '中央大道门廊立柱', labelEn: 'Gateway Pillar' },
+        { type: 'box', cx: 0, cz: zp, hw: 30, hd: 3.5, y0: 48, y1: 55, labelZh: '中央大道门廊横梁', labelEn: 'Gateway Beam' }
+      ];
+      cityObjects.push({ cx: 0, cz: zp, faces: gateFaces, colliders: gateColliders });
     });
 
-    // Floating Minimalist 3D Clouds
-    for (let i = 0; i < 14; i++) {
+    // 3D Volumetric Cumulus Cloud Clusters & Low-Altitude Mist Layers
+    for (let i = 0; i < 16; i++) {
       const cx = (rngCity() - 0.5) * 680;
       const cz = (rngCity() - 0.5) * 680;
-      const cy = 115 + rngCity() * 40;
-      const cw = 28 + rngCity() * 26;
-      const cd = 18 + rngCity() * 18;
-      cityObjects.push({
-        cx,
-        cz,
-        faces: createBoxFaces(cx, cy, cz, cw, 5, cd, [195, 210, 228], [235, 242, 250])
-      });
+      const cy = 128 + rngCity() * 44;
+      cityObjects.push(createVolumetricCloudCluster(cx, cy, cz, 0.95 + rngCity() * 0.45, timeOfDay, rngCity));
+    }
+    for (let mz = -280; mz <= 280; mz += 140) {
+      cityObjects.push(
+        createVolumetricMistLayer(0, 14, mz, 92, 110, isNight ? [42, 68, 98] : [188, 208, 228], 0.18)
+      );
     }
 
     scenes.city = {
-      skyTop: '#0A1320',
-      skyMid: '#182C46',
-      skyHorizon: '#C47B54',
-      groundFill: '#0F1824',
-      gridStroke: 'rgba(120, 165, 210, 0.16)',
-      roadColor: [24, 38, 54],
-      roadStripe: [240, 123, 50],
-      fogRgb: [38, 56, 78],
+      groundFill: isWinter ? '#233040' : '#0F1824',
+      gridStroke: isWinter ? 'rgba(200, 225, 250, 0.22)' : 'rgba(120, 165, 210, 0.16)',
       objects: cityObjects
     };
 
     // =======================================================================
-    // SCENE 02: 几何山川 (Minimalist Low-Poly Mountains & Winding River Valley)
+    // SCENE 02: 几何山川 (Ultra-High Snow Mountains, Canyon Terraces, Alpine Lake & Forests)
     // =======================================================================
     const mountainObjects = [];
     const rngMtn = makeRng(202605);
-    const mtnPalettes = [
-      { base: [58, 78, 102], cap: [238, 244, 252] }, // Alpine Slate + Snow
-      { base: [158, 86, 62], cap: [232, 188, 156] }, // Danxia Ochre + Warm Crest
-      { base: [72, 92, 114], cap: [242, 247, 255] }, // High Peak + Snow Cap
-      { base: [122, 78, 70], cap: [218, 165, 138] }  // Terracotta Ridge
-    ];
+    const mtnPalettes = isWinter
+      ? [
+          { base: [110, 130, 154], cap: [245, 250, 255] },
+          { base: [128, 144, 166], cap: [248, 252, 255] },
+          { base: [92, 114, 138], cap: [240, 246, 255] }
+        ]
+      : isAutumn
+      ? [
+          { base: [168, 92, 58], cap: [242, 210, 175] },
+          { base: [142, 78, 56], cap: [235, 185, 142] },
+          { base: [86, 94, 110], cap: [242, 246, 252] }
+        ]
+      : isSpring
+      ? [
+          { base: [64, 108, 92], cap: [240, 248, 252] },
+          { base: [82, 118, 104], cap: [232, 244, 248] },
+          { base: [138, 92, 76], cap: [238, 205, 188] }
+        ]
+      : [
+          { base: [58, 78, 102], cap: [238, 244, 252] },
+          { base: [158, 86, 62], cap: [232, 188, 156] },
+          { base: [72, 92, 114], cap: [242, 247, 255] },
+          { base: [122, 78, 70], cap: [218, 165, 138] }
+        ];
 
-    // Winding River Tiles along the central canyon (|x| < 38)
+    const riverRgb = isWinter ? [165, 215, 242] : [42, 156, 198];
+
+    // Winding River Tiles + Expanded Highland Glacial Lake Basin
     for (let rz = -360; rz < 360; rz += 40) {
       const curveX = Math.sin(rz * 0.012) * 28;
       const nextCurveX = Math.sin((rz + 40) * 0.012) * 28;
-      const rw = 26;
+      const isLakeBasin = Math.abs(rz + 120) < 65;
+      const rw = isLakeBasin ? 52 : 26;
       mountainObjects.push({
         cx: curveX,
         cz: rz + 20,
+        colliders: [],
         faces: [
           {
             verts: [
@@ -2221,73 +2618,205 @@ function initDroneFpvCard() {
               [nextCurveX + rw, 0.25, rz + 40],
               [nextCurveX - rw, 0.25, rz + 40]
             ],
-            rgb: [42, 148, 186],
-            emissive: 0.24,
+            rgb: isLakeBasin ? [64, 192, 232] : riverRgb,
+            emissive: isNight ? 0.42 : 0.28,
             doubleSided: true
           }
         ]
       });
     }
 
-    // Low-Poly Faceted Mountain Peaks flanking both sides of the river canyon
+    // -----------------------------------------------------------------------
+    // ULTRA-HIGH SNOW-CAPPED ALPINE MASSIFS (特别高的雪山群: 205m - 268m!)
+    // Towering far above regular hills and piercing the volumetric cloud layer
+    // -----------------------------------------------------------------------
+    const alpineSummitSpots = [
+      { cx: -148, cz: -145, r: 74, h: 266, subR: 48, subH: 176 },
+      { cx: 152, cz: -128, r: 70, h: 248, subR: 46, subH: 164 },
+      { cx: -158, cz: 118, r: 68, h: 236, subR: 44, subH: 158 },
+      { cx: 146, cz: 142, r: 72, h: 254, subR: 46, subH: 168 },
+      { cx: -245, cz: -10, r: 66, h: 222, subR: 42, subH: 148 },
+      { cx: 242, cz: 12, r: 68, h: 228, subR: 44, subH: 152 }
+    ];
+
+    alpineSummitSpots.forEach((sp, idx) => {
+      const graniteBase = [64, 82, 106];
+      const glacierBlue = [186, 224, 252];
+      const pureSnow = [248, 252, 255];
+      const rot = idx * 0.7;
+
+      const massifFaces = [
+        createGroundShadowQuad(sp.cx, sp.cz, sp.r * 0.85, sp.r * 0.85, -sp.h * 0.16, sp.h * 0.12, 0.34),
+        // Main Colossal Summit Pyramid (205m - 266m tall with deep eternal snow cap!)
+        ...createPyramidFaces(sp.cx, 0, sp.cz, sp.r, sp.h, 6, graniteBase, pureSnow, 0.56, rot, 0.18),
+        // Upper Glacial Ice Crest Overlay
+        ...createPyramidFaces(sp.cx, sp.h * 0.52, sp.cz, sp.r * 0.46, sp.h * 0.48, 6, glacierBlue, pureSnow, 0.68, rot + 0.52, 0.25),
+        // Flanking Jagged Ridge Peak 1
+        ...createPyramidFaces(
+          sp.cx + sp.r * 0.52,
+          0,
+          sp.cz - sp.r * 0.32,
+          sp.subR,
+          sp.subH,
+          5,
+          [76, 94, 118],
+          pureSnow,
+          0.48,
+          rot + 0.3,
+          0.14
+        ),
+        // Flanking Jagged Ridge Peak 2
+        ...createPyramidFaces(
+          sp.cx - sp.r * 0.48,
+          0,
+          sp.cz + sp.r * 0.36,
+          sp.subR * 0.88,
+          sp.subH * 0.86,
+          5,
+          [58, 76, 98],
+          glacierBlue,
+          0.44,
+          rot + 1.1,
+          0.14
+        )
+      ];
+
+      const massifColliders = [
+        {
+          type: 'cone',
+          cx: sp.cx,
+          cz: sp.cz,
+          rBase: sp.r * 0.82,
+          rTop: 3.5,
+          y0: 0,
+          y1: sp.h,
+          labelZh: '极高雪山主峰',
+          labelEn: 'Ultra-High Snow Peak'
+        },
+        {
+          type: 'cone',
+          cx: sp.cx + sp.r * 0.52,
+          cz: sp.cz - sp.r * 0.32,
+          rBase: sp.subR * 0.78,
+          rTop: 3,
+          y0: 0,
+          y1: sp.subH,
+          labelZh: '雪山冰川侧峰',
+          labelEn: 'Glacier Ridge Peak'
+        }
+      ];
+
+      mountainObjects.push({ cx: sp.cx, cz: sp.cz, faces: massifFaces, colliders: massifColliders });
+    });
+
+    // Varied Mountain Terrain: Mid-altitude peaks, Stepped Canyon Mesas & Alpine Conifer Groves
     for (let gx = -330; gx <= 330; gx += 66) {
       for (let gz = -330; gz <= 330; gz += 66) {
         const riverCenter = Math.sin(gz * 0.012) * 28;
-        if (Math.abs(gx - riverCenter) < 58) continue;
+        const distFromRiver = Math.abs(gx - riverCenter);
+        if (distFromRiver < 46) continue;
 
-        const mx = gx + (rngMtn() - 0.5) * 22;
-        const mz = gz + (rngMtn() - 0.5) * 22;
-        const radius = 32 + rngMtn() * 28;
-        const height = 46 + rngMtn() * 98;
-        const sides = rngMtn() > 0.45 ? 5 : 4;
-        const pal = mtnPalettes[Math.floor(rngMtn() * mtnPalettes.length)];
-        const capRatio = height > 82 ? 0.34 : height > 64 ? 0.22 : 0;
-
-        const faces = createPyramidFaces(
-          mx,
-          0,
-          mz,
-          radius,
-          height,
-          sides,
-          pal.base,
-          pal.cap,
-          capRatio,
-          rngMtn() * Math.PI
+        // Skip spots occupied by the 6 colossal snow massifs
+        const nearMassif = alpineSummitSpots.some(
+          (sp) => Math.hypot(gx - sp.cx, gz - sp.cz) < sp.r * 0.92
         );
-        mountainObjects.push({ cx: mx, cz: mz, faces });
+        if (nearMassif) continue;
+
+        const mx = gx + (rngMtn() - 0.5) * 20;
+        const mz = gz + (rngMtn() - 0.5) * 20;
+
+        if (distFromRiver < 86 && rngMtn() < 0.58) {
+          // Riverbank Terrain Variety: Stepped Canyon Terrace Mesa + Alpine Pine Trees
+          const mesaR = 20 + rngMtn() * 14;
+          const mesaH = 18 + rngMtn() * 22;
+          const mesaTop = isWinter ? [232, 242, 252] : [112, 134, 118];
+          const pineColor = isWinter ? [168, 198, 218] : [38, 96, 72];
+          const pineCap = isWinter ? [245, 250, 255] : [76, 148, 104];
+
+          const mesaFaces = [
+            createGroundShadowQuad(mx, mz, mesaR * 0.8, mesaR * 0.8, -mesaH * 0.2, mesaH * 0.15, 0.25),
+            ...createPrismFaces(mx, 0, mz, mesaR, mesaH, 6, [84, 96, 112], mesaTop),
+            ...createPrismFaces(mx - 3, mesaH, mz + 2, mesaR * 0.58, mesaH * 0.45, 6, [98, 110, 126], mesaTop),
+            // Alpine pine atop the canyon terrace
+            ...createPyramidFaces(mx + 4, mesaH, mz - 3, 6.5, 18, 5, pineColor, pineCap, 0.45, 0.2)
+          ];
+          mountainObjects.push({
+            cx: mx,
+            cz: mz,
+            faces: mesaFaces,
+            colliders: [
+              {
+                type: 'cone',
+                cx: mx,
+                cz: mz,
+                rBase: mesaR * 0.85,
+                rTop: mesaR * 0.55,
+                y0: 0,
+                y1: mesaH * 1.45,
+                labelZh: '峡谷断崖台地',
+                labelEn: 'Canyon Cliff Mesa'
+              }
+            ]
+          });
+        } else {
+          // Faceted Mid-Altitude & High Mountain Peaks
+          const radius = 30 + rngMtn() * 28;
+          const height = 52 + rngMtn() * 108;
+          const sides = rngMtn() > 0.45 ? 5 : 4;
+          const pal = mtnPalettes[Math.floor(rngMtn() * mtnPalettes.length)];
+          const capRatio = isWinter ? 0.62 : height > 95 ? 0.44 : height > 68 ? 0.26 : 0;
+
+          const faces = [
+            createGroundShadowQuad(mx, mz, radius * 0.72, radius * 0.72, -height * 0.16, height * 0.12, 0.26),
+            ...createPyramidFaces(
+              mx,
+              0,
+              mz,
+              radius,
+              height,
+              sides,
+              pal.base,
+              pal.cap,
+              capRatio,
+              rngMtn() * Math.PI
+            )
+          ];
+          const colliders = [
+            {
+              type: 'cone',
+              cx: mx,
+              cz: mz,
+              rBase: radius * 0.78,
+              rTop: 2.5,
+              y0: 0,
+              y1: height,
+              labelZh: '山川岩峰',
+              labelEn: 'Mountain Peak'
+            }
+          ];
+          mountainObjects.push({ cx: mx, cz: mz, faces, colliders });
+        }
       }
     }
 
-    // Floating 3D Geometric Clouds among the peaks
-    for (let i = 0; i < 16; i++) {
+    // Volumetric Mountain Clouds (Drifting around mid-summit altitude Y=115..165m while 266m snow peaks tower above!)
+    for (let i = 0; i < 18; i++) {
       const cx = (rngMtn() - 0.5) * 680;
       const cz = (rngMtn() - 0.5) * 680;
-      const cy = 112 + rngMtn() * 42;
-      mountainObjects.push({
-        cx,
-        cz,
-        faces: createBoxFaces(
-          cx,
-          cy,
-          cz,
-          32 + rngMtn() * 24,
-          5.5,
-          20 + rngMtn() * 16,
-          [210, 224, 238],
-          [245, 249, 255]
-        )
-      });
+      const cy = 116 + rngMtn() * 48;
+      mountainObjects.push(createVolumetricCloudCluster(cx, cy, cz, 1.05 + rngMtn() * 0.5, timeOfDay, rngMtn));
+    }
+    // Canyon River Volumetric Mist Layers
+    for (let mz = -300; mz <= 300; mz += 120) {
+      const mx = Math.sin(mz * 0.012) * 28;
+      mountainObjects.push(
+        createVolumetricMistLayer(mx, 12, mz, 96, 110, isNight ? [48, 72, 102] : [205, 225, 245], 0.22)
+      );
     }
 
     scenes.mountain = {
-      skyTop: '#0C1828',
-      skyMid: '#214263',
-      skyHorizon: '#DF9468',
-      groundFill: '#17222D',
-      gridStroke: 'rgba(155, 190, 215, 0.13)',
-      roadColor: null,
-      fogRgb: [46, 68, 92],
+      groundFill: isWinter ? '#2A3948' : isAutumn ? '#241E22' : '#17222D',
+      gridStroke: isWinter ? 'rgba(210, 230, 250, 0.22)' : 'rgba(155, 190, 215, 0.13)',
       objects: mountainObjects
     };
 
@@ -2297,7 +2826,7 @@ function initDroneFpvCard() {
     const grassObjects = [];
     const rngGrass = makeRng(309187);
 
-    // Meandering Steppe Stream
+    const streamColor = isWinter ? [175, 222, 248] : [56, 178, 216];
     for (let sz = -360; sz < 360; sz += 40) {
       const sx1 = Math.cos(sz * 0.01) * 36;
       const sx2 = Math.cos((sz + 40) * 0.01) * 36;
@@ -2305,6 +2834,7 @@ function initDroneFpvCard() {
       grassObjects.push({
         cx: sx1,
         cz: sz + 20,
+        colliders: [],
         faces: [
           {
             verts: [
@@ -2313,15 +2843,14 @@ function initDroneFpvCard() {
               [sx2 + sw, 0.22, sz + 40],
               [sx2 - sw, 0.22, sz + 40]
             ],
-            rgb: [56, 178, 216],
-            emissive: 0.22,
+            rgb: streamColor,
+            emissive: isNight ? 0.38 : 0.22,
             doubleSided: true
           }
         ]
       });
     }
 
-    // Rolling Low-Poly Emerald Hills, Geometric Pine Trees & White Steppe Yurts
     for (let gx = -320; gx <= 320; gx += 64) {
       for (let gz = -320; gz <= 320; gz += 64) {
         const streamX = Math.cos(gz * 0.01) * 36;
@@ -2332,78 +2861,136 @@ function initDroneFpvCard() {
         const roll = rngGrass();
 
         if (roll < 0.36) {
-          // Low-poly rolling emerald hill
           const r = 34 + rngGrass() * 26;
           const h = 16 + rngGrass() * 26;
-          const hillColor =
-            rngGrass() > 0.5 ? [52, 118, 82] : [68, 134, 90];
+          const hillBase = isWinter
+            ? [188, 206, 224]
+            : isAutumn
+            ? [176, 128, 56]
+            : isSpring
+            ? [64, 152, 98]
+            : [52, 118, 82];
+          const hillCap = isWinter
+            ? [242, 248, 255]
+            : isAutumn
+            ? [218, 162, 74]
+            : isSpring
+            ? [112, 196, 132]
+            : [96, 162, 108];
+
           grassObjects.push({
             cx: px,
             cz: pz,
-            faces: createPyramidFaces(px, 0, pz, r, h, 6, hillColor, [96, 162, 108], 0.35, rngGrass())
+            faces: [
+              createGroundShadowQuad(px, pz, r * 0.7, r * 0.7, -h * 0.15, h * 0.12, 0.22),
+              ...createPyramidFaces(px, 0, pz, r, h, 6, hillBase, hillCap, 0.38, rngGrass())
+            ],
+            colliders: [
+              { type: 'cone', cx: px, cz: pz, rBase: r * 0.76, rTop: 3, y0: 0, y1: h, labelZh: '草原丘陵', labelEn: 'Steppe Hill' }
+            ]
           });
         } else if (roll < 0.78) {
-          // Cluster of Minimalist 3D Geometric Pine Trees
+          const foliageLow = isWinter
+            ? [150, 178, 196]
+            : isAutumn
+            ? [198, 92, 46]
+            : isSpring
+            ? [76, 156, 102]
+            : [42, 106, 74];
+          const foliageCap = isWinter
+            ? [240, 247, 255]
+            : isAutumn
+            ? [238, 158, 62]
+            : isSpring
+            ? [242, 168, 188]
+            : [88, 166, 112];
+
           const treeFaces = [
+            createGroundShadowQuad(px, pz, 7.5, 7.5, -4, 3, 0.25),
             ...createBoxFaces(px, 0, pz, 2.6, 5, 2.6, [102, 74, 52], [102, 74, 52]),
-            ...createPyramidFaces(px, 4.5, pz, 8.5, 16, 5, [42, 106, 74], [66, 142, 96], 0.4, 0.3),
-            ...createPyramidFaces(px, 13, pz, 6.2, 13, 5, [54, 126, 86], [88, 166, 112], 0.45, 0.8)
+            ...createPyramidFaces(px, 4.5, pz, 8.5, 16, 5, foliageLow, foliageCap, 0.42, 0.3),
+            ...createPyramidFaces(px, 13, pz, 6.2, 13, 5, foliageLow, foliageCap, 0.48, 0.8)
           ];
-          grassObjects.push({ cx: px, cz: pz, faces: treeFaces });
+          grassObjects.push({
+            cx: px,
+            cz: pz,
+            faces: treeFaces,
+            colliders: [
+              { type: 'cone', cx: px, cz: pz, rBase: 7.5, rTop: 1.5, y0: 0, y1: 26, labelZh: '草原树林', labelEn: 'Steppe Tree' }
+            ]
+          });
         } else {
-          // Minimalist 3D White Steppe Yurt (蒙古包) with Copper Crown
           const yurtFaces = [
+            createGroundShadowQuad(px, pz, 9.8, 9.8, -3.5, 2.5, 0.26),
             ...createPrismFaces(px, 0, pz, 9.5, 6.5, 6, [232, 236, 240], [245, 247, 250]),
-            ...createPyramidFaces(px, 6.5, pz, 10.2, 6.2, 6, [242, 244, 248], [240, 123, 50], 0.32, 0)
+            ...createPyramidFaces(
+              px,
+              6.5,
+              pz,
+              10.2,
+              6.2,
+              6,
+              [242, 244, 248],
+              isNight ? [255, 195, 95] : [240, 123, 50],
+              0.34,
+              0,
+              isNight ? 0.85 : 0.15
+            )
           ];
-          grassObjects.push({ cx: px, cz: pz, faces: yurtFaces });
+          grassObjects.push({
+            cx: px,
+            cz: pz,
+            faces: yurtFaces,
+            colliders: [
+              { type: 'cone', cx: px, cz: pz, rBase: 9.5, rTop: 2.5, y0: 0, y1: 12.7, labelZh: '草原蒙古包', labelEn: 'Steppe Yurt' }
+            ]
+          });
         }
       }
     }
 
-    // Golden-Hour Geometric Clouds
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 16; i++) {
       const cx = (rngGrass() - 0.5) * 680;
       const cz = (rngGrass() - 0.5) * 680;
-      const cy = 105 + rngGrass() * 38;
-      grassObjects.push({
-        cx,
-        cz,
-        faces: createBoxFaces(
-          cx,
-          cy,
-          cz,
-          30 + rngGrass() * 22,
-          5,
-          18 + rngGrass() * 14,
-          [232, 226, 218],
-          [252, 248, 242]
-        )
-      });
+      const cy = 108 + rngGrass() * 42;
+      grassObjects.push(createVolumetricCloudCluster(cx, cy, cz, 0.95 + rngGrass() * 0.45, timeOfDay, rngGrass));
+    }
+    for (let mz = -280; mz <= 280; mz += 140) {
+      const sx = Math.cos(mz * 0.01) * 36;
+      grassObjects.push(
+        createVolumetricMistLayer(sx, 8, mz, 88, 100, isNight ? [42, 68, 88] : [215, 235, 225], 0.18)
+      );
     }
 
     scenes.grassland = {
-      skyTop: '#0F2436',
-      skyMid: '#285878',
-      skyHorizon: '#E0A458',
-      groundFill: '#1B3627',
-      gridStroke: 'rgba(130, 205, 150, 0.14)',
-      roadColor: null,
-      fogRgb: [42, 78, 64],
+      groundFill: isWinter
+        ? '#2C3C4B'
+        : isAutumn
+        ? '#332818'
+        : isSpring
+        ? '#1D3E2B'
+        : '#183424',
+      gridStroke: isWinter
+        ? 'rgba(210, 232, 250, 0.20)'
+        : isAutumn
+        ? 'rgba(225, 180, 110, 0.15)'
+        : 'rgba(130, 205, 150, 0.14)',
       objects: grassObjects
     };
 
     return scenes;
   }
 
-  const SCENES_3D = buildScenes();
+  let SCENES_3D = buildScenes(envSeason, envTime);
+
+  function rebuildScenesForEnv() {
+    SCENES_3D = buildScenes(envSeason, envTime);
+  }
 
   // =========================================================================
-  // Build 3D Third-Person DJI Quadcopter Mesh in World Space
+  // Build 3D Third-Person DJI Quadcopter Mesh (No Rotor Disc Overlay Effect)
   // =========================================================================
-  function buildDrone3DFaces(dx, dy, dz, yawRad, pitchRad, rollRad, spinPhase) {
-    // Transform local drone point (lx, ly, lz) -> world space
-    // Local +Z = Forward nose, +Y = Up, +X = Right
+  function buildDrone3DFaces(dx, dy, dz, yawRad, pitchRad, rollRad, spinPhase, crashed) {
     const cy = Math.cos(yawRad);
     const sy = Math.sin(yawRad);
     const cp = Math.cos(pitchRad);
@@ -2412,15 +2999,12 @@ function initDroneFpvCard() {
     const sr = Math.sin(rollRad);
 
     function toWorld(lx, ly, lz) {
-      // 1. Roll around local Z
       const rx = lx * cr - ly * sr;
       const ry = lx * sr + ly * cr;
       const rz = lz;
-      // 2. Pitch around local X
       const px = rx;
       const py = ry * cp - rz * sp;
       const pz = ry * sp + rz * cp;
-      // 3. Yaw around world Y (heading: 0 -> +Z, 90deg -> +X)
       const wx = dx + px * cy + pz * sy;
       const wy = dy + py;
       const wz = dz - px * sy + pz * cy;
@@ -2451,92 +3035,371 @@ function initDroneFpvCard() {
     }
 
     const faces = [];
+    const statusLedRgb = crashed ? [239, 68, 68] : [74, 222, 128];
 
     // 1. Central Aerodynamic DJI Fuselage Core
     faces.push(...makeLocalBox(0, 0, 0, 1.85, 0.72, 3.3, [58, 66, 78], [108, 118, 132]));
-    // Upper faceted canopy ridge
     faces.push(...makeLocalBox(0, 0.44, -0.1, 1.32, 0.34, 2.3, [78, 88, 102], [142, 152, 166]));
-    // Front DJI Copper Gimbal Visor
-    faces.push(...makeLocalBox(0, -0.12, 1.72, 1.05, 0.56, 0.55, [240, 123, 50], [255, 155, 85], 0.3));
-    // Rear Green Battery / Flight Status LED Bar
-    faces.push(...makeLocalBox(0, 0.08, -1.68, 1.15, 0.28, 0.18, [74, 222, 128], [74, 222, 128], 0.85));
+    faces.push(...makeLocalBox(0, -0.12, 1.72, 1.05, 0.56, 0.55, [240, 123, 50], [255, 155, 85], 0.35));
+    faces.push(...makeLocalBox(0, 0.08, -1.68, 1.15, 0.28, 0.18, statusLedRgb, statusLedRgb, 0.9));
 
-    // 2. Four Outrigger Motor Arms + Spinning 3D Propellers
+    // 2. Four Outrigger Motor Arms + Clean 3D Propeller Blades (No Rotor Disc Effect)
     const motors = [
-      { x: -2.45, y: 0.15, z: 2.15, dir: 1, front: true },  // Front-Left
-      { x: 2.45, y: 0.15, z: 2.15, dir: -1, front: true },  // Front-Right
-      { x: -2.25, y: 0.05, z: -2.05, dir: -1, front: false }, // Rear-Left
-      { x: 2.25, y: 0.05, z: -2.05, dir: 1, front: false }   // Rear-Right
+      { x: -2.45, y: 0.15, z: 2.15, dir: 1, front: true },
+      { x: 2.45, y: 0.15, z: 2.15, dir: -1, front: true },
+      { x: -2.25, y: 0.05, z: -2.05, dir: -1, front: false },
+      { x: 2.25, y: 0.05, z: -2.05, dir: 1, front: false }
     ];
 
     motors.forEach((m) => {
-      // Arm strut from body to motor hub
       const armMidX = m.x * 0.55;
       const armMidZ = m.z * 0.55;
       faces.push(
         ...makeLocalBox(armMidX, m.y * 0.6, armMidZ, Math.abs(m.x) * 0.78, 0.22, 0.34, [46, 52, 62], [82, 92, 104])
       );
-      // Motor Hub Pod
       const ledColor = m.front ? [240, 123, 50] : [68, 76, 88];
-      faces.push(...makeLocalBox(m.x, m.y, m.z, 0.52, 0.42, 0.52, ledColor, [120, 130, 142]));
+      faces.push(...makeLocalBox(m.x, m.y, m.z, 0.52, 0.42, 0.52, ledColor, [120, 130, 142], m.front ? 0.3 : 0));
 
-      // Spinning 3D Rotor Disc ( Octagonal translucent ring + 2 spinning carbon blades )
-      const rY = m.y + 0.26;
-      const bladeRadius = 1.48;
-      const discSegs = 8;
-      const discPts = [];
-      for (let i = 0; i < discSegs; i++) {
-        const a = (i / discSegs) * Math.PI * 2;
-        discPts.push(toWorld(m.x + Math.cos(a) * bladeRadius, rY, m.z + Math.sin(a) * bladeRadius));
-      }
-      faces.push({
-        verts: discPts,
-        rgb: m.front ? [240, 140, 80] : [180, 195, 210],
-        alpha: 0.24,
-        doubleSided: true,
-        emissive: 0.35,
-        isDrone: true
-      });
-
-      // 2 Spinning Carbon Propeller Blades
+      // Clean 3D Propeller Blades Only (Translucent rotor disc effect removed)
+      const rY = m.y + 0.24;
+      const bladeRadius = 1.42;
       for (let b = 0; b < 2; b++) {
         const ang = spinPhase * m.dir + b * (Math.PI / 2);
         const c = Math.cos(ang);
         const s = Math.sin(ang);
-        const bw = 0.16;
-        const p1 = toWorld(m.x + c * bladeRadius - s * bw, rY + 0.02, m.z + s * bladeRadius + c * bw);
-        const p2 = toWorld(m.x + c * bladeRadius + s * bw, rY + 0.02, m.z + s * bladeRadius - c * bw);
-        const p3 = toWorld(m.x - c * bladeRadius + s * bw, rY + 0.02, m.z - s * bladeRadius - c * bw);
-        const p4 = toWorld(m.x - c * bladeRadius - s * bw, rY + 0.02, m.z - s * bladeRadius + c * bw);
+        const bw = 0.14;
+        const p1 = toWorld(m.x + c * bladeRadius - s * bw, rY, m.z + s * bladeRadius + c * bw);
+        const p2 = toWorld(m.x + c * bladeRadius + s * bw, rY, m.z + s * bladeRadius - c * bw);
+        const p3 = toWorld(m.x - c * bladeRadius + s * bw, rY, m.z - s * bladeRadius - c * bw);
+        const p4 = toWorld(m.x - c * bladeRadius - s * bw, rY, m.z - s * bladeRadius + c * bw);
         faces.push({
           verts: [p1, p2, p3, p4],
-          rgb: [28, 32, 38],
+          rgb: [32, 36, 42],
           doubleSided: true,
-          emissive: 0.15,
+          emissive: 0.12,
           isDrone: true
         });
       }
     });
 
-    // 3. Projected Ground Shadow directly under the drone at y = 0.3
-    const shadowScale = Math.max(0.25, Math.min(1.0, 48 / (dy + 18)));
+    // 3. Projected Ground Shadow directly under the drone
+    const shadowScale = Math.max(0.22, Math.min(1.0, 48 / (dy + 18)));
     const sr0 = 2.6 * shadowScale;
-    const shadowVerts = [
-      [dx - sr0, 0.3, dz + sr0],
-      [dx + sr0, 0.3, dz + sr0],
-      [dx + sr0, 0.3, dz - sr0],
-      [dx - sr0, 0.3, dz - sr0]
-    ];
     faces.push({
-      verts: shadowVerts,
-      rgb: [5, 8, 12],
-      alpha: 0.38 * shadowScale,
+      verts: [
+        [dx - sr0, 0.28, dz + sr0],
+        [dx + sr0, 0.28, dz + sr0],
+        [dx + sr0, 0.28, dz - sr0],
+        [dx - sr0, 0.28, dz - sr0]
+      ],
+      rgb: [4, 7, 11],
+      alpha: 0.36 * shadowScale,
       doubleSided: true,
       emissive: 0
     });
 
     return faces;
   }
+
+  // =========================================================================
+  // 3D Obstacle Collision Detection & Crash State Handler
+  // =========================================================================
+  function wrapCoord(val, center) {
+    let diff = ((val - center + HALF_WRAP) % WRAP_SIZE);
+    if (diff < 0) diff += WRAP_SIZE;
+    return center + diff - HALF_WRAP;
+  }
+
+  function triggerCrash(obstacleZh, obstacleEn) {
+    if (isCrashed) return;
+    isCrashed = true;
+    crashShakeTime = 0.55;
+    if (cardEl) cardEl.classList.add('is-crashed');
+
+    const isEn = getSiteLanguage() === 'en';
+    if (statusTextEl) {
+      statusTextEl.textContent = isEn ? 'CRASHED (MOTORS LOCKED)' : '⚠ 碰撞坠毁 (电机锁死)';
+    }
+    if (crashTitleEl) {
+      crashTitleEl.textContent = isEn
+        ? `COLLISION · HIT ${obstacleEn.toUpperCase()}`
+        : `发生碰撞 · 撞击${obstacleZh}坠毁`;
+    }
+    if (crashDescEl) {
+      crashDescEl.textContent = isEn
+        ? 'Impact detected. Press R or click Relaunch to take off again.'
+        : '机身与障碍物发生剧烈碰撞，动力已切断。按 R 键或点击右侧按钮重新起飞。';
+    }
+
+    // Spawn 3D geometric crash sparks & debris shards
+    crashDebris = Array.from({ length: 18 }, (_, i) => {
+      const a = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
+      const spd = 8 + Math.random() * 18;
+      return {
+        x: droneX,
+        y: droneY,
+        z: droneZ,
+        vx: Math.cos(a) * spd,
+        vy: 5 + Math.random() * 12,
+        vz: Math.sin(a) * spd,
+        size: 0.45 + Math.random() * 0.55,
+        rgb: i % 2 === 0 ? [240, 123, 50] : [239, 68, 68]
+      };
+    });
+  }
+
+  function resetDroneToSafeHover() {
+    isCrashed = false;
+    crashShakeTime = 0;
+    crashDebris = [];
+    if (cardEl) cardEl.classList.remove('is-crashed');
+
+    const isEn = getSiteLanguage() === 'en';
+    if (statusTextEl) {
+      statusTextEl.textContent = isEn ? 'In Flight (GPS)' : '正常飞行 (GPS)';
+    }
+
+    droneX = 0;
+    droneZ = 0;
+    droneY = activeSceneKey === 'mountain' ? 68 : activeSceneKey === 'grassland' ? 36 : 45;
+    vxWorld = 0;
+    vzWorld = 0;
+    vyWorld = 0;
+    yawVel = 0;
+    currentRoll = 0;
+    currentPitch = 0;
+    headingDeg = 0;
+  }
+
+  function checkObstacleCollisions(scene) {
+    if (isCrashed) return;
+    const droneRadius = 2.05;
+
+    // 1. Check Ground Impact
+    if (droneY <= 1.55) {
+      droneY = 1.2;
+      triggerCrash('地面', 'Ground');
+      return;
+    }
+
+    // 2. Check Scene 3D Solid Obstacles
+    const objs = scene.objects;
+    for (let i = 0; i < objs.length; i++) {
+      const obj = objs[i];
+      if (!obj.colliders || !obj.colliders.length) continue;
+
+      const shiftX = wrapCoord(obj.cx, droneX) - obj.cx;
+      const shiftZ = wrapCoord(obj.cz, droneZ) - obj.cz;
+
+      for (let c = 0; c < obj.colliders.length; c++) {
+        const col = obj.colliders[c];
+        if (droneY + 0.65 < col.y0 || droneY - 0.65 > col.y1) continue;
+
+        const wx = col.cx + shiftX;
+        const wz = col.cz + shiftZ;
+
+        if (col.type === 'box') {
+          if (
+            Math.abs(droneX - wx) < col.hw + droneRadius &&
+            Math.abs(droneZ - wz) < col.hd + droneRadius
+          ) {
+            triggerCrash(col.labelZh || '建筑障碍物', col.labelEn || 'Building');
+            return;
+          }
+        } else if (col.type === 'cone') {
+          const t = Math.max(0, Math.min(1, (droneY - col.y0) / Math.max(1, col.y1 - col.y0)));
+          const rAtHeight = col.rBase + (col.rTop - col.rBase) * t;
+          const distH = Math.hypot(droneX - wx, droneZ - wz);
+          if (distH < rAtHeight + droneRadius * 0.85) {
+            triggerCrash(col.labelZh || '山体/树木', col.labelEn || 'Terrain Obstacle');
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  // =========================================================================
+  // View Mode Switcher (Press C -> Toggle 3rd-Person / 1st-Person)
+  // =========================================================================
+  function updateViewModeUI() {
+    if (cardEl) {
+      cardEl.classList.toggle('is-first-person', isFirstPerson);
+    }
+    const isEn = getSiteLanguage() === 'en';
+    if (viewLabel) {
+      const zhText = isFirstPerson ? '第一人称' : '第三人称';
+      const enText = isFirstPerson ? '1ST PERSON' : '3RD PERSON';
+      viewLabel.setAttribute('data-i18n-zh', zhText);
+      viewLabel.setAttribute('data-i18n-en', enText);
+      viewLabel.textContent = isEn ? enText : zhText;
+    }
+  }
+
+  function toggleCameraViewMode() {
+    isFirstPerson = !isFirstPerson;
+    updateViewModeUI();
+  }
+
+  if (viewBtn) {
+    viewBtn.addEventListener('click', toggleCameraViewMode);
+  }
+
+  // =========================================================================
+  // Gimbal Pitch Angle Control (Mouse Wheel & Preset Button: -90° to +20°)
+  // =========================================================================
+  function setGimbalAngle(deg) {
+    gimbalAngleDeg = Math.max(-90, Math.min(20, Math.round(deg)));
+    const isEn = getSiteLanguage() === 'en';
+    const labelStr = `${gimbalAngleDeg > 0 ? '+' : ''}${gimbalAngleDeg}°`;
+
+    if (gimbalReadout) {
+      gimbalReadout.textContent = `GIMBAL ${labelStr}`;
+    }
+    if (gimbalAngleBadge) {
+      gimbalAngleBadge.textContent = labelStr;
+    }
+    if (gimbalThumb) {
+      // +20° is top (0%), -90° is bottom (100%)
+      const pct = ((20 - gimbalAngleDeg) / 110) * 100;
+      gimbalThumb.style.top = `${Math.max(0, Math.min(100, pct)).toFixed(1)}%`;
+    }
+    if (gimbalBtn) {
+      const zhLabel = `云台 ${labelStr}`;
+      const enLabel = `GIMBAL ${labelStr}`;
+      gimbalBtn.setAttribute('data-i18n-zh', zhLabel);
+      gimbalBtn.setAttribute('data-i18n-en', enLabel);
+      gimbalBtn.textContent = isEn ? enLabel : zhLabel;
+    }
+  }
+  setGimbalAngle(gimbalAngleDeg);
+
+  if (gimbalBtn) {
+    gimbalBtn.addEventListener('click', () => {
+      gimbalPresetIdx = (gimbalPresetIdx + 1) % gimbalPresets.length;
+      setGimbalAngle(gimbalPresets[gimbalPresetIdx]);
+    });
+  }
+
+  // Mouse Wheel Smoothly Adjusts Gimbal Pitch Angle (-90° ~ +20°)
+  modal.addEventListener(
+    'wheel',
+    (e) => {
+      if (!isActive) return;
+      if (controlsModal && controlsModal.classList.contains('is-open')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const step = e.deltaY > 0 ? -3 : 3;
+      setGimbalAngle(gimbalAngleDeg + step);
+    },
+    { passive: false }
+  );
+
+  // =========================================================================
+  // Consolidated Environment Popover + Random Weather & Time Switcher
+  // =========================================================================
+  function updateEnvSummaryUI() {
+    timeBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-time') === envTime));
+    weatherBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-weather') === envWeather));
+    seasonBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-season') === envSeason));
+
+    if (envSummaryEl) {
+      const timeZhMap = { day: '☀ 白昼', sunset: '🌇 黄昏', night: '🌙 夜晚' };
+      const timeEnMap = { day: '☀ DAY', sunset: '🌇 SUNSET', night: '🌙 NIGHT' };
+      const weatherZhMap = { clear: '晴', rain: '雨', snow: '雪', fog: '雾' };
+      const weatherEnMap = { clear: 'CLEAR', rain: 'RAIN', snow: 'SNOW', fog: 'FOG' };
+
+      const zhSummary = `${timeZhMap[envTime] || '🌇 黄昏'} · ${weatherZhMap[envWeather] || '晴'} ▾`;
+      const enSummary = `${timeEnMap[envTime] || '🌇 SUNSET'} · ${weatherEnMap[envWeather] || 'CLEAR'} ▾`;
+      envSummaryEl.setAttribute('data-i18n-zh', zhSummary);
+      envSummaryEl.setAttribute('data-i18n-en', enSummary);
+      envSummaryEl.textContent = getSiteLanguage() === 'en' ? enSummary : zhSummary;
+    }
+  }
+
+  function toggleEnvPopover(forceState) {
+    if (!envPopover || !envToggleBtn) return;
+    const nextOpen =
+      typeof forceState === 'boolean' ? forceState : !envPopover.classList.contains('is-open');
+    envPopover.classList.toggle('is-open', nextOpen);
+    envToggleBtn.classList.toggle('is-open', nextOpen);
+    envToggleBtn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+    envPopover.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
+  }
+
+  if (envToggleBtn) {
+    envToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleEnvPopover();
+    });
+  }
+
+  // Close popover when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (
+      envPopover &&
+      envPopover.classList.contains('is-open') &&
+      envDropdownWrap &&
+      !envDropdownWrap.contains(e.target)
+    ) {
+      toggleEnvPopover(false);
+    }
+  });
+
+  // Random Weather & Time Button: Randomly switches Weather, Time, and Season together
+  function randomizeEnvironment() {
+    const times = ['day', 'sunset', 'night'];
+    const weathers = ['clear', 'rain', 'snow', 'fog'];
+    const seasons = ['spring', 'summer', 'autumn', 'winter'];
+
+    // Pick a distinct weather & time so every click produces a visible atmospheric change
+    const otherWeathers = weathers.filter((w) => w !== envWeather);
+    const otherTimes = times.filter((t) => t !== envTime);
+
+    envWeather = otherWeathers[Math.floor(Math.random() * otherWeathers.length)];
+    envTime = otherTimes[Math.floor(Math.random() * otherTimes.length)];
+
+    if (envWeather === 'snow') {
+      envSeason = Math.random() < 0.7 ? 'winter' : seasons[Math.floor(Math.random() * seasons.length)];
+    } else {
+      envSeason = seasons[Math.floor(Math.random() * seasons.length)];
+    }
+
+    updateEnvSummaryUI();
+    rebuildScenesForEnv();
+  }
+
+  if (envRandomBtn) {
+    envRandomBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      randomizeEnvironment();
+    });
+  }
+
+  timeBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      envTime = btn.getAttribute('data-env-time') || 'sunset';
+      updateEnvSummaryUI();
+      rebuildScenesForEnv();
+    });
+  });
+
+  weatherBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      envWeather = btn.getAttribute('data-env-weather') || 'clear';
+      updateEnvSummaryUI();
+    });
+  });
+
+  seasonBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      envSeason = btn.getAttribute('data-env-season') || 'summer';
+      updateEnvSummaryUI();
+      rebuildScenesForEnv();
+    });
+  });
+
+  updateEnvSummaryUI();
 
   // =========================================================================
   // Controls Guide Modal & Buttons
@@ -2594,6 +3457,7 @@ function initDroneFpvCard() {
   function closeModal() {
     isActive = false;
     closeControlsGuide();
+    toggleEnvPopover(false);
     modal.classList.remove('is-active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
@@ -2609,19 +3473,11 @@ function initDroneFpvCard() {
     if (e.target === modal) closeModal();
   });
 
-  // Hover / RTH Reset Button
   if (rthBtn) {
-    rthBtn.addEventListener('click', () => {
-      droneX = 0;
-      droneZ = 0;
-      droneY = activeSceneKey === 'mountain' ? 68 : activeSceneKey === 'grassland' ? 36 : 45;
-      vxWorld = 0;
-      vzWorld = 0;
-      vyWorld = 0;
-      currentRoll = 0;
-      currentPitch = 0;
-      headingDeg = 0;
-    });
+    rthBtn.addEventListener('click', resetDroneToSafeHover);
+  }
+  if (crashRetryBtn) {
+    crashRetryBtn.addEventListener('click', resetDroneToSafeHover);
   }
 
   // Flight Mode Switcher (CINE / NORMAL / SPORT)
@@ -2636,41 +3492,11 @@ function initDroneFpvCard() {
   sceneBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const sceneKey = btn.getAttribute('data-fpv-scene') || 'city';
-      const baseAlt = parseFloat(btn.getAttribute('data-fpv-alt') || '45');
       activeSceneKey = SCENES_3D[sceneKey] ? sceneKey : 'city';
       sceneBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
-      droneX = 0;
-      droneZ = 0;
-      droneY = baseAlt;
-      vxWorld = 0;
-      vzWorld = 0;
-      vyWorld = 0;
+      resetDroneToSafeHover();
     });
   });
-
-  // Gimbal Pitch Preset Toggle (-25° / -45° / -12°)
-  function updateGimbalLabels() {
-    const angle = gimbalPresets[gimbalIndex];
-    const isEn = getSiteLanguage() === 'en';
-    if (gimbalReadout) {
-      gimbalReadout.textContent = `GIMBAL ${angle}°`;
-    }
-    if (gimbalBtn) {
-      const zhLabel = `云台 ${angle}°`;
-      const enLabel = `GIMBAL ${angle}°`;
-      gimbalBtn.setAttribute('data-i18n-zh', zhLabel);
-      gimbalBtn.setAttribute('data-i18n-en', enLabel);
-      gimbalBtn.textContent = isEn ? enLabel : zhLabel;
-    }
-  }
-  updateGimbalLabels();
-
-  if (gimbalBtn) {
-    gimbalBtn.addEventListener('click', () => {
-      gimbalIndex = (gimbalIndex + 1) % gimbalPresets.length;
-      updateGimbalLabels();
-    });
-  }
 
   // Shutter Button Capture
   if (shutterBtn) {
@@ -2743,6 +3569,8 @@ function initDroneFpvCard() {
   //   W / A / S / D -> Forward / Left / Backward / Right (前后左右)
   //   Q / E         -> Yaw Rotate Left / Right (转向)
   //   ArrowUp / Down-> Altitude Up / Down (高低)
+  //   C             -> Toggle 1st-Person / 3rd-Person View
+  //   R             -> Relaunch / Reset Drone
   window.addEventListener('keydown', (e) => {
     if (!isActive) return;
     if (e.key === 'Escape') {
@@ -2754,6 +3582,16 @@ function initDroneFpvCard() {
       return;
     }
     const k = e.key.toLowerCase();
+    if (k === 'c' && !e.repeat) {
+      e.preventDefault();
+      toggleCameraViewMode();
+      return;
+    }
+    if (k === 'r' && !e.repeat) {
+      e.preventDefault();
+      resetDroneToSafeHover();
+      return;
+    }
     if (['w', 'a', 's', 'd', 'q', 'e', 'arrowup', 'arrowdown'].includes(k)) {
       e.preventDefault();
       keysPressed[k] = true;
@@ -2766,35 +3604,126 @@ function initDroneFpvCard() {
   });
 
   // =========================================================================
-  // 3D Perspective Projection & Painter's Algorithm Renderer
+  // Dynamic Time / Weather / Season Lighting & Volumetric 3D Renderer
   // =========================================================================
-  const sunDir = [0.48, 0.76, -0.43]; // Normalized directional sunlight
+  function getEnvironmentLighting() {
+    let skyTop = '#0A1320';
+    let skyMid = '#182C46';
+    let skyHorizon = '#C47B54';
+    let fogRgb = [42, 62, 84];
+    let sunDir = [0.46, 0.76, 0.45];
+    let celestialColor = [255, 200, 130];
+    let ambient = 0.52;
+    let diffuse = 0.58;
 
-  function wrapCoord(val, center) {
-    let diff = ((val - center + HALF_WRAP) % WRAP_SIZE);
-    if (diff < 0) diff += WRAP_SIZE;
-    return center + diff - HALF_WRAP;
+    if (envTime === 'day') {
+      skyTop = envSeason === 'winter' ? '#2A547E' : '#1B4B7A';
+      skyMid = envSeason === 'winter' ? '#5E8FB8' : '#4584B6';
+      skyHorizon = envSeason === 'winter' ? '#CFE2F2' : '#A9D6E5';
+      fogRgb = envSeason === 'winter' ? [185, 205, 225] : [135, 178, 210];
+      sunDir = [0.35, 0.84, 0.41];
+      celestialColor = [255, 248, 220];
+      ambient = 0.64;
+      diffuse = 0.56;
+    } else if (envTime === 'sunset') {
+      skyTop = '#0C1626';
+      skyMid = '#263E5C';
+      skyHorizon = '#E28754';
+      fogRgb = [112, 82, 84];
+      sunDir = [0.52, 0.34, 0.78];
+      celestialColor = [255, 148, 72];
+      ambient = 0.48;
+      diffuse = 0.64;
+    } else {
+      skyTop = '#040810';
+      skyMid = '#0A1322';
+      skyHorizon = '#16263B';
+      fogRgb = [14, 24, 38];
+      sunDir = [-0.38, 0.68, 0.62];
+      celestialColor = [200, 225, 255];
+      ambient = 0.28;
+      diffuse = 0.36;
+    }
+
+    let fogStart = 88;
+    let fogSpan = 260;
+    let heightFogDensity = 0.24;
+
+    if (envWeather === 'fog') {
+      fogStart = 18;
+      fogSpan = 108;
+      heightFogDensity = 0.68;
+      fogRgb = envTime === 'night' ? [28, 42, 58] : [176, 190, 204];
+      skyHorizon = envTime === 'night' ? '#1E2A3A' : '#B8C6D4';
+    } else if (envWeather === 'rain') {
+      fogStart = 48;
+      fogSpan = 175;
+      heightFogDensity = 0.42;
+      fogRgb = envTime === 'night' ? [16, 26, 38] : [68, 84, 102];
+      skyTop = '#0A1018';
+      skyMid = '#1E2B3A';
+      skyHorizon = '#46586C';
+      ambient *= 0.82;
+    } else if (envWeather === 'snow') {
+      fogStart = 42;
+      fogSpan = 165;
+      heightFogDensity = 0.48;
+      fogRgb = envTime === 'night' ? [34, 48, 68] : [186, 202, 218];
+    }
+
+    return {
+      skyTop,
+      skyMid,
+      skyHorizon,
+      fogRgb,
+      sunDir,
+      celestialColor,
+      ambient,
+      diffuse,
+      fogStart,
+      fogSpan,
+      heightFogDensity
+    };
   }
 
-  function render3DScene(scene) {
+  function render3DScene(scene, nowMs) {
     if (!ctx || !canvas) return;
     const W = canvas.width;
     const H = canvas.height;
     if (W < 2 || H < 2) return;
 
-    const yawRad = (headingDeg * Math.PI) / 180;
-    const gimbalDeg = gimbalPresets[gimbalIndex];
-    const thetaDown = (Math.abs(gimbalDeg) * 0.58 * Math.PI) / 180; // Positive downward tilt angle
+    const env = getEnvironmentLighting();
+    const sunDir = env.sunDir;
 
+    const yawRad = (headingDeg * Math.PI) / 180;
     const fwdX = Math.sin(yawRad);
     const fwdZ = Math.cos(yawRad);
 
-    // Third-person camera sits behind and above the 3D drone
-    const camDist = 15.5;
-    const camElev = 4.6 + Math.abs(gimbalDeg) * 0.12;
-    const camX = droneX - fwdX * camDist;
-    const camY = droneY + camElev;
-    const camZ = droneZ - fwdZ * camDist;
+    const effectivePitchDeg = isFirstPerson ? gimbalAngleDeg : gimbalAngleDeg * 0.65;
+    const thetaDown = (-effectivePitchDeg * Math.PI) / 180;
+
+    let camX;
+    let camY;
+    let camZ;
+
+    if (isFirstPerson) {
+      camX = droneX + fwdX * 1.85;
+      camY = droneY + 0.1;
+      camZ = droneZ + fwdZ * 1.85;
+    } else {
+      const camDist = 15.5;
+      const camElev = 4.2 + Math.max(-2, -gimbalAngleDeg * 0.11);
+      camX = droneX - fwdX * camDist;
+      camY = Math.max(1.5, droneY + camElev);
+      camZ = droneZ - fwdZ * camDist;
+    }
+
+    if (crashShakeTime > 0) {
+      const shakeMag = crashShakeTime * 1.8;
+      camX += (Math.random() - 0.5) * shakeMag;
+      camY += (Math.random() - 0.5) * shakeMag;
+      camZ += (Math.random() - 0.5) * shakeMag;
+    }
 
     const cosYaw = Math.cos(yawRad);
     const sinYaw = Math.sin(yawRad);
@@ -2810,27 +3739,25 @@ function initDroneFpvCard() {
     const clampedHorizon = Math.max(0, Math.min(H, horizonY));
 
     const skyGrad = ctx.createLinearGradient(0, 0, 0, Math.max(10, clampedHorizon));
-    skyGrad.addColorStop(0, scene.skyTop);
-    skyGrad.addColorStop(0.68, scene.skyMid);
-    skyGrad.addColorStop(1, scene.skyHorizon);
+    skyGrad.addColorStop(0, env.skyTop);
+    skyGrad.addColorStop(0.66, env.skyMid);
+    skyGrad.addColorStop(1, env.skyHorizon);
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, clampedHorizon + 2);
 
-    ctx.fillStyle = scene.groundFill;
+    ctx.fillStyle =
+      envSeason === 'winter' ? '#2B3A4A' : scene.groundFill;
     ctx.fillRect(0, clampedHorizon, W, H - clampedHorizon);
 
-    // Transform world point -> camera space [rx, ry, rz] (where rz > 0 is in front of camera)
     function worldToCam(wx, wy, wz) {
       const dx = wx - camX;
       const dy = wy - camY;
       const dz = wz - camZ;
 
-      // Rotate by -yawRad around Y
       const x1 = dx * cosYaw - dz * sinYaw;
       const z1 = dx * sinYaw + dz * cosYaw;
       const y1 = dy;
 
-      // Tilt camera downward by thetaDown around X
       const y2 = y1 * cosPitch + z1 * sinPitch;
       const z2 = -y1 * sinPitch + z1 * cosPitch;
       return [x1, y2, z2];
@@ -2841,8 +3768,56 @@ function initDroneFpvCard() {
       return [cxScreen + pt[0] * invZ, cyScreen - pt[1] * invZ];
     }
 
-    // Clip polygon against near plane z = nearZ
-    const NEAR_Z = 1.2;
+    // 1B. Night Twinkling Starfield & Celestial Sun/Moon Volumetric Bloom Halo
+    if (envTime === 'night' && clampedHorizon > 5) {
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < starField.length; i++) {
+        const st = starField[i];
+        const sxWorld = camX + Math.sin(st.az) * Math.cos(st.el) * 400;
+        const syWorld = camY + Math.sin(st.el) * 400;
+        const szWorld = camZ + Math.cos(st.az) * Math.cos(st.el) * 400;
+        const sc = worldToCam(sxWorld, syWorld, szWorld);
+        if (sc[2] > 2) {
+          const sp = camToScreen(sc);
+          if (sp[1] < clampedHorizon - 4) {
+            const twinkle = 0.35 + 0.65 * Math.abs(Math.sin(nowMs * 0.002 + st.phase));
+            ctx.globalAlpha = twinkle;
+            ctx.fillRect(sp[0], sp[1], st.size, st.size);
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    const celWorld = [
+      camX + sunDir[0] * 500,
+      camY + sunDir[1] * 500,
+      camZ + sunDir[2] * 500
+    ];
+    const celCam = worldToCam(celWorld[0], celWorld[1], celWorld[2]);
+    if (celCam[2] > 10 && envWeather !== 'rain') {
+      const celScreen = camToScreen(celCam);
+      const haloRadius = envTime === 'sunset' ? H * 0.36 : H * 0.25;
+      const [cr, cg, cb] = env.celestialColor;
+      const haloGrad = ctx.createRadialGradient(
+        celScreen[0],
+        celScreen[1],
+        4,
+        celScreen[0],
+        celScreen[1],
+        haloRadius
+      );
+      haloGrad.addColorStop(0, `rgba(255, 255, 245, 0.95)`);
+      haloGrad.addColorStop(0.12, `rgba(${cr}, ${cg}, ${cb}, 0.65)`);
+      haloGrad.addColorStop(0.45, `rgba(${cr}, ${cg}, ${cb}, 0.18)`);
+      haloGrad.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(celScreen[0], celScreen[1], haloRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const NEAR_Z = 1.1;
     function clipPolygonNear(camVerts) {
       const out = [];
       const n = camVerts.length;
@@ -2867,7 +3842,7 @@ function initDroneFpvCard() {
       return out;
     }
 
-    // 2. Draw 3D Perspective Ground Grid Lines for strong 3D depth sense
+    // 2. Draw 3D Perspective Ground Grid Lines
     ctx.strokeStyle = scene.gridStroke;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -2900,9 +3875,9 @@ function initDroneFpvCard() {
     }
     ctx.stroke();
 
-    // 3. Collect & Project Visible 3D Faces (World Objects + Third-Person 3D Drone)
+    // 3. Collect & Project Visible 3D Faces (with Volumetric Height + Distance Fog)
     const renderList = [];
-    const MAX_DIST_SQ = 350 * 350;
+    const MAX_DIST_SQ = 365 * 365;
 
     function pushFace(face, shiftX, shiftZ) {
       const verts = face.verts;
@@ -2912,6 +3887,7 @@ function initDroneFpvCard() {
       let sumX = 0;
       let sumY = 0;
       let sumZ = 0;
+      let sumWorldY = 0;
       let anyInFront = false;
 
       for (let i = 0; i < n; i++) {
@@ -2925,10 +3901,10 @@ function initDroneFpvCard() {
         sumX += cv[0];
         sumY += cv[1];
         sumZ += cv[2];
+        sumWorldY += wy;
       }
       if (!anyInFront) return;
 
-      // Compute world normal for flat shading & backface culling
       const v0 = wVerts[0];
       const v1 = wVerts[1];
       const v2 = wVerts[2];
@@ -2947,11 +3923,14 @@ function initDroneFpvCard() {
       ny /= len;
       nz /= len;
 
-      // Backface check relative to camera
+      const viewDot =
+        nx * (v0[0] - camX) + ny * (v0[1] - camY) + nz * (v0[2] - camZ);
       if (!face.doubleSided) {
-        const viewDot =
-          nx * (v0[0] - camX) + ny * (v0[1] - camY) + nz * (v0[2] - camZ);
         if (viewDot >= 0) return;
+      } else if (viewDot > 0) {
+        nx = -nx;
+        ny = -ny;
+        nz = -nz;
       }
 
       const clipped = clipPolygonNear(cVerts);
@@ -2959,21 +3938,29 @@ function initDroneFpvCard() {
 
       const screenPts = clipped.map(camToScreen);
 
-      // Lighting + Distance Fog
       const sunDot = Math.max(0, nx * sunDir[0] + ny * sunDir[1] + nz * sunDir[2]);
       const emissive = face.emissive || 0;
-      const light = Math.min(1.22, 0.54 + sunDot * 0.56 + emissive);
+      const light = Math.min(1.32, env.ambient + sunDot * env.diffuse + emissive);
 
       const avgDepth = Math.hypot(sumX / n, sumY / n, sumZ / n);
-      const fogFactor = face.isDrone
-        ? 0
-        : Math.max(0, Math.min(0.78, (avgDepth - 90) / 270));
+      const avgWorldY = sumWorldY / n;
+
+      // Volumetric Fog = Distance Scattering + Low-Altitude Valley Mist
+      let fogFactor = 0;
+      if (!face.isDrone) {
+        const distFog = Math.max(0, Math.min(0.88, (avgDepth - env.fogStart) / env.fogSpan));
+        const lowAltMist =
+          avgWorldY < 34
+            ? (1 - avgWorldY / 34) * env.heightFogDensity * Math.min(1, avgDepth / 95)
+            : 0;
+        fogFactor = Math.max(0, Math.min(0.9, distFog + lowAltMist * (1 - distFog)));
+      }
 
       const base = face.rgb;
-      const fog = scene.fogRgb;
-      const r = Math.round((base[0] * light) * (1 - fogFactor) + fog[0] * fogFactor);
-      const g = Math.round((base[1] * light) * (1 - fogFactor) + fog[1] * fogFactor);
-      const b = Math.round((base[2] * light) * (1 - fogFactor) + fog[2] * fogFactor);
+      const fog = env.fogRgb;
+      const r = Math.min(255, Math.round((base[0] * light) * (1 - fogFactor) + fog[0] * fogFactor));
+      const g = Math.min(255, Math.round((base[1] * light) * (1 - fogFactor) + fog[1] * fogFactor));
+      const b = Math.min(255, Math.round((base[2] * light) * (1 - fogFactor) + fog[2] * fogFactor));
 
       const alpha = face.alpha !== undefined ? face.alpha : 1;
       const fillStyle =
@@ -2981,18 +3968,20 @@ function initDroneFpvCard() {
 
       renderList.push({
         pts: screenPts,
-        depth: face.isDrone ? avgDepth * 0.45 : avgDepth, // Ensure drone sorts cleanly in foreground
+        depth: face.isDrone ? avgDepth * 0.45 : avgDepth,
         fillStyle,
         isDrone: !!face.isDrone,
         alpha
       });
     }
 
-    // Add Scene 3D Objects (wrapped seamlessly around the drone)
+    // Add Scene 3D Objects (with slow wind drift for Volumetric Clouds!)
     const objs = scene.objects;
+    const cloudWindSec = nowMs * 0.001;
     for (let i = 0; i < objs.length; i++) {
       const obj = objs[i];
-      const wrappedX = wrapCoord(obj.cx, droneX);
+      const baseCx = obj.isCloud ? obj.cx + cloudWindSec * (obj.driftSpeed || 2.5) : obj.cx;
+      const wrappedX = wrapCoord(baseCx, droneX);
       const wrappedZ = wrapCoord(obj.cz, droneZ);
       const dSq =
         (wrappedX - droneX) * (wrappedX - droneX) +
@@ -3007,26 +3996,51 @@ function initDroneFpvCard() {
       }
     }
 
-    // Add 3D Third-Person DJI Quadcopter Drone
-    const dronePitchRad = (currentPitch * Math.PI) / 180;
-    const droneRollRad = (-currentRoll * Math.PI) / 180;
-    const droneFaces = buildDrone3DFaces(
-      droneX,
-      droneY,
-      droneZ,
-      yawRad,
-      dronePitchRad,
-      droneRollRad,
-      rotorPhase
-    );
-    for (let i = 0; i < droneFaces.length; i++) {
-      pushFace(droneFaces[i], 0, 0);
+    // Add 3D Third-Person DJI Quadcopter Drone (Hidden in 1st-Person Mode!)
+    if (!isFirstPerson) {
+      const dronePitchRad = (currentPitch * Math.PI) / 180;
+      const droneRollRad = (-currentRoll * Math.PI) / 180;
+      const droneFaces = buildDrone3DFaces(
+        droneX,
+        droneY,
+        droneZ,
+        yawRad,
+        dronePitchRad,
+        droneRollRad,
+        rotorPhase,
+        isCrashed
+      );
+      for (let i = 0; i < droneFaces.length; i++) {
+        pushFace(droneFaces[i], 0, 0);
+      }
+    }
+
+    // Add 3D Crash Debris Shards when crashed
+    if (isCrashed && crashDebris.length) {
+      for (let i = 0; i < crashDebris.length; i++) {
+        const d = crashDebris[i];
+        const shardFaces = createBoxFaces(
+          d.x,
+          d.y,
+          d.z,
+          d.size,
+          d.size,
+          d.size,
+          d.rgb,
+          [255, 200, 120],
+          null,
+          0.75
+        );
+        for (let k = 0; k < shardFaces.length; k++) {
+          shardFaces[k].isDrone = true;
+          pushFace(shardFaces[k], 0, 0);
+        }
+      }
     }
 
     // Painter's Algorithm: Sort back-to-front by depth
     renderList.sort((a, b) => b.depth - a.depth);
 
-    // Draw all 3D polygons with crisp minimalist geometric edges
     for (let i = 0; i < renderList.length; i++) {
       const item = renderList[i];
       const pts = item.pts;
@@ -3047,10 +4061,100 @@ function initDroneFpvCard() {
         ctx.stroke();
       }
     }
+
+    // 4. Multi-Layered Volumetric Fog & Atmospheric Mist Bands (体积雾)
+    {
+      const [fr, fg, fb] = env.fogRgb;
+      const baseFogPeak =
+        envWeather === 'fog'
+          ? 0.56
+          : envWeather === 'snow'
+          ? 0.32
+          : envWeather === 'rain'
+          ? 0.28
+          : 0.15;
+
+      // Horizon Volumetric Mist Band
+      const fogGrad = ctx.createLinearGradient(
+        0,
+        clampedHorizon - H * 0.26,
+        0,
+        clampedHorizon + H * 0.36
+      );
+      fogGrad.addColorStop(0, `rgba(${fr},${fg},${fb},0)`);
+      fogGrad.addColorStop(0.48, `rgba(${fr},${fg},${fb},${baseFogPeak.toFixed(2)})`);
+      fogGrad.addColorStop(0.75, `rgba(${fr},${fg},${fb},${(baseFogPeak * 0.6).toFixed(2)})`);
+      fogGrad.addColorStop(1, `rgba(${fr},${fg},${fb},0)`);
+      ctx.fillStyle = fogGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Drifting Volumetric Fog Puffs when in Fog / Snow / Rain or inside Cloud Deck
+      const cloudDeckProximity = Math.max(0, 1 - Math.abs(camY - 135) / 38);
+      if (envWeather === 'fog' || cloudDeckProximity > 0.05) {
+        const puffAlpha = Math.min(0.48, (envWeather === 'fog' ? 0.26 : 0) + cloudDeckProximity * 0.34);
+        for (let b = 0; b < 3; b++) {
+          const driftX = ((nowMs * 0.025 * (b + 1) + b * 240) % (W + 400)) - 200;
+          const bandY = clampedHorizon + (b - 1) * H * 0.11;
+          const radG = ctx.createRadialGradient(driftX, bandY, 10, driftX, bandY, W * 0.42);
+          radG.addColorStop(0, `rgba(${fr},${fg},${fb},${puffAlpha.toFixed(2)})`);
+          radG.addColorStop(1, `rgba(${fr},${fg},${fb},0)`);
+          ctx.fillStyle = radG;
+          ctx.fillRect(0, 0, W, H);
+        }
+      }
+    }
+
+    // 5. Render High-Density 3D Weather Particles (Rain Streaks & Dense Swirling 3D Snowflakes)
+    if (envWeather === 'rain' || envWeather === 'snow') {
+      ctx.save();
+      if (envWeather === 'rain') {
+        ctx.strokeStyle = 'rgba(185, 220, 255, 0.54)';
+        ctx.lineWidth = 1.35;
+        ctx.beginPath();
+        for (let i = 0; i < weatherParticles.length; i++) {
+          const p = weatherParticles[i];
+          const wx = camX + p.x;
+          const wy = camY + p.y - 42;
+          const wz = camZ + p.z;
+          const c0 = worldToCam(wx, wy, wz);
+          const c1 = worldToCam(wx + 0.7, wy - 4.5, wz);
+          if (c0[2] > 1.8 && c1[2] > 1.8) {
+            const s0 = camToScreen(c0);
+            const s1 = camToScreen(c1);
+            ctx.moveTo(s0[0], s0[1]);
+            ctx.lineTo(s1[0], s1[1]);
+          }
+        }
+        ctx.stroke();
+      } else if (envWeather === 'snow') {
+        // High-density 520 3D snowflakes with 3D turbulence & multi-scale depth
+        ctx.fillStyle = 'rgba(248, 252, 255, 0.88)';
+        ctx.beginPath();
+        for (let i = 0; i < weatherParticles.length; i++) {
+          const p = weatherParticles[i];
+          const swirlX = Math.sin(nowMs * 0.0022 + p.drift) * 4.2;
+          const swirlZ = Math.cos(nowMs * 0.0018 + p.driftZ) * 4.2;
+          const wx = camX + p.x + swirlX;
+          const wy = camY + p.y - 45;
+          const wz = camZ + p.z + swirlZ;
+          const c0 = worldToCam(wx, wy, wz);
+          if (c0[2] > 1.6) {
+            const s0 = camToScreen(c0);
+            if (s0[0] >= -10 && s0[0] <= W + 10 && s0[1] >= -10 && s0[1] <= H + 10) {
+              const sz = Math.max(1.2, Math.min(6.2, (105 / c0[2]) * p.sizeScale));
+              ctx.moveTo(s0[0] + sz, s0[1]);
+              ctx.arc(s0[0], s0[1], sz, 0, Math.PI * 2);
+            }
+          }
+        }
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
 
   // =========================================================================
-  // Main 60fps Flight Physics & 3D Render Loop
+  // Main 60fps Inertial Flight Physics, Collision Check & 3D Render Loop
   // =========================================================================
   let lastFrame = performance.now();
 
@@ -3059,64 +4163,121 @@ function initDroneFpvCard() {
     lastFrame = now;
 
     if (isActive) {
-      const mult = modeMultipliers[flightMode] || 1.0;
+      const activeScene = SCENES_3D[activeSceneKey] || SCENES_3D.city;
 
-      // Left Stick: Up/Down Arrows = Altitude (高低), Q/E = Yaw (转向)
-      const keyAltY = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
-      const keyYawX = (keysPressed['e'] ? 1 : 0) - (keysPressed['q'] ? 1 : 0);
-
-      // Right Stick: W/S = Forward/Back (前后), A/D = Left/Right (左右)
-      const keyMoveY = (keysPressed['s'] ? 1 : 0) - (keysPressed['w'] ? 1 : 0);
-      const keyMoveX = (keysPressed['d'] ? 1 : 0) - (keysPressed['a'] ? 1 : 0);
-
-      const effLeftX = Math.max(-1, Math.min(1, leftX + keyYawX));
-      const effLeftY = Math.max(-1, Math.min(1, leftY + keyAltY));
-      const effRightX = Math.max(-1, Math.min(1, rightX + keyMoveX));
-      const effRightY = Math.max(-1, Math.min(1, rightY + keyMoveY));
-
-      // Reflect keyboard inputs on the DJI virtual joystick knobs when not manually dragging
-      if (knobLeft && leftX === 0 && leftY === 0) {
-        knobLeft.style.transform = `translate3d(${(effLeftX * 16).toFixed(1)}px, ${(effLeftY * 16).toFixed(1)}px, 0)`;
-      }
-      if (knobRight && rightX === 0 && rightY === 0) {
-        knobRight.style.transform = `translate3d(${(effRightX * 16).toFixed(1)}px, ${(effRightY * 16).toFixed(1)}px, 0)`;
+      // Update High-Density 3D Weather Particle Positions
+      if (envWeather === 'rain' || envWeather === 'snow') {
+        const fallMul = envWeather === 'rain' ? 2.4 : 0.62;
+        for (let i = 0; i < weatherParticles.length; i++) {
+          const p = weatherParticles[i];
+          p.y -= p.speed * fallMul * dt;
+          if (p.y < 0) {
+            p.y = 125;
+            p.x = (Math.random() - 0.5) * 210;
+            p.z = (Math.random() - 0.5) * 210;
+          }
+        }
       }
 
-      // 1. Yaw Heading Rotation (Q/E)
-      headingDeg = (headingDeg + effLeftX * 68 * mult * dt + 360) % 360;
-      const yawRad = (headingDeg * Math.PI) / 180;
-      const fwdX = Math.sin(yawRad);
-      const fwdZ = Math.cos(yawRad);
-      const rightVecX = Math.cos(yawRad);
-      const rightVecZ = -Math.sin(yawRad);
+      if (!isCrashed) {
+        const mult = modeMultipliers[flightMode] || 1.0;
 
-      // 2. Pitch & Roll Attitude Angles (WASD)
-      const targetRoll = effRightX * 24 * mult;
-      const targetPitch = -effRightY * 18 * mult;
-      currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 10);
-      currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 10);
+        // Up/Down Arrows = Altitude (高低), Q/E = Yaw (转向)
+        const keyAltY = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
+        const keyYawX = (keysPressed['e'] ? 1 : 0) - (keysPressed['q'] ? 1 : 0);
 
-      // 3. 3D World Velocity & Position Integration
-      const forwardSpeed = -effRightY * 42 * mult;
-      const strafeSpeed = effRightX * 34 * mult;
-      const targetVx = fwdX * forwardSpeed + rightVecX * strafeSpeed;
-      const targetVz = fwdZ * forwardSpeed + rightVecZ * strafeSpeed;
-      const targetVy = -effLeftY * 22 * mult;
+        // W/S = Forward/Back (前后), A/D = Left/Right (左右)
+        const keyMoveY = (keysPressed['s'] ? 1 : 0) - (keysPressed['w'] ? 1 : 0);
+        const keyMoveX = (keysPressed['d'] ? 1 : 0) - (keysPressed['a'] ? 1 : 0);
 
-      vxWorld += (targetVx - vxWorld) * Math.min(1, dt * 6.5);
-      vzWorld += (targetVz - vzWorld) * Math.min(1, dt * 6.5);
-      vyWorld += (targetVy - vyWorld) * Math.min(1, dt * 7.5);
+        const effLeftX = Math.max(-1, Math.min(1, leftX + keyYawX));
+        const effLeftY = Math.max(-1, Math.min(1, leftY + keyAltY));
+        const effRightX = Math.max(-1, Math.min(1, rightX + keyMoveX));
+        const effRightY = Math.max(-1, Math.min(1, rightY + keyMoveY));
 
-      droneX += vxWorld * dt;
-      droneZ += vzWorld * dt;
-      droneY = Math.max(8, Math.min(260, droneY + vyWorld * dt));
+        // 1. Rotational Yaw Inertia (Q/E accelerates angular velocity, releasing coasts smoothly)
+        const targetYawRate = effLeftX * 72 * mult;
+        const yawResponse = Math.abs(effLeftX) > 0.01 ? 3.8 : 2.1;
+        yawVel += (targetYawRate - yawVel) * Math.min(1, dt * yawResponse);
+        headingDeg = (headingDeg + yawVel * dt + 360) % 360;
 
-      const horizontalSpeed = Math.hypot(vxWorld, vzWorld);
+        const yawRad = (headingDeg * Math.PI) / 180;
+        const fwdX = Math.sin(yawRad);
+        const fwdZ = Math.cos(yawRad);
+        const rightVecX = Math.cos(yawRad);
+        const rightVecZ = -Math.sin(yawRad);
+
+        // 2. 3D Translational Momentum & Aerodynamic Drag Inertia (WASD + ↑↓)
+        const forwardSpeed = -effRightY * 46 * mult;
+        const strafeSpeed = effRightX * 36 * mult;
+        const targetVx = fwdX * forwardSpeed + rightVecX * strafeSpeed;
+        const targetVz = fwdZ * forwardSpeed + rightVecZ * strafeSpeed;
+        const targetVy = -effLeftY * 26 * mult;
+
+        const hasHorizInput = Math.abs(effRightX) > 0.01 || Math.abs(effRightY) > 0.01;
+        const hasVertInput = Math.abs(effLeftY) > 0.01;
+        const horizInertiaRate = hasHorizInput ? 2.5 : 1.38; // Smooth glide/coast on key release
+        const vertInertiaRate = hasVertInput ? 2.8 : 1.75;
+
+        vxWorld += (targetVx - vxWorld) * Math.min(1, dt * horizInertiaRate);
+        vzWorld += (targetVz - vzWorld) * Math.min(1, dt * horizInertiaRate);
+        vyWorld += (targetVy - vyWorld) * Math.min(1, dt * vertInertiaRate);
+
+        // 3. Inertial Pitch & Roll Attitude Banking (Tilts with thrust & counter-tilts when braking)
+        const localVelFwd = vxWorld * fwdX + vzWorld * fwdZ;
+        const localVelRight = vxWorld * rightVecX + vzWorld * rightVecZ;
+        const accelFwd = forwardSpeed - localVelFwd;
+        const accelRight = strafeSpeed - localVelRight;
+
+        const targetPitch = Math.max(-28, Math.min(28, -effRightY * 16 * mult + accelFwd * 0.22));
+        const targetRoll = Math.max(-28, Math.min(28, effRightX * 20 * mult + accelRight * 0.25));
+        currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 5.4);
+        currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 5.4);
+
+        droneX += vxWorld * dt;
+        droneZ += vzWorld * dt;
+        droneY = Math.min(340, droneY + vyWorld * dt);
+
+        const horizontalSpeed = Math.hypot(vxWorld, vzWorld);
+        rotorPhase += dt * (26 + horizontalSpeed * 0.45);
+
+        // 4. Check 3D Collisions against Landmarks, Buildings, Snow Peaks, Trees, Yurts & Ground
+        checkObstacleCollisions(activeScene);
+      } else {
+        // Crashed Physics: Tumble & Fall to Ground + Update Debris Shards
+        crashShakeTime = Math.max(0, crashShakeTime - dt);
+        vxWorld *= 0.92;
+        vzWorld *= 0.92;
+        yawVel *= 0.9;
+        if (droneY > 1.1) {
+          vyWorld -= 38 * dt;
+          droneY = Math.max(1.0, droneY + vyWorld * dt);
+          currentRoll += 160 * dt;
+          currentPitch -= 110 * dt;
+        } else {
+          vyWorld = 0;
+          currentRoll += (38 - currentRoll) * Math.min(1, dt * 6);
+          currentPitch += (-24 - currentPitch) * Math.min(1, dt * 6);
+        }
+
+        for (let i = 0; i < crashDebris.length; i++) {
+          const d = crashDebris[i];
+          d.x += d.vx * dt;
+          d.z += d.vz * dt;
+          d.vy -= 28 * dt;
+          d.y = Math.max(0.4, d.y + d.vy * dt);
+          if (d.y <= 0.45) {
+            d.vx *= 0.85;
+            d.vz *= 0.85;
+          }
+        }
+      }
+
+      const horizontalSpeed = isCrashed ? 0 : Math.hypot(vxWorld, vzWorld);
       const homeDistance = Math.hypot(droneX, droneZ);
-      rotorPhase += dt * (26 + horizontalSpeed * 0.45);
 
-      // Render 3D Minimalist Geometric World & Third-Person Drone
-      render3DScene(SCENES_3D[activeSceneKey] || SCENES_3D.city);
+      // Render 3D Minimalist Geometric World & Drone
+      render3DScene(activeScene, now);
 
       // Update HUD Elements
       if (horizonGroup) {
@@ -3137,7 +4298,7 @@ function initDroneFpvCard() {
       }
 
       if (altVal) altVal.textContent = droneY.toFixed(1);
-      if (vsVal) vsVal.textContent = vyWorld.toFixed(1);
+      if (vsVal) vsVal.textContent = (isCrashed ? 0 : vyWorld).toFixed(1);
       if (distVal) distVal.textContent = homeDistance.toFixed(1);
       if (spdVal) spdVal.textContent = horizontalSpeed.toFixed(1);
       if (pitchReadout) pitchReadout.textContent = `PITCH ${currentPitch.toFixed(1)}°`;

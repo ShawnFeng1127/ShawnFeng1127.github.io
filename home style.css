@@ -28,13 +28,14 @@ body.home-page .glass-nav {
   position: relative;
   width: 100%;
   max-width: 1440px;
-  min-height: 1080px;
+  min-height: 100vh;
+  height: 100vh;
   margin: 0 auto;
   padding: 28px 40px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* Layer 1: Atmospheric Pavilion Background Photo (home page背景.png) */

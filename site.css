@@ -193,35 +193,9 @@ body {
   will-change: transform;
 }
 
-/* Swept Motion-Blur Air Disc + DJI Orange Tip Perimeter Ring */
+/* Swept Motion-Blur Air Disc Removed per User Request */
 .drone-rotor-disc {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      transparent 0%,
-      rgba(26, 30, 34, 0.14) 25%,
-      rgba(215, 222, 230, 0.12) 68%,
-      rgba(26, 30, 34, 0.22) 88%,
-      rgba(240, 123, 50, 0.72) 95.5%,
-      rgba(240, 123, 50, 0.0) 100%
-    ),
-    conic-gradient(
-      from 0deg,
-      rgba(24, 27, 31, 0.52) 0deg,
-      rgba(220, 228, 236, 0.24) 28deg,
-      rgba(24, 27, 31, 0.04) 68deg,
-      transparent 90deg,
-      rgba(24, 27, 31, 0.04) 155deg,
-      rgba(24, 27, 31, 0.52) 180deg,
-      rgba(220, 228, 236, 0.24) 208deg,
-      rgba(24, 27, 31, 0.04) 248deg,
-      transparent 270deg,
-      rgba(24, 27, 31, 0.04) 335deg,
-      rgba(24, 27, 31, 0.52) 360deg
-    );
+  display: none;
 }
 
 .drone-rotor-svg {
