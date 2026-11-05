@@ -92,8 +92,9 @@ function initSiteEntranceAnimation() {
     return;
   }
 
-  const isHomePage = document.body.getAttribute('data-page') === 'home';
-  if (!isHomePage) {
+  const page = document.body.getAttribute('data-page') || '';
+  const isHomeOrCanvas = page === 'home' || page === 'canvas' || document.body.classList.contains('unified-canvas-page');
+  if (!isHomeOrCanvas) {
     return;
   }
 
@@ -381,7 +382,7 @@ function initInteractiveDrone() {
   });
 
   function triggerAboutDroneFpv(e) {
-    if (pageType === 'about' && typeof openDroneFpvCardFn === 'function') {
+    if (typeof openDroneFpvCardFn === 'function') {
       if (e) e.stopPropagation();
       openDroneFpvCardFn();
     }
@@ -395,7 +396,7 @@ function initInteractiveDrone() {
     }
   });
 
-  if (perchTarget && pageType === 'about') {
+  if (perchTarget) {
     perchTarget.addEventListener('click', triggerAboutDroneFpv);
     perchTarget.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -430,6 +431,18 @@ function initInteractiveDrone() {
     const dt = Math.min((now - lastTime) / 1000, 0.05);
     lastTime = now;
     orbitPhase += dt * 2.1;
+
+    // On unified continuous canvas: automatically dock near About, take off when scrolling away
+    if (perchTarget && (document.body.classList.contains('unified-canvas-page') || !!document.querySelector('.canvas-stream'))) {
+      const rect = perchTarget.getBoundingClientRect();
+      const isPerchInView = rect.top > -60 && rect.top < window.innerHeight * 0.72;
+      if (isPerchInView && mode !== 'RETURN_TO_PERCH' && mode !== 'DEPART_FROM_PERCH') {
+        mode = 'RETURN_TO_PERCH';
+      } else if (!isPerchInView && mode === 'RETURN_TO_PERCH') {
+        mode = 'CURSOR_ORBIT';
+        hasSettledOnPerch = false;
+      }
+    }
 
     let targetX = mouseX;
     let targetY = mouseY;
@@ -762,6 +775,70 @@ function initInfiniteRingGallery() {
     viewport.classList.remove('is-dragging');
     targetOffset += dragVelocity * 5.5;
   });
+
+  // Mobile Touch Swipe Drag with Inertial Momentum
+  let isTouchDragging = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let lastTouchX = 0;
+  let touchVelocity = 0;
+  let isHorizontalTouchMove = false;
+
+  viewport.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1) return;
+      isTouchDragging = true;
+      galleryWasDragged = false;
+      isHorizontalTouchMove = false;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      lastTouchX = touchStartX;
+      touchVelocity = 0;
+    },
+    { passive: true }
+  );
+
+  viewport.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!isTouchDragging || e.touches.length !== 1) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const dx = currentX - lastTouchX;
+      const totalDx = currentX - touchStartX;
+      const totalDy = currentY - touchStartY;
+
+      if (!isHorizontalTouchMove) {
+        if (Math.abs(totalDx) > 8 && Math.abs(totalDx) > Math.abs(totalDy)) {
+          isHorizontalTouchMove = true;
+        } else if (Math.abs(totalDy) > 8) {
+          isTouchDragging = false;
+          return;
+        }
+      }
+
+      if (isHorizontalTouchMove) {
+        targetOffset -= dx * 1.65;
+        touchVelocity = dx;
+        lastTouchX = currentX;
+        galleryWasDragged = true;
+      }
+    },
+    { passive: true }
+  );
+
+  viewport.addEventListener(
+    'touchend',
+    () => {
+      if (isTouchDragging && isHorizontalTouchMove) {
+        targetOffset -= touchVelocity * 6.0;
+      }
+      isTouchDragging = false;
+      isHorizontalTouchMove = false;
+    },
+    { passive: true }
+  );
 
   // Hover Spotlight Effect across all ring cards
   function activateCardHover(hoveredCard) {
@@ -1253,12 +1330,103 @@ function initInfiniteRingGallery() {
 }
 
 /**
+ * 5b. Unified Continuous Single-Canvas Smooth Navigation & Scroll Spy
+ *     - Smoothly scrolls to #section-home, #section-about, #section-work, #section-help
+ *     - Dynamically updates active nav link as the user scrolls
+ */
+function initUnifiedCanvasNavigation() {
+  const links = document.querySelectorAll(
+    '.nav-links .nav-link[href^="#"], .home-scroll-prompt, a[href^="#section-"]'
+  );
+
+  links.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          const nav = document.getElementById('main-glass-nav');
+          const navOffset = nav ? nav.offsetHeight + 18 : 72;
+          const targetY = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+          });
+          if (history.replaceState) {
+            history.replaceState(null, '', href);
+          }
+        }
+      }
+    });
+  });
+
+  initScrollSpy();
+}
+
+function initScrollSpy() {
+  const sections = [
+    { id: 'section-home', link: document.querySelector('.nav-link[data-nav-target="section-home"], .nav-link[href="#section-home"]') },
+    { id: 'section-about', link: document.querySelector('.nav-link[data-nav-target="section-about"], .nav-link[href="#section-about"]') },
+    { id: 'section-work', link: document.querySelector('.nav-link[data-nav-target="section-work"], .nav-link[href="#section-work"]') },
+    { id: 'section-help', link: document.querySelector('.nav-link[data-nav-target="section-help"], .nav-link[href="#section-help"]') }
+  ];
+
+  function updateActiveLink() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const nav = document.getElementById('main-glass-nav');
+    const navOffset = nav ? nav.offsetHeight + 40 : 90;
+    const probeY = scrollY + navOffset + 80;
+
+    let currentSection = sections[0];
+    for (let i = 0; i < sections.length; i++) {
+      const sec = sections[i];
+      const el = document.getElementById(sec.id);
+      if (el) {
+        const top = el.offsetTop;
+        if (probeY >= top) {
+          currentSection = sec;
+        }
+      }
+    }
+
+    sections.forEach((sec) => {
+      if (sec.link) {
+        sec.link.classList.toggle('active', sec === currentSection);
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
+
+  // Scroll to hash on initial page load if URL contains #section-...
+  if (window.location.hash) {
+    const hashTarget = document.querySelector(window.location.hash);
+    if (hashTarget) {
+      setTimeout(() => {
+        const nav = document.getElementById('main-glass-nav');
+        const navOffset = nav ? nav.offsetHeight + 18 : 72;
+        const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset - navOffset;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      }, 120);
+    }
+  }
+}
+
+/**
  * 5. Whole-Website Mouse Scroll Navigation & Keyboard PageDown / PageUp
  *    - Allows natural vertical scrolling within each page (to view the full portrait and content)
  *    - When reaching the bottom of a page and continuing to scroll down, smoothly transitions to the next page
  *    - When reaching the top of a page and continuing to scroll up, smoothly transitions to the previous page
  */
 function initScrollAndKeyGuidance() {
+  const isUnified = document.body.classList.contains('unified-canvas-page') || !!document.querySelector('.canvas-stream');
+  if (isUnified) {
+    initUnifiedCanvasNavigation();
+    return;
+  }
+
   const nextPage = document.body.getAttribute('data-next-page');
   const prevPage = document.body.getAttribute('data-prev-page');
   const modal = document.getElementById('project-lightbox');
@@ -1360,6 +1528,91 @@ function initScrollAndKeyGuidance() {
       navigateToPage(prevPage, null, 'up');
     }
   });
+}
+
+/**
+ * 5b. Unified Continuous Single-Canvas Smooth Navigation & Scroll Spy
+ *     - Smoothly scrolls to #section-home, #section-about, #section-work, #section-help
+ *     - Dynamically updates active nav link as the user scrolls
+ */
+function initUnifiedCanvasNavigation() {
+  const links = document.querySelectorAll(
+    '.nav-links .nav-link[href^="#"], .home-scroll-prompt, a[href^="#section-"]'
+  );
+
+  links.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          const nav = document.getElementById('main-glass-nav');
+          const navOffset = nav ? nav.offsetHeight + 18 : 72;
+          const targetY = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+          });
+          if (history.replaceState) {
+            history.replaceState(null, '', href);
+          }
+        }
+      }
+    });
+  });
+
+  initScrollSpy();
+}
+
+function initScrollSpy() {
+  const sections = [
+    { id: 'section-home', link: document.querySelector('.nav-link[data-nav-target="section-home"], .nav-link[href="#section-home"]') },
+    { id: 'section-about', link: document.querySelector('.nav-link[data-nav-target="section-about"], .nav-link[href="#section-about"]') },
+    { id: 'section-work', link: document.querySelector('.nav-link[data-nav-target="section-work"], .nav-link[href="#section-work"]') },
+    { id: 'section-help', link: document.querySelector('.nav-link[data-nav-target="section-help"], .nav-link[href="#section-help"]') }
+  ];
+
+  function updateActiveLink() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const nav = document.getElementById('main-glass-nav');
+    const navOffset = nav ? nav.offsetHeight + 40 : 90;
+    const probeY = scrollY + navOffset + 80;
+
+    let currentSection = sections[0];
+    for (let i = 0; i < sections.length; i++) {
+      const sec = sections[i];
+      const el = document.getElementById(sec.id);
+      if (el) {
+        const top = el.offsetTop;
+        if (probeY >= top) {
+          currentSection = sec;
+        }
+      }
+    }
+
+    sections.forEach((sec) => {
+      if (sec.link) {
+        sec.link.classList.toggle('active', sec === currentSection);
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
+
+  // Scroll to hash on initial page load if URL contains #section-...
+  if (window.location.hash) {
+    const hashTarget = document.querySelector(window.location.hash);
+    if (hashTarget) {
+      setTimeout(() => {
+        const nav = document.getElementById('main-glass-nav');
+        const navOffset = nav ? nav.offsetHeight + 18 : 72;
+        const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset - navOffset;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      }, 120);
+    }
+  }
 }
 
 /**
@@ -1912,45 +2165,45 @@ function initDroneFpvCard() {
   const canvas = document.getElementById('fpv-3d-canvas');
   const ctx = canvas ? canvas.getContext('2d') : null;
 
-  const closeBtn = document.getElementById('fpv-close-btn');
+  const closeBtn = document.getElementById('fpv-modal-close') || document.getElementById('fpv-close-btn');
   const statusTextEl = document.getElementById('fpv-status-text');
   const viewBtn = document.getElementById('fpv-view-btn');
   const viewLabel = document.getElementById('fpv-view-label');
 
-  const horizonGroup = document.getElementById('fpv-horizon-group');
-  const compassTrack = document.getElementById('fpv-compass-track');
-  const headingVal = document.getElementById('fpv-heading-val');
+  const horizonGroup = document.getElementById('dji-horizon-group') || document.getElementById('fpv-horizon-group');
+  const compassTrack = document.getElementById('dji-compass-track') || document.getElementById('fpv-compass-track');
+  const headingVal = document.getElementById('dji-heading-val') || document.getElementById('fpv-heading-val');
 
   const spdVal = document.getElementById('fpv-spd-val');
   const vsVal = document.getElementById('fpv-vs-val');
   const altVal = document.getElementById('fpv-alt-val');
   const distVal = document.getElementById('fpv-dist-val');
-  const pitchReadout = document.getElementById('fpv-pitch-readout');
-  const rollReadout = document.getElementById('fpv-roll-readout');
-  const gimbalReadout = document.getElementById('fpv-gimbal-readout');
-  const gimbalAngleBadge = document.getElementById('fpv-gimbal-angle-badge');
-  const gimbalThumb = document.getElementById('fpv-gimbal-thumb');
+  const pitchReadout = document.getElementById('dji-pitch-readout') || document.getElementById('fpv-pitch-readout');
+  const rollReadout = document.getElementById('dji-roll-readout') || document.getElementById('fpv-roll-readout');
+  const gimbalReadout = document.getElementById('dji-gimbal-deg') || document.getElementById('fpv-gimbal-readout');
+  const gimbalAngleBadge = document.getElementById('dji-gimbal-deg') || document.getElementById('fpv-gimbal-angle-badge');
+  const gimbalThumb = document.getElementById('dji-gimbal-pointer') || document.getElementById('fpv-gimbal-thumb');
 
-  const radarCompass = document.getElementById('fpv-radar-compass');
-  const radarHorizon = document.getElementById('fpv-radar-horizon');
+  const radarCompass = document.getElementById('dji-radar-compass') || document.getElementById('fpv-radar-compass');
+  const radarHorizon = document.getElementById('dji-radar-horizon') || document.getElementById('fpv-radar-horizon');
 
-  const crashTitleEl = document.getElementById('fpv-crash-title');
+  const crashTitleEl = document.getElementById('dji-crash-banner') || document.getElementById('fpv-crash-title');
   const crashDescEl = document.getElementById('fpv-crash-desc');
-  const crashRetryBtn = document.getElementById('fpv-crash-retry-btn');
+  const crashRetryBtn = document.getElementById('dji-crash-reset-btn') || document.getElementById('fpv-crash-retry-btn');
 
   const shutterFlash = document.getElementById('fpv-shutter-flash');
   const captureBadge = document.getElementById('fpv-capture-badge');
 
-  const stickLeft = document.getElementById('fpv-stick-left');
-  const knobLeft = document.getElementById('fpv-knob-left');
-  const stickRight = document.getElementById('fpv-stick-right');
-  const knobRight = document.getElementById('fpv-knob-right');
+  const stickLeft = document.getElementById('fpv-left-stick') || document.getElementById('fpv-stick-left');
+  const knobLeft = document.getElementById('fpv-left-knob') || document.getElementById('fpv-knob-left');
+  const stickRight = document.getElementById('fpv-right-stick') || document.getElementById('fpv-stick-right');
+  const knobRight = document.getElementById('fpv-right-knob') || document.getElementById('fpv-knob-right');
 
   const modeBtns = modal.querySelectorAll('.fpv-mode-btn');
-  const sceneBtns = modal.querySelectorAll('.fpv-scene-btn');
-  const timeBtns = modal.querySelectorAll('[data-env-time]');
-  const weatherBtns = modal.querySelectorAll('[data-env-weather]');
-  const seasonBtns = modal.querySelectorAll('[data-env-season]');
+  const sceneBtns = modal.querySelectorAll('.dji-scene-tab, .fpv-scene-btn');
+  const timeBtns = modal.querySelectorAll('[data-env-time], [data-env-type="time"]');
+  const weatherBtns = modal.querySelectorAll('[data-env-weather], [data-env-type="weather"]');
+  const seasonBtns = modal.querySelectorAll('[data-env-season], [data-env-type="season"]');
 
   const envDropdownWrap = document.getElementById('fpv-env-dropdown-wrap');
   const envToggleBtn = document.getElementById('fpv-env-toggle-btn');
@@ -1962,9 +2215,9 @@ function initDroneFpvCard() {
   const gimbalBtn = document.getElementById('fpv-gimbal-btn');
   const shutterBtn = document.getElementById('fpv-shutter-btn');
 
-  const helpBtn = document.getElementById('fpv-help-btn');
-  const controlsModal = document.getElementById('fpv-controls-modal');
-  const controlsCloseBtn = document.getElementById('fpv-controls-close');
+  const helpBtn = document.getElementById('dji-guide-btn') || document.getElementById('fpv-help-btn');
+  const controlsModal = document.getElementById('dji-guide-popover') || document.getElementById('fpv-controls-modal');
+  const controlsCloseBtn = document.getElementById('dji-guide-close') || document.getElementById('fpv-controls-close');
   const controlsOkBtn = document.getElementById('fpv-controls-ok');
 
   let isActive = false;
@@ -3295,9 +3548,18 @@ function initDroneFpvCard() {
   // Consolidated Environment Popover + Random Weather & Time Switcher
   // =========================================================================
   function updateEnvSummaryUI() {
-    timeBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-time') === envTime));
-    weatherBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-weather') === envWeather));
-    seasonBtns.forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-env-season') === envSeason));
+    timeBtns.forEach((b) => {
+      const val = b.getAttribute('data-env-time') || b.getAttribute('data-env-val');
+      b.classList.toggle('is-active', val === envTime);
+    });
+    weatherBtns.forEach((b) => {
+      const val = b.getAttribute('data-env-weather') || b.getAttribute('data-env-val');
+      b.classList.toggle('is-active', val === envWeather);
+    });
+    seasonBtns.forEach((b) => {
+      const val = b.getAttribute('data-env-season') || b.getAttribute('data-env-val');
+      b.classList.toggle('is-active', val === envSeason);
+    });
 
     if (envSummaryEl) {
       const timeZhMap = { day: '☀ 白昼', sunset: '🌇 黄昏', night: '🌙 夜晚' };
@@ -3374,7 +3636,7 @@ function initDroneFpvCard() {
 
   timeBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      envTime = btn.getAttribute('data-env-time') || 'sunset';
+      envTime = btn.getAttribute('data-env-time') || btn.getAttribute('data-env-val') || 'sunset';
       updateEnvSummaryUI();
       rebuildScenesForEnv();
     });
@@ -3382,14 +3644,14 @@ function initDroneFpvCard() {
 
   weatherBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      envWeather = btn.getAttribute('data-env-weather') || 'clear';
+      envWeather = btn.getAttribute('data-env-weather') || btn.getAttribute('data-env-val') || 'clear';
       updateEnvSummaryUI();
     });
   });
 
   seasonBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      envSeason = btn.getAttribute('data-env-season') || 'summer';
+      envSeason = btn.getAttribute('data-env-season') || btn.getAttribute('data-env-val') || 'summer';
       updateEnvSummaryUI();
       rebuildScenesForEnv();
     });
@@ -3487,7 +3749,7 @@ function initDroneFpvCard() {
   // 3 Minimalist 3D Geometric Scenes Switcher (City / Mountain / Grassland)
   sceneBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const sceneKey = btn.getAttribute('data-fpv-scene') || 'city';
+      const sceneKey = btn.getAttribute('data-scene') || btn.getAttribute('data-fpv-scene') || 'city';
       activeSceneKey = SCENES_3D[sceneKey] ? sceneKey : 'city';
       sceneBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
       resetDroneToSafeHover();
@@ -3515,7 +3777,7 @@ function initDroneFpvCard() {
   function bindVirtualStick(padEl, knobEl, onMove) {
     if (!padEl || !knobEl) return;
     let dragging = false;
-    const maxRadius = 20;
+    const maxRadius = (padEl.offsetWidth || 70) * 0.36;
 
     function updateFromPointer(clientX, clientY) {
       const rect = padEl.getBoundingClientRect();

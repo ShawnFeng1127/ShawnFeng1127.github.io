@@ -2,13 +2,16 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Shawn Feng (冯靖翔) — Portfolio Website</title>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="home style.css">
+  <link rel="stylesheet" href="about style.css">
+  <link rel="stylesheet" href="projects detail style.css">
+  <link rel="stylesheet" href="help style.css">
 </head>
-<body class="home-page fade-in" data-page="home" data-next-page="about.html" data-prev-page="help.html">
-  <!-- SVG Optical Refraction Filter for Authentic Liquid Glass -->
+<body class="unified-canvas-page home-page about-page work-page help-page" data-page="canvas">
+  <!-- Hidden SVG Optical Refraction Filter for Authentic Liquid Glass -->
   <svg class="liquid-glass-svg-defs" aria-hidden="true">
     <defs>
       <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
@@ -21,57 +24,890 @@
 
   <div class="liquid-glow-orb"></div>
 
-  <!-- Interactive Flying Drone (Orbits Mouse with Realistic Flight Attitude) -->
-  <div id="interactive-drone" class="interactive-drone-layer is-airborne" aria-hidden="true">
-    <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="Interactive DJI Drone">
+  <!-- Interactive Flying Drone (Orbits Cursor / Perches on About / Click to Open 3D FPV Simulation) -->
+  <div id="interactive-drone" class="interactive-drone-layer is-airborne" role="button" tabindex="0" aria-label="点击开启大疆无人机 3D 第一视角飞行">
+    <img class="interactive-drone-img" src="Project pictures/about page无人机.png" alt="DJI Drone">
   </div>
 
-  <div class="home-stage">
-    <!-- Layer 1: Background Pavilion Photo -->
-    <img class="home-bg-photo" src="Project pictures/home page背景.png" alt="Pavilion Background">
+  <!-- Dim overlay for gallery photo hover -->
+  <div class="gallery-dim-overlay" aria-hidden="true"></div>
 
-    <!-- Layer 4 (Top): Minimalist Liquid Glass Navigation Bar -->
-    <header class="glass-nav">
-      <a href="home page.html" class="nav-brand">SHAWN FENG</a>
-      <nav class="nav-links">
-        <a href="home page.html" class="nav-link active" data-i18n-zh="首页" data-i18n-en="HOME">HOME</a>
-        <a href="about.html" class="nav-link" data-i18n-zh="关于" data-i18n-en="ABOUT">ABOUT</a>
-        <a href="projects detail.html" class="nav-link" data-i18n-zh="作品" data-i18n-en="WORK">WORK</a>
-        <a href="help.html" class="nav-link" data-i18n-zh="帮助" data-i18n-en="HELP">HELP</a>
-        <button type="button" class="nav-lang-btn" aria-label="Switch Language / 切换语言">
-          <span class="lang-opt" data-lang="zh">中</span><span class="lang-sep">/</span><span class="lang-opt" data-lang="en">EN</span>
-        </button>
-      </nav>
-    </header>
+  <!-- ==========================================================================
+       Sticky Top Minimalist Liquid Glass Navigation Bar (Unified Canvas Navigation)
+       ========================================================================== -->
+  <header class="glass-nav" id="main-glass-nav">
+    <a href="#section-home" class="nav-brand">SHAWN FENG</a>
+    <nav class="nav-links">
+      <a href="#section-home" class="nav-link active" data-nav-target="section-home" data-i18n-zh="首页" data-i18n-en="HOME">HOME</a>
+      <a href="#section-about" class="nav-link" data-nav-target="section-about" data-i18n-zh="关于" data-i18n-en="ABOUT">ABOUT</a>
+      <a href="#section-work" class="nav-link" data-nav-target="section-work" data-i18n-zh="作品" data-i18n-en="WORK">WORK</a>
+      <a href="#section-help" class="nav-link" data-nav-target="section-help" data-i18n-zh="帮助" data-i18n-en="HELP">HELP</a>
+      <button type="button" class="nav-lang-btn" aria-label="Switch Language / 切换语言">
+        <span class="lang-opt" data-lang="zh">中</span><span class="lang-sep">/</span><span class="lang-opt" data-lang="en">EN</span>
+      </button>
+    </nav>
+  </header>
 
-    <!-- Layer 2 (Middle): Minimalist Editorial Typography & Copper Line -->
-    <main class="home-editorial-layer">
-      <div class="home-vertical-rule" aria-hidden="true"></div>
+  <!-- ==========================================================================
+       Continuous Single-Canvas Main Stream (Sections 1 -> 4)
+       ========================================================================== -->
+  <main class="canvas-stream" id="canvas-stream">
 
-      <div class="home-main-block">
-        <div class="hero-titles">
-          <h1 class="hero-title-cn">冯靖翔</h1>
-          <h1 class="hero-title-en">SHAWN</h1>
+    <!-- ==================== SECTION 1: HOME ==================== -->
+    <section class="canvas-section home-section home-stage" id="section-home">
+      <!-- Layer 1: Background Pavilion Photo -->
+      <img class="home-bg-photo" src="Project pictures/home page背景.png" alt="Pavilion Background">
+
+      <!-- Layer 2: Editorial Typography & Copper Axis -->
+      <div class="home-editorial-layer">
+        <div class="home-vertical-rule" aria-hidden="true"></div>
+
+        <div class="home-main-block">
+          <div class="hero-titles">
+            <h1 class="hero-title-cn">冯靖翔</h1>
+            <h1 class="hero-title-en">SHAWN</h1>
+          </div>
+
+          <div class="hero-divider"></div>
+
+          <p class="hero-tagline" data-i18n-html-zh="透过视觉镜头<br>观察并记录<br>这个世界。" data-i18n-html-en="SEEING THE WORLD<br>THROUGH A VISUAL<br>LENS.">
+            SEEING THE WORLD<br>
+            THROUGH A VISUAL<br>
+            LENS.
+          </p>
+        </div>
+      </div>
+
+      <!-- Layer 3: Foreground Subject Cutout Portrait -->
+      <img class="home-subject-photo" src="Project pictures/home page人物.png" alt="Shawn Feng Portrait">
+
+      <!-- Scroll Down Guidance Prompt -->
+      <a href="#section-about" class="home-scroll-prompt" aria-label="向下滚动浏览">
+        <span class="scroll-mouse-icon">
+          <span class="scroll-mouse-dot"></span>
+        </span>
+        <span data-i18n-zh="向下滚动浏览" data-i18n-en="SCROLL TO EXPLORE">向下滚动浏览</span>
+      </a>
+    </section>
+
+    <!-- ==================== SECTION 2: ABOUT ==================== -->
+    <section class="canvas-section about-section about-stage" id="section-about">
+      <!-- Clickable Perch Target for the Drone (Click Drone to Open 3D FPV Simulation) -->
+      <div id="drone-perch-target" class="drone-perch-target" role="button" tabindex="0" aria-label="点击无人机进入 3D 第一视角飞行交互"></div>
+
+      <!-- Main About 2-Column Editorial Grid -->
+      <div class="about-hero-grid">
+        <!-- Left Editorial Column -->
+        <div class="about-editorial">
+          <h2 class="about-headline">
+            EXPLORE WITH<br>
+            CURIOSITY.<br>
+            CREATE WITH<br>
+            <span class="perspective-glass-wrap" data-text="PERSPECTIVE.">
+              <span class="perspective-text">PERSPECTIVE.</span>
+            </span>
+          </h2>
+
+          <p class="about-bio" data-i18n-zh="我是冯靖翔（Shawn Feng），14 岁，来自北京，目前是探月学校（Moonshot Academy）九年级学生。我热衷于摄影、无人机航拍与数字视觉创作。" data-i18n-en="My name is Shawn Feng. I am 14, from Beijing, and a 9th grade student at Moonshot Academy. I am interested in digital and visual creation.">
+            我是冯靖翔（Shawn Feng），14 岁，来自北京，目前是探月学校（Moonshot Academy）九年级学生。我热衷于摄影、无人机航拍与数字视觉创作。
+          </p>
         </div>
 
-        <div class="hero-divider"></div>
+        <!-- Right Portrait Card & Overlapping Liquid Glass Badge -->
+        <aside class="profile-card-wrapper">
+          <div class="profile-visual-card">
+            <div class="profile-photo-frame">
+              <img class="profile-photo" src="Project pictures/About Page（个人照片）.png" alt="Shawn Feng Portrait">
+            </div>
 
-        <p class="hero-tagline" data-i18n-html-zh="透过视觉镜头<br>观察并记录<br>这个世界。" data-i18n-html-en="SEEING THE WORLD<br>THROUGH A VISUAL<br>LENS.">
-          SEEING THE WORLD<br>
-          THROUGH A VISUAL<br>
-          LENS.
-        </p>
+            <div class="profile-glass-badge">
+              <div class="badge-top-row">
+                <span class="badge-age">14</span>
+                <span class="badge-city" data-i18n-zh="中国 · 北京" data-i18n-en="BEIJING, CHINA">BEIJING, CHINA</span>
+              </div>
+              <div class="badge-school" data-i18n-zh="探月学校 · 九年级 (G9)" data-i18n-en="MOONSHOT ACADEMY · GRADE 9">MOONSHOT ACADEMY · GRADE 9</div>
+            </div>
+          </div>
+        </aside>
       </div>
-    </main>
+    </section>
 
-    <!-- Layer 3 (Foreground Subject): Transparent Cutout Portrait of Shawn Feng -->
-    <img class="home-subject-photo" src="Project pictures/home page人物.png" alt="Shawn Feng">
+    <!-- ==================== SECTION 3: WORK / PHOTOGRAPHY ==================== -->
+    <section class="canvas-section work-section work-stage" id="section-work">
+      <!-- Section Header & Slide Arrows -->
+      <div class="work-header">
+        <div>
+          <h2 class="work-header-title">PHOTOGRAPHY</h2>
+        </div>
+        <div class="gallery-slide-controls" aria-label="Slide Gallery">
+          <button class="gallery-slide-btn gallery-prev-btn" type="button" aria-label="Slide Left" title="向左滑动 (←)">←</button>
+          <button class="gallery-slide-btn gallery-next-btn" type="button" aria-label="Slide Right" title="向右滑动 (→)">→</button>
+        </div>
+      </div>
 
-    <!-- Footer -->
+      <!-- Infinite Ring Photography Exhibition Gallery (10 Series) -->
+      <div class="projects-gallery-section" aria-label="Photography Exhibition Gallery">
+        <div class="projects-gallery-viewport" id="projects-gallery-viewport">
+          <div class="projects-gallery-track" id="projects-gallery-track">
+            <!-- 01: Project 1.png (郑州黑川纪章纪念馆) -->
+            <article class="project-card card-1" data-series="1" data-photo-id="1" tabindex="0" role="button" aria-label="郑州 · 黑川纪章纪念馆">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/Project 1.png" alt="郑州 · 黑川纪章纪念馆">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">郑州 · 黑川纪章纪念馆</h3>
+                <p class="project-subtitle">ARCHITECTURE · SYMBIOSIS · DUSK</p>
+              </div>
+            </article>
+
+            <!-- 02: Project 2.jpg (甘肃苦水丹霞) -->
+            <article class="project-card card-2" data-series="2" data-photo-id="2" tabindex="0" role="button" aria-label="甘肃 · 苦水丹霞">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/Project 2.jpg" alt="甘肃 · 苦水丹霞">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">甘肃 · 苦水丹霞</h3>
+                <p class="project-subtitle">GEOLOGY · AERIAL · TEXTURE</p>
+              </div>
+            </article>
+
+            <!-- 03: Project 3.png (北京CBD) -->
+            <article class="project-card card-3" data-series="3" data-photo-id="3" tabindex="0" role="button" aria-label="北京 · CBD">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/Project 3.png" alt="北京 · CBD">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">北京 · CBD</h3>
+                <p class="project-subtitle">METROPOLIS · LIGHT · AXIS</p>
+              </div>
+            </article>
+
+            <!-- 04: project 4a.jpg (西安中轴线航拍 / 可切换 4b 永宁门) -->
+            <article class="project-card card-4a" data-series="4" data-photo-id="4a" tabindex="0" role="button" aria-label="西安 · 中轴线航拍">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 4a.jpg" alt="西安 · 中轴线航拍">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">西安 · 中轴线航拍</h3>
+                <p class="project-subtitle">HERITAGE · CENTRAL AXIS · BLUE HOUR</p>
+              </div>
+            </article>
+
+            <!-- 05: project 5.jpg (九寨沟航拍) -->
+            <article class="project-card card-5" data-series="5" data-photo-id="5" tabindex="0" role="button" aria-label="川西 · 九寨沟航拍">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 5.jpg" alt="川西 · 九寨沟航拍">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">川西 · 九寨沟航拍</h3>
+                <p class="project-subtitle">EMERALD · SHORELINE · WILDERNESS</p>
+              </div>
+            </article>
+
+            <!-- 06: project 6.jpg (上海陆家嘴CBD) -->
+            <article class="project-card card-6" data-series="6" data-photo-id="6" tabindex="0" role="button" aria-label="上海 · 陆家嘴 CBD">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 6.jpg" alt="上海 · 陆家嘴 CBD">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">上海 · 陆家嘴 CBD</h3>
+                <p class="project-subtitle">VERTICAL · SKYLINE · TWILIGHT</p>
+              </div>
+            </article>
+
+            <!-- 07: project 7.jpg (郑州龙湖湿地公园) -->
+            <article class="project-card card-7" data-series="7" data-photo-id="7" tabindex="0" role="button" aria-label="郑州 · 龙湖湿地公园">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 7.jpg" alt="郑州 · 龙湖湿地公园">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">郑州 · 龙湖湿地公园</h3>
+                <p class="project-subtitle">PANORAMA · SYMMETRY · STILLNESS</p>
+              </div>
+            </article>
+
+            <!-- 08: project 8.jpg (重庆朝天门和千佛寺) -->
+            <article class="project-card card-8" data-series="8" data-photo-id="8" tabindex="0" role="button" aria-label="重庆 · 朝天门与千佛寺">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 8.jpg" alt="重庆 · 朝天门与千佛寺">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">重庆 · 朝天门与千佛寺</h3>
+                <p class="project-subtitle">CONTRAST · EAVES · CYBERPUNK</p>
+              </div>
+            </article>
+
+            <!-- 09: project 9.jpg (北京CBD晚霞) -->
+            <article class="project-card card-9" data-series="9" data-photo-id="9" tabindex="0" role="button" aria-label="北京 · CBD 晚霞">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 9.jpg" alt="北京 · CBD 晚霞">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">北京 · CBD 晚霞</h3>
+                <p class="project-subtitle">AFTERGLOW · HORIZON · SILHOUETTE</p>
+              </div>
+            </article>
+
+            <!-- 10: project 10a.jpg (郑州二七塔与大玉米·蓝调 / 可切换 10b 黄昏) -->
+            <article class="project-card card-10a" data-series="10" data-photo-id="10a" tabindex="0" role="button" aria-label="郑州 · 二七塔与大玉米">
+              <div class="project-card-media">
+                <img class="project-card-image" src="Project pictures/project 10a.jpg" alt="郑州 · 二七塔与大玉米">
+              </div>
+              <div class="project-card-content">
+                <div class="project-indicator"></div>
+                <h3 class="project-title">郑州 · 二七塔与大玉米</h3>
+                <p class="project-subtitle">ZHENGZHOU · BLUE HOUR &amp; DUSK</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minimalist 3-Column Liquid Glass Editorial Box -->
+      <div class="project-editorial-box">
+        <div class="editorial-columns">
+          <div class="editorial-col">
+            <h3 class="editorial-col-title" data-i18n-zh="这是什么项目？" data-i18n-en="WHAT IS THIS PROJECT?">WHAT IS THIS PROJECT?</h3>
+            <p class="editorial-col-desc" data-i18n-zh="一个专注于细致观察世界、将日常与城市风景转化为视觉故事的个人摄影项目。" data-i18n-en="A personal photography project focused on observing the world carefully and turning everyday scenes into visual stories.">
+              一个专注于细致观察世界、将日常与城市风景转化为视觉故事的个人摄影项目。
+            </p>
+          </div>
+
+          <div class="editorial-col">
+            <h3 class="editorial-col-title" data-i18n-zh="为什么做这个项目" data-i18n-en="WHY I MADE IT">WHY I MADE IT</h3>
+            <p class="editorial-col-desc" data-i18n-zh="我想探索取景构图与视角的变化，如何让熟悉的地方呈现出全新的氛围感。" data-i18n-en="I want to explore how framing and perspective can change the way a familiar place feels.">
+              我想探索取景构图与视角的变化，如何让熟悉的地方呈现出全新的氛围感。
+            </p>
+          </div>
+
+          <div class="editorial-col">
+            <h3 class="editorial-col-title" data-i18n-zh="项目成果" data-i18n-en="OUTCOME">OUTCOME</h3>
+            <p class="editorial-col-desc" data-i18n-zh="一份持续生长的摄影作品档案，记录下不同城市与地貌中的光线实验与观察。" data-i18n-en="A growing visual archive of photographs, experiments, and observations.">
+              一份持续生长的摄影作品档案，记录下不同城市与地貌中的光线实验与观察。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 4: HOW CAN I HELP ==================== -->
+    <section class="canvas-section help-section help-stage" id="section-help">
+      <!-- Section Header & Filter Tabs -->
+      <div class="help-header">
+        <div>
+          <h2 class="help-header-title">HOW CAN I HELP</h2>
+        </div>
+
+        <div class="help-filter-group" role="tablist" aria-label="Switch Help Topic">
+          <button type="button" class="help-filter-btn is-active" role="tab" aria-selected="true" data-help-filter="photo" data-i18n-zh="01 · 摄影与调色" data-i18n-en="01 · PHOTO &amp; GRADING">
+            01 · 摄影与调色
+          </button>
+          <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="drone" data-i18n-zh="02 · 无人机航拍" data-i18n-en="02 · DRONE AERIAL">
+            02 · 无人机航拍
+          </button>
+          <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="digital" data-i18n-zh="03 · Vibe Coding" data-i18n-en="03 · VIBE CODING">
+            03 · Vibe Coding
+          </button>
+        </div>
+      </div>
+
+      <!-- Proposals Grid -->
+      <div class="help-proposals-grid">
+        <!-- 01: 摄影与后期调色 (Default Active) -->
+        <article class="help-card is-active-panel" data-help-category="photo" role="tabpanel">
+          <div class="help-card-header">
+            <div class="help-card-title-group">
+              <h3 class="help-card-title" data-i18n-zh="摄影与后期调色" data-i18n-en="PHOTOGRAPHY &amp; COLOR GRADING">摄影与后期调色</h3>
+            </div>
+            <span class="help-badge-pill" data-i18n-zh="📱 手机 / 相机均可提问" data-i18n-en="📱 PHONE &amp; CAMERA FRIENDLY">📱 手机 / 相机均可提问</span>
+          </div>
+
+          <div class="help-visual-row">
+            <div class="help-card-media" data-open-help-photo="Project pictures/project 9.jpg" data-photo-caption="北京 · CBD 晚霞 (BEIJING CBD · AFTERGLOW)" role="button" tabindex="0" aria-label="点击放大查看图片：北京 CBD 晚霞">
+              <img src="Project pictures/project 9.jpg" alt="北京 CBD 晚霞">
+              <span class="help-media-caption">BEIJING CBD · AFTERGLOW</span>
+            </div>
+
+            <div class="help-card-media" data-open-help-photo="Project pictures/Project 3.png" data-photo-caption="北京 · CBD 蓝调时刻 (BEIJING CBD · BLUE HOUR)" role="button" tabindex="0" aria-label="点击放大查看图片：北京 CBD 蓝调时刻">
+              <img src="Project pictures/Project 3.png" alt="北京 CBD 蓝调时刻">
+              <span class="help-media-caption">BEIJING CBD · BLUE HOUR</span>
+            </div>
+
+            <aside class="help-visual-spec-card" data-open-help-modal="photo" role="button" tabindex="0">
+              <div class="spec-card-top">
+                <span class="spec-card-label" data-i18n-zh="色彩与参数 · VISUAL SPEC" data-i18n-en="COLOR &amp; EXIF SPEC">色彩与参数 · VISUAL SPEC</span>
+                <div class="spec-palette-row" aria-hidden="true">
+                  <span class="palette-dot" style="background: #132238;"></span>
+                  <span class="palette-dot" style="background: #2C4A6F;"></span>
+                  <span class="palette-dot" style="background: #8E4A62;"></span>
+                  <span class="palette-dot" style="background: #C47A45;"></span>
+                  <span class="palette-dot" style="background: #F4B976;"></span>
+                </div>
+              </div>
+
+              <div class="spec-metrics-grid">
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">2 YRS</span>
+                  <span class="spec-metric-tag" data-i18n-zh="摄影项目经验" data-i18n-en="PHOTO ARCHIVE">摄影项目经验</span>
+                </div>
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">10+</span>
+                  <span class="spec-metric-tag" data-i18n-zh="城市与风光系列" data-i18n-en="CITY SERIES">城市与风光系列</span>
+                </div>
+              </div>
+
+              <div class="spec-tags-wrap">
+                <span class="spec-mini-pill">RAW 14-BIT</span>
+                <span class="spec-mini-pill">LIGHTROOM</span>
+                <span class="spec-mini-pill">FRAMING</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="help-summary-columns">
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。" data-i18n-en="Students and beginners looking to improve framing, exposure, or Lightroom color grading.">
+                想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。" data-i18n-en="Online photo critique, exposure parameter Q&amp;A, and RAW color grading walkthroughs.">
+                提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。" data-i18n-en="1.5–2h every weekend. Email your photos or questions to shawnfeng@moonshotacademy.cn.">
+                每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card-footer">
+            <button type="button" class="help-learn-more-btn" data-open-help-modal="photo" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+              了解更多 / 查看完整详情 →
+            </button>
+            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%91%84%E5%BD%B1%E4%B8%8E%E8%B0%83%E8%89%B2%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+            </button>
+          </div>
+        </article>
+
+        <!-- 02: 无人机航拍与安全飞行 -->
+        <article class="help-card" data-help-category="drone" role="tabpanel" hidden>
+          <div class="help-card-header">
+            <div class="help-card-title-group">
+              <h3 class="help-card-title" data-i18n-zh="无人机航拍与安全飞行" data-i18n-en="DRONE AERIAL &amp; SAFE FLIGHT">无人机航拍与安全飞行</h3>
+            </div>
+            <span class="help-badge-pill" data-i18n-zh="🛸 选购 / 申报 / 航拍均可提问" data-i18n-en="🛸 GEAR, AIRSPACE &amp; AERIAL Q&amp;A">🛸 选购 / 申报 / 航拍均可提问</span>
+          </div>
+
+          <div class="help-visual-row">
+            <div class="help-card-media" data-open-help-photo="Project pictures/project 4a.jpg" data-photo-caption="西安 · 中轴线航拍 (XI'AN CENTRAL AXIS · AERIAL)" role="button" tabindex="0" aria-label="点击放大查看图片：西安中轴线航拍">
+              <img src="Project pictures/project 4a.jpg" alt="西安中轴线航拍">
+              <span class="help-media-caption">XI'AN AXIS · AERIAL VIEW</span>
+            </div>
+
+            <div class="help-card-media" data-open-help-photo="Project pictures/Project 2.jpg" data-photo-caption="甘肃 · 苦水丹霞航拍 (GANSU DANXIA · TOP-DOWN)" role="button" tabindex="0" aria-label="点击放大查看图片：甘肃苦水丹霞航拍">
+              <img src="Project pictures/Project 2.jpg" alt="甘肃苦水丹霞航拍">
+              <span class="help-media-caption">GANSU DANXIA · TOP-DOWN</span>
+            </div>
+
+            <aside class="help-visual-spec-card" data-open-help-modal="drone" role="button" tabindex="0">
+              <div class="spec-card-top">
+                <span class="spec-card-label" data-i18n-zh="飞行参数 · FLIGHT TELEMETRY" data-i18n-en="FLIGHT TELEMETRY">飞行参数 · FLIGHT TELEMETRY</span>
+                <div class="spec-palette-row" aria-hidden="true">
+                  <span class="palette-dot" style="background: #0F2437;"></span>
+                  <span class="palette-dot" style="background: #2C5E7A;"></span>
+                  <span class="palette-dot" style="background: #A45D38;"></span>
+                  <span class="palette-dot" style="background: #D48954;"></span>
+                  <span class="palette-dot" style="background: #52D681;"></span>
+                </div>
+              </div>
+
+              <div class="spec-metrics-grid">
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">4 YRS</span>
+                  <span class="spec-metric-tag" data-i18n-zh="安全航拍经验" data-i18n-en="FLIGHT EXP">安全航拍经验</span>
+                </div>
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">120M</span>
+                  <span class="spec-metric-tag" data-i18n-zh="UOM 适飞合规" data-i18n-en="LEGAL AIRSPACE">UOM 适飞合规</span>
+                </div>
+              </div>
+
+              <div class="spec-tags-wrap">
+                <span class="spec-mini-pill">DJI AERIAL</span>
+                <span class="spec-mini-pill">UOM CHECK</span>
+                <span class="spec-mini-pill">PANORAMA</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="help-summary-columns">
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。" data-i18n-en="Beginners curious about DJI drones, airspace rules, or top-down aerial composition.">
+                想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。" data-i18n-en="Online guidance on UOM airspace checks, pre-flight safety, and aerial panorama editing.">
+                提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。" data-i18n-en="1–1.5h every weekend. Email your drone or aerial questions to shawnfeng@moonshotacademy.cn.">
+                每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card-footer">
+            <button type="button" class="help-learn-more-btn" data-open-help-modal="drone" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+              了解更多 / 查看完整详情 →
+            </button>
+            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%88%AA%E6%8B%8D%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+            </button>
+          </div>
+        </article>
+
+        <!-- 03: Vibe Coding 个人建站 -->
+        <article class="help-card" data-help-category="digital" role="tabpanel" hidden>
+          <div class="help-card-header">
+            <div class="help-card-title-group">
+              <h3 class="help-card-title" data-i18n-zh="Vibe Coding 个人建站" data-i18n-en="VIBE CODING &amp; WEB CREATION">Vibe Coding 个人建站</h3>
+            </div>
+            <span class="help-badge-pill" data-i18n-zh="💻 Figma + AI 零基础建站指导" data-i18n-en="💻 FIGMA + AI VIBE CODING">💻 Figma + AI 零基础建站指导</span>
+          </div>
+
+          <div class="help-visual-row">
+            <div class="help-card-media" data-open-help-photo="Project pictures/vibe_coding_1.png" data-photo-caption="Figma 布局设计与液态玻璃组件系统 (FIGMA UI &amp; LIQUID GLASS SYSTEM)" role="button" tabindex="0" aria-label="点击放大查看图片：Figma 布局设计与液态玻璃组件系统">
+              <img src="Project pictures/vibe_coding_1.png" alt="Figma UI &amp; Liquid Glass Design System">
+              <span class="help-media-caption">FIGMA UI · DESIGN SYSTEM</span>
+            </div>
+
+            <div class="help-card-media" data-open-help-photo="Project pictures/vibe_coding_2.png" data-photo-caption="AI Vibe Coding 提示词生成代码与 GitHub Pages 部署 (AI PROMPT TO LIVE SITE)" role="button" tabindex="0" aria-label="点击放大查看图片：AI Vibe Coding 提示词与部署">
+              <img src="Project pictures/vibe_coding_2.png" alt="AI Vibe Coding Studio &amp; GitHub Pages Deployment">
+              <span class="help-media-caption">VIBE CODING · LIVE DEPLOY</span>
+            </div>
+
+            <aside class="help-visual-spec-card" data-open-help-modal="digital" role="button" tabindex="0">
+              <div class="spec-card-top">
+                <span class="spec-card-label" data-i18n-zh="建站技术栈 · VIBE CODING STACK" data-i18n-en="VIBE CODING STACK">建站技术栈 · VIBE CODING STACK</span>
+                <div class="spec-palette-row" aria-hidden="true">
+                  <span class="palette-dot" style="background: #090C10;"></span>
+                  <span class="palette-dot" style="background: #162533;"></span>
+                  <span class="palette-dot" style="background: #C47A45;"></span>
+                  <span class="palette-dot" style="background: #6EC3F5;"></span>
+                  <span class="palette-dot" style="background: #52D681;"></span>
+                </div>
+              </div>
+
+              <div class="spec-metrics-grid">
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">AI+UI</span>
+                  <span class="spec-metric-tag" data-i18n-zh="Figma 转交互网页" data-i18n-en="FIGMA TO WEB">Figma 转交互网页</span>
+                </div>
+                <div class="spec-metric-item">
+                  <span class="spec-metric-num">100%</span>
+                  <span class="spec-metric-tag" data-i18n-zh="GitHub Pages 上线" data-i18n-en="LIVE DEPLOY">GitHub Pages 上线</span>
+                </div>
+              </div>
+
+              <div class="spec-tags-wrap">
+                <span class="spec-mini-pill">FIGMA UI</span>
+                <span class="spec-mini-pill">VIBE CODING</span>
+                <span class="spec-mini-pill">GITHUB PAGES</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="help-summary-columns">
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="没有深厚编程基础，但想通过 Figma + AI (Vibe Coding) 搭建个人网站并发布上线的同学。" data-i18n-en="Students who want to build and publish a personal website using Figma + AI (Vibe Coding).">
+                没有深厚编程基础，但想通过 Figma + AI (Vibe Coding) 搭建个人网站并发布上线的同学。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="线上指导如何编写结构化 AI 提示词（Prompt）、调试 HTML/CSS 排版动画与部署到 GitHub Pages。" data-i18n-en="Online guidance on writing structured AI prompts, refining HTML/CSS layouts, and deploying to GitHub Pages.">
+                线上指导如何编写结构化 AI 提示词（Prompt）、调试 HTML/CSS 排版动画与部署到 GitHub Pages。
+              </p>
+            </div>
+
+            <div class="help-summary-col">
+              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
+              <p class="help-summary-col-desc" data-i18n-zh="每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或网页问题即可。" data-i18n-en="45–60 min weekly. Email your Figma design or webpage question to shawnfeng@moonshotacademy.cn.">
+                每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或问题即可。
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card-footer">
+            <button type="button" class="help-learn-more-btn" data-open-help-modal="digital" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
+              了解更多 / 查看完整详情 →
+            </button>
+            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5BVibe%20Coding%20%E5%BB%BA%E7%AB%99%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
+              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================== UNIFIED CANVAS FOOTER ==================== -->
     <footer class="page-footer">
       <span>SHAWN FENG</span>
       <span>PORTFOLIO / 2026</span>
     </footer>
+  </main>
+
+  <!-- ==========================================================================
+       DJI Fly 3D Geometric FPV Flight Modal (#drone-fpv-modal)
+       ========================================================================== -->
+  <div id="drone-fpv-modal" class="drone-fpv-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="drone-fpv-card" id="drone-fpv-card">
+      <div class="fpv-viewport" id="fpv-viewport">
+        <!-- 3D Geometric Canvas -->
+        <canvas id="fpv-3d-canvas" class="fpv-3d-canvas"></canvas>
+
+        <!-- Camera Shutter Flash Overlay -->
+        <div class="fpv-shutter-flash" id="fpv-shutter-flash"></div>
+
+        <!-- 1. TOP HUD STATUS BAR -->
+        <header class="dji-top-hud">
+          <div class="dji-top-left">
+            <div class="dji-flight-status" id="fpv-flight-status">
+              <span class="fpv-live-dot" id="fpv-live-dot"></span>
+              <span class="dji-status-text" id="fpv-status-text" data-i18n-zh="正常飞行 (GPS)" data-i18n-en="In Flight (GPS)">正常飞行 (GPS)</span>
+            </div>
+            <!-- 3P / 1P View Switcher -->
+            <button type="button" class="dji-view-toggle-btn" id="fpv-view-btn" title="按 C 键切换第一人称 / 第三人称视角">
+              <span class="dji-view-key">C</span>
+              <span id="fpv-view-label" data-i18n-zh="第三人称" data-i18n-en="3RD PERSON">第三人称</span>
+            </button>
+
+            <!-- Consolidated Environment & Weather Dropdown Trigger -->
+            <div class="dji-env-dropdown-wrap" id="fpv-env-dropdown-wrap">
+              <button type="button" class="dji-env-trigger-btn" id="fpv-env-toggle-btn" aria-expanded="false" title="点击展开时间、天气与季节设置">
+                <span id="fpv-env-summary" data-i18n-zh="🌇 环境与天气 ▾" data-i18n-en="🌇 ENV &amp; WEATHER ▾">🌇 环境与天气 ▾</span>
+              </button>
+
+              <button type="button" class="dji-env-random-btn" id="fpv-env-random-btn" title="随机切换天气、时间与季节">
+                <span data-i18n-zh="🎲 随机天气" data-i18n-en="🎲 RANDOM">🎲 随机天气</span>
+              </button>
+
+              <!-- Popover Panel -->
+              <div class="dji-env-popover" id="fpv-env-popover" aria-hidden="true">
+                <div class="dji-env-group" role="group" aria-label="时间切换">
+                  <span class="dji-env-label" data-i18n-zh="时间" data-i18n-en="TIME">时间</span>
+                  <div class="dji-env-btns">
+                    <button type="button" class="dji-env-btn is-active" data-env-type="time" data-env-val="day" data-i18n-zh="白天" data-i18n-en="Day">白天</button>
+                    <button type="button" class="dji-env-btn" data-env-type="time" data-env-val="sunset" data-i18n-zh="黄昏" data-i18n-en="Dusk">黄昏</button>
+                    <button type="button" class="dji-env-btn" data-env-type="time" data-env-val="night" data-i18n-zh="夜晚" data-i18n-en="Night">夜晚</button>
+                  </div>
+                </div>
+
+                <div class="dji-env-group" role="group" aria-label="天气切换">
+                  <span class="dji-env-label" data-i18n-zh="天气" data-i18n-en="WEATHER">天气</span>
+                  <div class="dji-env-btns">
+                    <button type="button" class="dji-env-btn is-active" data-env-type="weather" data-env-val="clear" data-i18n-zh="晴朗" data-i18n-en="Clear">晴朗</button>
+                    <button type="button" class="dji-env-btn" data-env-type="weather" data-env-val="fog" data-i18n-zh="体积雾" data-i18n-en="Fog">体积雾</button>
+                    <button type="button" class="dji-env-btn" data-env-type="weather" data-env-val="rain" data-i18n-zh="下雨" data-i18n-en="Rain">下雨</button>
+                    <button type="button" class="dji-env-btn" data-env-type="weather" data-env-val="snow" data-i18n-zh="大雪" data-i18n-en="Snow">大雪</button>
+                  </div>
+                </div>
+
+                <div class="dji-env-group" role="group" aria-label="季节切换">
+                  <span class="dji-env-label" data-i18n-zh="季节" data-i18n-en="SEASON">季节</span>
+                  <div class="dji-env-btns">
+                    <button type="button" class="dji-env-btn is-active" data-env-type="season" data-env-val="summer" data-i18n-zh="夏" data-i18n-en="Summer">夏</button>
+                    <button type="button" class="dji-env-btn" data-env-type="season" data-env-val="autumn" data-i18n-zh="秋" data-i18n-en="Autumn">秋</button>
+                    <button type="button" class="dji-env-btn" data-env-type="season" data-env-val="winter" data-i18n-zh="冬" data-i18n-en="Winter">冬</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Geometric Maps Switcher -->
+          <div class="dji-top-center">
+            <div class="dji-scene-switch" role="tablist" aria-label="3D 场景切换">
+              <button type="button" class="dji-scene-tab is-active" role="tab" aria-selected="true" data-scene="city" data-i18n-zh="城市 CBD" data-i18n-en="CITY CBD">
+                🏙️ <span class="scene-tab-text">城市 CBD</span>
+              </button>
+              <button type="button" class="dji-scene-tab" role="tab" aria-selected="false" data-scene="mountain" data-i18n-zh="山川峡谷" data-i18n-en="MOUNTAIN">
+                ⛰️ <span class="scene-tab-text">山川峡谷</span>
+              </button>
+              <button type="button" class="dji-scene-tab" role="tab" aria-selected="false" data-scene="grassland" data-i18n-zh="广袤草原" data-i18n-en="GRASSLAND">
+                🌾 <span class="scene-tab-text">广袤草原</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Telemetry & Exit -->
+          <div class="dji-top-right">
+            <div class="dji-telemetry-pill">
+              <span class="dji-tel-item"><span class="dji-tel-icon">🛰️</span> 24</span>
+              <span class="dji-tel-item"><span class="dji-tel-icon">📶</span> RC 98%</span>
+              <span class="dji-tel-item dji-battery-val"><span class="dji-tel-icon">🔋</span> 94%</span>
+            </div>
+            <button type="button" class="dji-hud-exit-btn" id="fpv-modal-close" aria-label="退出飞行" title="退出飞行 (Esc)">&times;</button>
+          </div>
+        </header>
+
+        <!-- 2. CENTRAL CROSSHAIR & CRASH OVERLAY -->
+        <div class="dji-center-crosshair">
+          <svg class="dji-crosshair-svg" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="14" fill="none" stroke="rgba(255,255,255,0.72)" stroke-width="1.2" stroke-dasharray="2 3" />
+            <circle cx="80" cy="80" r="1.5" fill="#4ADE80" />
+            <line x1="80" y1="20" x2="80" y2="44" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" />
+            <line x1="80" y1="116" x2="80" y2="140" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" />
+            <line x1="20" y1="80" x2="44" y2="80" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" />
+            <line x1="116" y1="80" x2="140" y2="80" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" />
+            <g id="dji-horizon-group">
+              <line x1="50" y1="80" x2="68" y2="80" stroke="#4ADE80" stroke-width="2" />
+              <line x1="92" y1="80" x2="110" y2="80" stroke="#4ADE80" stroke-width="2" />
+              <polyline points="72,76 80,72 88,76" fill="none" stroke="#4ADE80" stroke-width="1.8" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- Crash Alert Banner & Reset Button -->
+        <div class="dji-crash-banner" id="dji-crash-banner" aria-live="assertive">
+          <div class="dji-crash-title">⚠️ 无人机已碰撞坠毁 / COLLISION CRASH</div>
+          <p class="dji-crash-desc">无人机与障碍物发生碰撞并损毁。电机已紧急切断并迫降地面。</p>
+          <button type="button" class="dji-crash-reset-btn" id="dji-crash-reset-btn">
+            🔄 重启无人机并重新起飞 (R)
+          </button>
+        </div>
+
+        <!-- 3. TOP COMPASS TAPE -->
+        <div class="dji-compass-strip">
+          <div class="dji-compass-track" id="dji-compass-track">
+            <span>N</span><span>·</span><span>·</span><span>E</span><span>·</span><span>·</span><span>S</span><span>·</span><span>·</span><span>W</span><span>·</span><span>·</span><span>N</span>
+          </div>
+          <div class="dji-compass-pointer">▲</div>
+          <span class="dji-heading-readout" id="dji-heading-val">000°</span>
+        </div>
+
+        <!-- 4. RIGHT GIMBAL PITCH GAUGE -->
+        <div class="dji-gimbal-gauge-pure" id="dji-gimbal-gauge">
+          <div class="dji-gimbal-ticks">
+            <span class="gimbal-tick tick-p30">+30°</span>
+            <span class="gimbal-tick tick-0">0°</span>
+            <span class="gimbal-tick tick-m45">-45°</span>
+            <span class="gimbal-tick tick-m90">-90°</span>
+          </div>
+          <div class="dji-gimbal-line-track">
+            <div class="dji-gimbal-line-pointer" id="dji-gimbal-pointer">
+              <span class="gimbal-pointer-arrow">◀</span>
+              <span class="gimbal-pointer-deg" id="dji-gimbal-deg">0°</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. BOTTOM TELEMETRY BAR & ATTITUDE RADAR -->
+        <footer class="dji-bottom-hud">
+          <div class="dji-telemetry-group">
+            <div class="dji-tel-metric">
+              <span class="metric-label">H</span>
+              <span class="metric-value" id="fpv-alt-val">18.5</span>
+              <span class="metric-unit">M</span>
+            </div>
+            <div class="dji-tel-metric">
+              <span class="metric-label">V.S</span>
+              <span class="metric-value" id="fpv-vs-val">0.0</span>
+              <span class="metric-unit">M/S</span>
+            </div>
+            <div class="dji-tel-metric">
+              <span class="metric-label">D</span>
+              <span class="metric-value" id="fpv-dist-val">32.4</span>
+              <span class="metric-unit">M</span>
+            </div>
+            <div class="dji-tel-metric">
+              <span class="metric-label">H.S</span>
+              <span class="metric-value" id="fpv-spd-val">0.0</span>
+              <span class="metric-unit">M/S</span>
+            </div>
+          </div>
+
+          <!-- Attitude Ball -->
+          <div class="dji-radar-pod">
+            <div class="dji-radar-circle">
+              <div class="dji-radar-compass" id="dji-radar-compass">
+                <span class="radar-n">N</span>
+              </div>
+              <div class="dji-radar-home" id="dji-radar-home">H</div>
+              <div class="dji-radar-drone" id="dji-radar-drone">
+                <div class="dji-drone-wedge">▲</div>
+                <div class="dji-radar-horizon" id="dji-radar-horizon"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dji-camera-feed-meta">
+            <span class="dji-meta-tag">4K / 60FPS</span>
+            <span class="dji-meta-tag">EV 0.0</span>
+            <span class="dji-meta-tag" id="dji-pitch-readout">PITCH 0°</span>
+            <span class="dji-meta-tag" id="dji-roll-readout">ROLL 0°</span>
+          </div>
+        </footer>
+
+        <!-- Mobile Virtual Touch Joysticks -->
+        <div class="fpv-mobile-touch-zones" id="fpv-mobile-touch-zones">
+          <div class="fpv-touch-stick fpv-left-stick" id="fpv-left-stick">
+            <div class="fpv-stick-knob" id="fpv-left-knob"></div>
+            <span class="fpv-stick-label">↑ 高度 / 偏航 ⟲⟳</span>
+          </div>
+          <div class="fpv-touch-stick fpv-right-stick" id="fpv-right-stick">
+            <div class="fpv-stick-knob" id="fpv-right-knob"></div>
+            <span class="fpv-stick-label">↑ 前进 / 侧移 ⇄</span>
+          </div>
+        </div>
+
+        <!-- 6. BOTTOM-RIGHT CONTROLS GUIDE TRIGGER -->
+        <button type="button" class="dji-guide-btn" id="dji-guide-btn" aria-expanded="false" title="点击查看操控方式">
+          <span>🕹️ 操控说明</span>
+        </button>
+
+        <div class="dji-guide-popover" id="dji-guide-popover" aria-hidden="true">
+          <div class="dji-guide-header">
+            <h4>🕹️ DJI 模拟器操控指南</h4>
+            <button type="button" class="dji-guide-close" id="dji-guide-close">&times;</button>
+          </div>
+          <div class="dji-guide-body">
+            <div class="dji-guide-row">
+              <span class="dji-keycap">W</span><span class="dji-keycap">S</span>
+              <span class="dji-key-desc">无人机前进 / 后退（俯仰推进）</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">A</span><span class="dji-keycap">D</span>
+              <span class="dji-key-desc">无人机左平移 / 右平移（横滚横移）</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">↑</span><span class="dji-keycap">↓</span>
+              <span class="dji-key-desc">油门控制：上升升高 / 下降下降</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">Q</span><span class="dji-keycap">E</span>
+              <span class="dji-key-desc">机头偏航旋转：左转航向 / 右转航向</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">C</span>
+              <span class="dji-key-desc">切换视角：第一人称 (1P) / 第三人称 (3P)</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">滚轮</span>
+              <span class="dji-key-desc">云台俯仰角度微调 (+30° ~ -90°)</span>
+            </div>
+            <div class="dji-guide-row">
+              <span class="dji-keycap">手机触控</span>
+              <span class="dji-key-desc">屏幕左右双虚拟摇杆，直接拇指推杆飞行</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Photo Inspection Lightbox (#project-lightbox)
+       ========================================================================== -->
+  <div id="project-lightbox" class="lightbox-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox-content is-horizontal" id="lightbox-content">
+      <div class="lightbox-img-wrap">
+        <img class="lightbox-img" src="" alt="Expanded Photography View">
+      </div>
+      <div class="lightbox-details">
+        <div class="lightbox-meta-header">
+          <div class="lightbox-header-left">
+            <span class="lightbox-series-tag" id="lightbox-series-tag">SERIES 01 / HORIZONTAL</span>
+            <div class="lightbox-dual-switcher" id="lightbox-dual-switcher" hidden>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="a" id="lightbox-variant-a">A</button>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="b" id="lightbox-variant-b">B</button>
+            </div>
+          </div>
+          <div class="lightbox-header-right">
+            <span class="lightbox-location-meta" id="lightbox-location-meta">SHAWN FENG PHOTOGRAPHY</span>
+            <div class="lightbox-controls">
+              <button class="lightbox-btn lightbox-prev" type="button" aria-label="上一张作品" title="上一张 (←)">←</button>
+              <button class="lightbox-btn lightbox-next" type="button" aria-label="下一张作品" title="下一张 (→)">→</button>
+              <button class="lightbox-btn lightbox-close" type="button" aria-label="关闭窗口" title="关闭 (Esc)">&times;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lightbox-bio-scroll" id="lightbox-bio-scroll" tabindex="0" aria-label="作品中英文简介（滚轮可上下滚动查看）">
+          <h3 class="lightbox-title"></h3>
+          <p class="lightbox-subtitle"></p>
+          <div class="lightbox-divider"></div>
+          <p class="lightbox-bio lightbox-bio-cn" id="lightbox-bio"></p>
+          <p class="lightbox-bio lightbox-bio-en" id="lightbox-bio-en"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Help Photo Preview Lightbox (#help-photo-lightbox)
+       ========================================================================== -->
+  <div id="help-photo-lightbox" class="help-photo-lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="help-photo-lightbox-inner" id="help-photo-lightbox-inner">
+      <button type="button" class="help-photo-lightbox-close" id="help-photo-lightbox-close" aria-label="关闭图片">&times;</button>
+      <img id="help-photo-lightbox-img" class="help-photo-lightbox-img" src="" alt="Expanded View">
+      <div id="help-photo-lightbox-caption" class="help-photo-lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Help Details Modal (#help-detail-modal)
+       ========================================================================== -->
+  <div id="help-detail-modal" class="help-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="help-modal-card" id="help-modal-card">
+      <div class="help-modal-header">
+        <div>
+          <span class="help-modal-tag" id="help-modal-tag">PROPOSAL 01 / ONLINE GUIDANCE</span>
+          <h3 class="help-modal-title" id="help-modal-title">摄影与后期调色</h3>
+        </div>
+        <button type="button" class="help-modal-close" id="help-modal-close" aria-label="关闭详情窗口">&times;</button>
+      </div>
+
+      <div class="help-modal-body" id="help-modal-body"></div>
+
+      <div class="help-modal-footer">
+        <span class="help-modal-email-label">✉️ shawnfeng@moonshotacademy.cn</span>
+        <button type="button" class="help-copy-btn" id="help-modal-email-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=Hi%20Shawn%EF%BC%81">
+          ✉ 发邮件向我提问 / 复制邮箱 ↗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy Success Toast -->
+  <div id="help-copy-toast" class="help-toast" role="status" aria-live="polite">
+    ✓ 已复制邮箱地址 shawnfeng@moonshotacademy.cn！欢迎随时发邮件获取线上指导
   </div>
 
   <script src="site.js"></script>

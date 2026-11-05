@@ -1379,3 +1379,507 @@ body.is-intro-stage-hold.home-page .hero-tagline {
     bottom: 24px;
   }
 }
+
+/* ==========================================================================
+   Unified Continuous Single-Canvas Architecture & Mobile Responsive Styles
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body.unified-canvas-page {
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(260deg, #08090A 5%, #162533 55%, #596470 100%);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Floating Sticky Top Liquid Glass Navigation */
+.unified-canvas-page .glass-nav {
+  position: sticky;
+  top: 20px;
+  z-index: 100;
+  max-width: 1320px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Continuous Canvas Stream & Sections */
+.canvas-stream {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-section {
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  scroll-margin-top: 96px;
+}
+
+/* Section 1: Home Section */
+.canvas-section.home-section {
+  min-height: calc(100vh - 84px);
+  padding: 0 40px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+/* Section 2: About Section */
+.canvas-section.about-section {
+  min-height: calc(100vh - 96px);
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Section 3: Photography Work Section */
+.canvas-section.work-section {
+  min-height: calc(100vh - 96px);
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+/* Section 4: How Can I Help Section */
+.canvas-section.help-section {
+  min-height: calc(100vh - 96px);
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+/* Subtle separator between continuous sections */
+.canvas-section + .canvas-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Home Section Scroll Prompt */
+.home-scroll-prompt {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgba(241, 240, 235, 0.65);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.28s ease;
+}
+
+.home-scroll-prompt:hover {
+  color: var(--accent-copper);
+}
+
+.home-scroll-prompt .scroll-mouse-icon {
+  width: 18px;
+  height: 28px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(241, 240, 235, 0.5);
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.home-scroll-prompt .scroll-mouse-dot {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--accent-copper);
+  margin-top: 5px;
+  animation: mouseScrollDot 1.6s infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes mouseScrollDot {
+  0% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+/* Mobile Virtual Touch Controls for 3D DJI Drone Simulation */
+.fpv-mobile-touch-zones {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  height: 120px;
+  display: none;
+  justify-content: space-between;
+  padding: 0 20px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.fpv-touch-stick {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(8px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.fpv-stick-knob {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFFFF 0%, rgba(240, 123, 50, 0.95) 100%);
+  box-shadow: 0 0 14px rgba(240, 123, 50, 0.8);
+  position: absolute;
+  transform: translate(0, 0);
+  pointer-events: none;
+  transition: transform 0.05s ease-out;
+}
+
+.fpv-stick-label {
+  position: absolute;
+  bottom: -20px;
+  font-size: 8.5px;
+  font-weight: 600;
+  color: rgba(241, 240, 235, 0.75);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Comprehensive Mobile Adaptation (Screens <= 768px & <= 480px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Navigation Bar */
+  .unified-canvas-page .glass-nav {
+    position: sticky;
+    top: 8px;
+    height: 52px;
+    padding: 0 12px;
+    margin: 0 8px 12px 8px;
+    border-radius: 18px;
+  }
+
+  .nav-brand {
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-link {
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    padding: 4px 6px;
+  }
+
+  .nav-lang-btn {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  /* Canvas Sections */
+  .canvas-section {
+    padding: 52px 16px;
+    scroll-margin-top: 68px;
+  }
+
+  /* Home Section */
+  .canvas-section.home-section {
+    min-height: calc(100svh - 68px);
+    padding: 10px 16px 36px;
+  }
+
+  .home-editorial-layer {
+    padding: 0;
+  }
+
+  .home-main-block {
+    padding: 0;
+  }
+
+  .hero-titles {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .hero-title-cn {
+    font-size: clamp(42px, 12vw, 68px);
+    letter-spacing: -1px;
+  }
+
+  .hero-title-en {
+    font-size: clamp(26px, 7.5vw, 42px);
+    letter-spacing: 1.5px;
+  }
+
+  .hero-divider {
+    margin: 12px 0 18px;
+  }
+
+  .hero-tagline {
+    font-size: clamp(14px, 4.2vw, 18px);
+    line-height: 1.25;
+  }
+
+  .home-subject-photo {
+    object-position: 78% bottom;
+    opacity: 0.9;
+  }
+
+  .home-vertical-rule {
+    display: none;
+  }
+
+  /* About Section */
+  .about-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 10px 0;
+  }
+
+  .about-headline {
+    font-size: clamp(30px, 8vw, 44px);
+    margin-bottom: 20px;
+    line-height: 1.14;
+  }
+
+  .perspective-glass-wrap {
+    height: auto;
+    min-height: 52px;
+    padding: 4px 14px;
+    margin-left: 0;
+    margin-top: 6px;
+    border-radius: 14px;
+    display: inline-flex;
+    max-width: 100%;
+  }
+
+  .perspective-text {
+    font-size: clamp(26px, 7.2vw, 42px);
+  }
+
+  .perspective-glass-wrap::before,
+  .perspective-glass-wrap::after {
+    font-size: clamp(26px, 7.2vw, 42px);
+    left: 14px;
+  }
+
+  .about-bio {
+    font-size: 15px;
+    line-height: 1.68;
+    max-width: 100%;
+    margin-top: 14px;
+  }
+
+  .profile-card-wrapper {
+    max-width: 320px;
+    margin: 0 auto;
+    justify-self: center;
+  }
+
+  .badge-age {
+    font-size: 32px;
+  }
+
+  .badge-city {
+    font-size: 16px;
+  }
+
+  .badge-school {
+    font-size: 11px;
+  }
+
+  /* Photography Work Section */
+  .work-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .work-header-title {
+    font-size: clamp(26px, 7vw, 38px);
+  }
+
+  .gallery-slide-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+  }
+
+  .projects-gallery-section {
+    margin: 0 -16px;
+  }
+
+  .projects-gallery-viewport {
+    padding: 14px 0 20px;
+  }
+
+  .projects-gallery-track {
+    gap: 16px;
+    padding-left: 20px;
+  }
+
+  .project-card {
+    height: 270px;
+  }
+
+  .project-card-image {
+    height: 205px;
+  }
+
+  .project-title {
+    font-size: 13px;
+  }
+
+  .project-subtitle {
+    font-size: 9px;
+  }
+
+  /* How Can I Help Section */
+  .help-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .help-header-title {
+    font-size: clamp(26px, 7vw, 38px);
+  }
+
+  .help-filter-group {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .help-filter-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .help-filter-btn {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
+  .help-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .help-card-title {
+    font-size: 20px;
+  }
+
+  .help-visual-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    height: auto;
+  }
+
+  .help-card-media {
+    height: 190px;
+    width: 100%;
+  }
+
+  .help-visual-spec-card {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .help-card-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .help-learn-more-btn,
+  .help-copy-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  /* FPV Drone Flight Modal on Mobile */
+  .drone-fpv-modal {
+    padding: 0;
+  }
+
+  .drone-fpv-card {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .fpv-mobile-touch-zones {
+    display: flex;
+  }
+
+  .dji-top-hud {
+    padding: 8px 10px;
+  }
+
+  .dji-flight-status {
+    padding: 4px 8px;
+  }
+
+  .dji-status-text {
+    font-size: 9.5px;
+  }
+
+  .dji-view-toggle-btn {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .dji-scene-tab {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  /* Footer */
+  .page-footer {
+    padding: 24px 16px;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
