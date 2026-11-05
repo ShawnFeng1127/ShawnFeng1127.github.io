@@ -102,20 +102,10 @@
        ========================================================================== -->
   <div id="drone-fpv-modal" class="drone-fpv-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="drone-fpv-card" id="drone-fpv-card">
-      <!-- Full-Screen Live Camera Viewport -->
+      <!-- Full-Screen 3D Third-Person Geometric Flight Viewport -->
       <div class="fpv-viewport" id="fpv-viewport">
-        <!-- 3D Perspective Aerial World Layer -->
-        <div class="fpv-world-plane" id="fpv-world-plane">
-          <img id="fpv-world-img" class="fpv-world-img" src="Project pictures/project 4a.jpg" alt="DJI Fly Aerial View">
-          <div class="fpv-cloud-stream" id="fpv-cloud-stream"></div>
-        </div>
-
-        <!-- DJI Rule-of-Thirds Gridlines -->
-        <div class="dji-gridlines" aria-hidden="true">
-          <span></span><span></span><span></span>
-          <span></span><span></span><span></span>
-          <span></span><span></span><span></span>
-        </div>
+        <!-- Real-Time 3D Minimalist Geometric Flight Canvas (Third-Person Drone + 3D World) -->
+        <canvas id="fpv-3d-canvas" class="fpv-3d-canvas"></canvas>
 
         <!-- Camera Shutter Flash Overlay -->
         <div class="fpv-shutter-flash" id="fpv-shutter-flash"></div>
@@ -157,40 +147,30 @@
           </div>
         </header>
 
-        <!-- ================= 2. LEFT DJI DOCK (Hover Reset & Aerial Locations) ================= -->
+        <!-- ================= 2. LEFT DJI DOCK (Hover Reset & 3 Minimalist 3D Scenes) ================= -->
         <aside class="dji-left-dock">
           <button type="button" class="dji-rth-btn" id="fpv-rth-btn" title="悬停归位 / 重置机位">
             <span class="dji-rth-icon">H</span>
-            <span class="dji-rth-label" data-i18n-zh="悬停复位" data-i18n-en="HOVER">悬停复位</span>
+            <span class="dji-rth-label" data-i18n-zh="返航复位" data-i18n-en="HOME RESET">返航复位</span>
           </button>
 
-          <div class="fpv-scenes-bar" role="tablist" aria-label="切换航拍机位">
-            <button type="button" class="fpv-scene-btn is-active" data-fpv-src="Project pictures/project 4a.jpg" data-fpv-alt="118">
-              01 · 西安中轴线
+          <div class="fpv-scenes-bar" role="tablist" aria-label="切换 3D 几何场景">
+            <button type="button" class="fpv-scene-btn is-active" data-fpv-scene="city" data-fpv-alt="45" data-i18n-zh="01 · 几何城市" data-i18n-en="01 · 3D CITY">
+              01 · 几何城市
             </button>
-            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/Project 2.jpg" data-fpv-alt="120">
-              02 · 甘肃丹霞
+            <button type="button" class="fpv-scene-btn" data-fpv-scene="mountain" data-fpv-alt="68" data-i18n-zh="02 · 几何山川" data-i18n-en="02 · 3D MOUNTAINS">
+              02 · 几何山川
             </button>
-            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 5.jpg" data-fpv-alt="96">
-              03 · 川西九寨沟
-            </button>
-            <button type="button" class="fpv-scene-btn" data-fpv-src="Project pictures/project 7.jpg" data-fpv-alt="105">
-              04 · 郑州龙湖
+            <button type="button" class="fpv-scene-btn" data-fpv-scene="grassland" data-fpv-alt="36" data-i18n-zh="03 · 几何草原" data-i18n-en="03 · 3D GRASSLAND">
+              03 · 几何草原
             </button>
           </div>
         </aside>
 
-        <!-- ================= 3. CENTER DJI RETICLE & ARTIFICIAL HORIZON ================= -->
+        <!-- ================= 3. SUBTLE HORIZON INDICATOR ================= -->
         <div class="fpv-center-reticle" aria-hidden="true">
           <div class="fpv-horizon-group" id="fpv-horizon-group">
-            <div class="fpv-pitch-rung fpv-pitch-up"><span>+15°</span><span>+15°</span></div>
             <div class="fpv-horizon-line"></div>
-            <div class="fpv-pitch-rung fpv-pitch-down"><span>-15°</span><span>-15°</span></div>
-          </div>
-          <div class="dji-center-cross">
-            <span class="dji-cross-h"></span>
-            <span class="dji-cross-v"></span>
-            <span class="dji-cross-box"></span>
           </div>
         </div>
 
@@ -367,7 +347,7 @@
             </div>
 
             <div class="dji-controls-footer">
-              <span class="dji-controls-tip" data-i18n-zh="提示：可在左侧切换 4 个真实航拍地点，顶部可切换 C 平稳 / N 普通 / S 运动三档速度" data-i18n-en="Tip: Switch between 4 aerial locations on the left, or toggle C / N / S flight speed modes at the top.">提示：可在左侧切换 4 个真实航拍地点，顶部可切换 C 平稳 / N 普通 / S 运动三档速度</span>
+              <span class="dji-controls-tip" data-i18n-zh="提示：左侧可切换「01 几何城市 / 02 几何山川 / 03 几何草原」三大立体 3D 场景，顶部可切换 C / N / S 三档速度" data-i18n-en="Tip: Switch between 01 3D City, 02 3D Mountains, and 03 3D Grassland on the left, or C / N / S flight modes at the top.">提示：左侧可切换「01 几何城市 / 02 几何山川 / 03 几何草原」三大立体 3D 场景，顶部可切换 C / N / S 三档速度</span>
               <button type="button" class="dji-controls-ok-btn" id="fpv-controls-ok" data-i18n-zh="开始飞行" data-i18n-en="RESUME FLIGHT">开始飞行</button>
             </div>
           </div>

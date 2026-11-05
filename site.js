@@ -1881,22 +1881,28 @@ function initHelpPageInteractions() {
 }
 
 /**
- * 8. DJI Fly / DJI RC Pro First-Person View (FPV) Interactive Flight Screen (#drone-fpv-modal)
+ * 8. DJI Fly 3D Third-Person Minimalist Geometric Flight Simulator (#drone-fpv-modal)
  *    - Opens when clicking the DJI Drone on the About Page
+ *    - Real-time 3D perspective flat-shaded geometric engine on #fpv-3d-canvas
+ *    - Third-person chase camera following a 3D geometric DJI quadcopter with 4 spinning 3D rotors
+ *    - 3 Minimalist 3D Geometric Scenes:
+ *        * 01 · 几何城市 (city)      — Architectural 3D skyscrapers, stepped towers, avenues & twin monuments
+ *        * 02 · 几何山川 (mountain)  — Low-poly faceted snow-capped peaks, danxia ridges & winding river canyon
+ *        * 03 · 几何草原 (grassland) — Rolling faceted emerald hills, geometric pine trees, stream & white yurts
  *    - Controls:
  *        * W / A / S / D -> Forward / Backward / Strafe Left / Strafe Right (前后左右)
  *        * Q / E         -> Yaw Rotate Left / Right (左右转向)
  *        * ↑ / ↓ Arrows  -> Climb / Descend Altitude (控制高低)
- *        * Dual virtual DJI RC joysticks + Gimbal pitch toggle + Shutter capture
  *        * Bottom-right button (#fpv-help-btn) opens the Drone Control Guide (#fpv-controls-modal)
  */
 function initDroneFpvCard() {
   const modal = document.getElementById('drone-fpv-modal');
   if (!modal) return;
 
+  const canvas = document.getElementById('fpv-3d-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+
   const closeBtn = document.getElementById('fpv-close-btn');
-  const worldPlane = document.getElementById('fpv-world-plane');
-  const worldImg = document.getElementById('fpv-world-img');
   const horizonGroup = document.getElementById('fpv-horizon-group');
   const compassTrack = document.getElementById('fpv-compass-track');
   const headingVal = document.getElementById('fpv-heading-val');
@@ -1926,15 +1932,15 @@ function initDroneFpvCard() {
   const gimbalBtn = document.getElementById('fpv-gimbal-btn');
   const shutterBtn = document.getElementById('fpv-shutter-btn');
 
-  // Bottom-right "How to Control Drone" button & modal
   const helpBtn = document.getElementById('fpv-help-btn');
   const controlsModal = document.getElementById('fpv-controls-modal');
   const controlsCloseBtn = document.getElementById('fpv-controls-close');
   const controlsOkBtn = document.getElementById('fpv-controls-ok');
 
   let isActive = false;
-  let flightMode = 'normal'; // cine | normal | sport
-  const modeMultipliers = { cine: 0.55, normal: 1.0, sport: 1.65 };
+  let activeSceneKey = 'city'; // 'city' | 'mountain' | 'grassland'
+  let flightMode = 'normal';   // 'cine' | 'normal' | 'sport'
+  const modeMultipliers = { cine: 0.6, normal: 1.0, sport: 1.65 };
 
   // Normalized joystick inputs (-1 to +1)
   let leftX = 0;  // Yaw rate (Q/E)
@@ -1942,22 +1948,599 @@ function initDroneFpvCard() {
   let rightX = 0; // Roll / Strafe Left-Right (A/D)
   let rightY = 0; // Pitch / Forward-Backward (W/S)
 
-  // Integrated flight state
-  let currentRoll = 0;
-  let currentPitch = 0;
-  let headingDeg = 35;
-  let altitude = 118.0;
-  let distance = 245.0;
-  let panX = 0;
-  let panY = 0;
-  let zoomScale = 1.12;
+  // 3D Drone World State
+  const WRAP_SIZE = 760;
+  const HALF_WRAP = WRAP_SIZE / 2;
+  let droneX = 0;
+  let droneY = 45; // Altitude H (m)
+  let droneZ = 0;
+  let vxWorld = 0;
+  let vzWorld = 0;
+  let vyWorld = 0;
 
-  const gimbalPresets = [-35, -90, 0];
+  let headingDeg = 0;
+  let currentRoll = 0;  // degrees
+  let currentPitch = 0; // degrees
+  let rotorPhase = 0;
+
+  const gimbalPresets = [-25, -45, -12];
   let gimbalIndex = 0;
   let captureTimer = null;
-
   const keysPressed = {};
 
+  // =========================================================================
+  // 3D Geometry Builders (Minimalist Low-Poly Architectural & Natural Meshes)
+  // =========================================================================
+  function createBoxFaces(cx, baseY, cz, w, h, d, sideRgb, topRgb, accentRoof) {
+    const hw = w / 2;
+    const hd = d / 2;
+    const y0 = baseY;
+    const y1 = baseY + h;
+
+    const v000 = [cx - hw, y0, cz - hd];
+    const v100 = [cx + hw, y0, cz - hd];
+    const v101 = [cx + hw, y0, cz + hd];
+    const v001 = [cx - hw, y0, cz + hd];
+
+    const v010 = [cx - hw, y1, cz - hd];
+    const v110 = [cx + hw, y1, cz - hd];
+    const v111 = [cx + hw, y1, cz + hd];
+    const v011 = [cx - hw, y1, cz + hd];
+
+    const faces = [
+      { verts: [v001, v101, v111, v011], rgb: sideRgb }, // +Z Front
+      { verts: [v100, v000, v010, v110], rgb: sideRgb }, // -Z Back
+      { verts: [v101, v100, v110, v111], rgb: sideRgb }, // +X Right
+      { verts: [v000, v001, v011, v010], rgb: sideRgb }, // -X Left
+      { verts: [v011, v111, v110, v010], rgb: topRgb || sideRgb } // +Y Top
+    ];
+
+    if (accentRoof) {
+      const rw = hw * 0.62;
+      const rd = hd * 0.62;
+      const ry = y1 + 0.35;
+      faces.push({
+        verts: [
+          [cx - rw, ry, cz + rd],
+          [cx + rw, ry, cz + rd],
+          [cx + rw, ry, cz - rd],
+          [cx - rw, ry, cz - rd]
+        ],
+        rgb: accentRoof,
+        emissive: 0.25,
+        doubleSided: true
+      });
+    }
+    return faces;
+  }
+
+  function createPyramidFaces(cx, baseY, cz, radius, h, sides, baseRgb, capRgb, capRatio, rotOffset) {
+    const faces = [];
+    const rot = rotOffset || 0;
+    const ring0 = [];
+    for (let i = 0; i < sides; i++) {
+      const a = rot + (i / sides) * Math.PI * 2;
+      ring0.push([cx + Math.cos(a) * radius, baseY, cz + Math.sin(a) * radius]);
+    }
+    const apex = [cx, baseY + h, cz];
+
+    if (capRgb && capRatio && capRatio > 0 && capRatio < 1) {
+      const splitRatio = 1 - capRatio;
+      const ringMid = ring0.map((v) => [
+        v[0] + (apex[0] - v[0]) * splitRatio,
+        v[1] + (apex[1] - v[1]) * splitRatio,
+        v[2] + (apex[2] - v[2]) * splitRatio
+      ]);
+      for (let i = 0; i < sides; i++) {
+        const next = (i + 1) % sides;
+        faces.push({
+          verts: [ring0[next], ring0[i], ringMid[i], ringMid[next]],
+          rgb: baseRgb
+        });
+        faces.push({
+          verts: [ringMid[next], ringMid[i], apex],
+          rgb: capRgb
+        });
+      }
+    } else {
+      for (let i = 0; i < sides; i++) {
+        const next = (i + 1) % sides;
+        faces.push({
+          verts: [ring0[next], ring0[i], apex],
+          rgb: baseRgb
+        });
+      }
+    }
+    return faces;
+  }
+
+  function createPrismFaces(cx, baseY, cz, radius, h, sides, sideRgb, topRgb) {
+    const faces = [];
+    const bot = [];
+    const top = [];
+    for (let i = 0; i < sides; i++) {
+      const a = (i / sides) * Math.PI * 2;
+      const x = cx + Math.cos(a) * radius;
+      const z = cz + Math.sin(a) * radius;
+      bot.push([x, baseY, z]);
+      top.push([x, baseY + h, z]);
+    }
+    for (let i = 0; i < sides; i++) {
+      const next = (i + 1) % sides;
+      faces.push({
+        verts: [bot[next], bot[i], top[i], top[next]],
+        rgb: sideRgb
+      });
+    }
+    faces.push({
+      verts: top,
+      rgb: topRgb || sideRgb
+    });
+    return faces;
+  }
+
+  // Deterministic pseudo-random generator for clean geometric layout
+  function makeRng(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 1664525 + 1013904223) % 4294967296;
+      return s / 4294967296;
+    };
+  }
+
+  // Build the 3 Minimalist 3D Scenes
+  function buildScenes() {
+    const scenes = {};
+
+    // =======================================================================
+    // SCENE 01: 几何城市 (Minimalist Architectural 3D Metropolis)
+    // =======================================================================
+    const cityObjects = [];
+    const rngCity = makeRng(104729);
+    const cityPalettes = [
+      { side: [56, 74, 96], top: [88, 112, 140], accent: [240, 123, 50] },
+      { side: [72, 86, 104], top: [110, 128, 150], accent: [56, 189, 248] },
+      { side: [44, 58, 76], top: [74, 94, 118], accent: null },
+      { side: [92, 102, 116], top: [138, 150, 166], accent: [245, 185, 135] }
+    ];
+
+    // Grid of architectural towers leaving a grand central boulevard along X=0 and Z=0
+    for (let gx = -320; gx <= 320; gx += 64) {
+      for (let gz = -320; gz <= 320; gz += 64) {
+        if (Math.abs(gx) < 42 || Math.abs(gz) < 42) continue;
+        const jx = gx + (rngCity() - 0.5) * 14;
+        const jz = gz + (rngCity() - 0.5) * 14;
+        const w = 18 + rngCity() * 18;
+        const d = 18 + rngCity() * 18;
+        const distCenter = Math.hypot(gx, gz);
+        const h =
+          distCenter < 160
+            ? 38 + rngCity() * 68
+            : 18 + rngCity() * 44;
+        const pal = cityPalettes[Math.floor(rngCity() * cityPalettes.length)];
+        const faces = createBoxFaces(jx, 0, jz, w, h, d, pal.side, pal.top, pal.accent);
+
+        // Stepped upper tier on tall skyscrapers
+        if (h > 58) {
+          const h2 = 14 + rngCity() * 20;
+          faces.push(
+            ...createBoxFaces(
+              jx,
+              h,
+              jz,
+              w * 0.62,
+              h2,
+              d * 0.62,
+              pal.top,
+              [175, 190, 208],
+              [240, 123, 50]
+            )
+          );
+          if (rngCity() > 0.45) {
+            faces.push(
+              ...createPyramidFaces(
+                jx,
+                h + h2,
+                jz,
+                w * 0.25,
+                16,
+                4,
+                [240, 123, 50],
+                null,
+                0,
+                Math.PI / 4
+              )
+            );
+          }
+        }
+        cityObjects.push({ cx: jx, cz: jz, faces });
+      }
+    }
+
+    // Central Boulevard Geometric Ring Gateways
+    [-180, 0, 180].forEach((zp) => {
+      const gateFaces = [
+        ...createBoxFaces(-26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120]),
+        ...createBoxFaces(26, 0, zp, 7, 54, 7, [215, 125, 65], [245, 175, 120]),
+        ...createBoxFaces(0, 48, zp, 60, 7, 7, [235, 145, 80], [255, 200, 150], [56, 189, 248])
+      ];
+      cityObjects.push({ cx: 0, cz: zp, faces: gateFaces });
+    });
+
+    // Floating Minimalist 3D Clouds
+    for (let i = 0; i < 14; i++) {
+      const cx = (rngCity() - 0.5) * 680;
+      const cz = (rngCity() - 0.5) * 680;
+      const cy = 115 + rngCity() * 40;
+      const cw = 28 + rngCity() * 26;
+      const cd = 18 + rngCity() * 18;
+      cityObjects.push({
+        cx,
+        cz,
+        faces: createBoxFaces(cx, cy, cz, cw, 5, cd, [195, 210, 228], [235, 242, 250])
+      });
+    }
+
+    scenes.city = {
+      skyTop: '#0A1320',
+      skyMid: '#182C46',
+      skyHorizon: '#C47B54',
+      groundFill: '#0F1824',
+      gridStroke: 'rgba(120, 165, 210, 0.16)',
+      roadColor: [24, 38, 54],
+      roadStripe: [240, 123, 50],
+      fogRgb: [38, 56, 78],
+      objects: cityObjects
+    };
+
+    // =======================================================================
+    // SCENE 02: 几何山川 (Minimalist Low-Poly Mountains & Winding River Valley)
+    // =======================================================================
+    const mountainObjects = [];
+    const rngMtn = makeRng(202605);
+    const mtnPalettes = [
+      { base: [58, 78, 102], cap: [238, 244, 252] }, // Alpine Slate + Snow
+      { base: [158, 86, 62], cap: [232, 188, 156] }, // Danxia Ochre + Warm Crest
+      { base: [72, 92, 114], cap: [242, 247, 255] }, // High Peak + Snow Cap
+      { base: [122, 78, 70], cap: [218, 165, 138] }  // Terracotta Ridge
+    ];
+
+    // Winding River Tiles along the central canyon (|x| < 38)
+    for (let rz = -360; rz < 360; rz += 40) {
+      const curveX = Math.sin(rz * 0.012) * 28;
+      const nextCurveX = Math.sin((rz + 40) * 0.012) * 28;
+      const rw = 26;
+      mountainObjects.push({
+        cx: curveX,
+        cz: rz + 20,
+        faces: [
+          {
+            verts: [
+              [curveX - rw, 0.25, rz],
+              [curveX + rw, 0.25, rz],
+              [nextCurveX + rw, 0.25, rz + 40],
+              [nextCurveX - rw, 0.25, rz + 40]
+            ],
+            rgb: [42, 148, 186],
+            emissive: 0.24,
+            doubleSided: true
+          }
+        ]
+      });
+    }
+
+    // Low-Poly Faceted Mountain Peaks flanking both sides of the river canyon
+    for (let gx = -330; gx <= 330; gx += 66) {
+      for (let gz = -330; gz <= 330; gz += 66) {
+        const riverCenter = Math.sin(gz * 0.012) * 28;
+        if (Math.abs(gx - riverCenter) < 58) continue;
+
+        const mx = gx + (rngMtn() - 0.5) * 22;
+        const mz = gz + (rngMtn() - 0.5) * 22;
+        const radius = 32 + rngMtn() * 28;
+        const height = 46 + rngMtn() * 98;
+        const sides = rngMtn() > 0.45 ? 5 : 4;
+        const pal = mtnPalettes[Math.floor(rngMtn() * mtnPalettes.length)];
+        const capRatio = height > 82 ? 0.34 : height > 64 ? 0.22 : 0;
+
+        const faces = createPyramidFaces(
+          mx,
+          0,
+          mz,
+          radius,
+          height,
+          sides,
+          pal.base,
+          pal.cap,
+          capRatio,
+          rngMtn() * Math.PI
+        );
+        mountainObjects.push({ cx: mx, cz: mz, faces });
+      }
+    }
+
+    // Floating 3D Geometric Clouds among the peaks
+    for (let i = 0; i < 16; i++) {
+      const cx = (rngMtn() - 0.5) * 680;
+      const cz = (rngMtn() - 0.5) * 680;
+      const cy = 112 + rngMtn() * 42;
+      mountainObjects.push({
+        cx,
+        cz,
+        faces: createBoxFaces(
+          cx,
+          cy,
+          cz,
+          32 + rngMtn() * 24,
+          5.5,
+          20 + rngMtn() * 16,
+          [210, 224, 238],
+          [245, 249, 255]
+        )
+      });
+    }
+
+    scenes.mountain = {
+      skyTop: '#0C1828',
+      skyMid: '#214263',
+      skyHorizon: '#DF9468',
+      groundFill: '#17222D',
+      gridStroke: 'rgba(155, 190, 215, 0.13)',
+      roadColor: null,
+      fogRgb: [46, 68, 92],
+      objects: mountainObjects
+    };
+
+    // =======================================================================
+    // SCENE 03: 几何草原 (Minimalist 3D Steppe, Rolling Hills, Pines & Yurts)
+    // =======================================================================
+    const grassObjects = [];
+    const rngGrass = makeRng(309187);
+
+    // Meandering Steppe Stream
+    for (let sz = -360; sz < 360; sz += 40) {
+      const sx1 = Math.cos(sz * 0.01) * 36;
+      const sx2 = Math.cos((sz + 40) * 0.01) * 36;
+      const sw = 16;
+      grassObjects.push({
+        cx: sx1,
+        cz: sz + 20,
+        faces: [
+          {
+            verts: [
+              [sx1 - sw, 0.22, sz],
+              [sx1 + sw, 0.22, sz],
+              [sx2 + sw, 0.22, sz + 40],
+              [sx2 - sw, 0.22, sz + 40]
+            ],
+            rgb: [56, 178, 216],
+            emissive: 0.22,
+            doubleSided: true
+          }
+        ]
+      });
+    }
+
+    // Rolling Low-Poly Emerald Hills, Geometric Pine Trees & White Steppe Yurts
+    for (let gx = -320; gx <= 320; gx += 64) {
+      for (let gz = -320; gz <= 320; gz += 64) {
+        const streamX = Math.cos(gz * 0.01) * 36;
+        if (Math.abs(gx - streamX) < 36) continue;
+
+        const px = gx + (rngGrass() - 0.5) * 20;
+        const pz = gz + (rngGrass() - 0.5) * 20;
+        const roll = rngGrass();
+
+        if (roll < 0.36) {
+          // Low-poly rolling emerald hill
+          const r = 34 + rngGrass() * 26;
+          const h = 16 + rngGrass() * 26;
+          const hillColor =
+            rngGrass() > 0.5 ? [52, 118, 82] : [68, 134, 90];
+          grassObjects.push({
+            cx: px,
+            cz: pz,
+            faces: createPyramidFaces(px, 0, pz, r, h, 6, hillColor, [96, 162, 108], 0.35, rngGrass())
+          });
+        } else if (roll < 0.78) {
+          // Cluster of Minimalist 3D Geometric Pine Trees
+          const treeFaces = [
+            ...createBoxFaces(px, 0, pz, 2.6, 5, 2.6, [102, 74, 52], [102, 74, 52]),
+            ...createPyramidFaces(px, 4.5, pz, 8.5, 16, 5, [42, 106, 74], [66, 142, 96], 0.4, 0.3),
+            ...createPyramidFaces(px, 13, pz, 6.2, 13, 5, [54, 126, 86], [88, 166, 112], 0.45, 0.8)
+          ];
+          grassObjects.push({ cx: px, cz: pz, faces: treeFaces });
+        } else {
+          // Minimalist 3D White Steppe Yurt (蒙古包) with Copper Crown
+          const yurtFaces = [
+            ...createPrismFaces(px, 0, pz, 9.5, 6.5, 6, [232, 236, 240], [245, 247, 250]),
+            ...createPyramidFaces(px, 6.5, pz, 10.2, 6.2, 6, [242, 244, 248], [240, 123, 50], 0.32, 0)
+          ];
+          grassObjects.push({ cx: px, cz: pz, faces: yurtFaces });
+        }
+      }
+    }
+
+    // Golden-Hour Geometric Clouds
+    for (let i = 0; i < 14; i++) {
+      const cx = (rngGrass() - 0.5) * 680;
+      const cz = (rngGrass() - 0.5) * 680;
+      const cy = 105 + rngGrass() * 38;
+      grassObjects.push({
+        cx,
+        cz,
+        faces: createBoxFaces(
+          cx,
+          cy,
+          cz,
+          30 + rngGrass() * 22,
+          5,
+          18 + rngGrass() * 14,
+          [232, 226, 218],
+          [252, 248, 242]
+        )
+      });
+    }
+
+    scenes.grassland = {
+      skyTop: '#0F2436',
+      skyMid: '#285878',
+      skyHorizon: '#E0A458',
+      groundFill: '#1B3627',
+      gridStroke: 'rgba(130, 205, 150, 0.14)',
+      roadColor: null,
+      fogRgb: [42, 78, 64],
+      objects: grassObjects
+    };
+
+    return scenes;
+  }
+
+  const SCENES_3D = buildScenes();
+
+  // =========================================================================
+  // Build 3D Third-Person DJI Quadcopter Mesh in World Space
+  // =========================================================================
+  function buildDrone3DFaces(dx, dy, dz, yawRad, pitchRad, rollRad, spinPhase) {
+    // Transform local drone point (lx, ly, lz) -> world space
+    // Local +Z = Forward nose, +Y = Up, +X = Right
+    const cy = Math.cos(yawRad);
+    const sy = Math.sin(yawRad);
+    const cp = Math.cos(pitchRad);
+    const sp = Math.sin(pitchRad);
+    const cr = Math.cos(rollRad);
+    const sr = Math.sin(rollRad);
+
+    function toWorld(lx, ly, lz) {
+      // 1. Roll around local Z
+      const rx = lx * cr - ly * sr;
+      const ry = lx * sr + ly * cr;
+      const rz = lz;
+      // 2. Pitch around local X
+      const px = rx;
+      const py = ry * cp - rz * sp;
+      const pz = ry * sp + rz * cp;
+      // 3. Yaw around world Y (heading: 0 -> +Z, 90deg -> +X)
+      const wx = dx + px * cy + pz * sy;
+      const wy = dy + py;
+      const wz = dz - px * sy + pz * cy;
+      return [wx, wy, wz];
+    }
+
+    function makeLocalBox(cx, cy0, cz, w, h, d, sideRgb, topRgb, emissive) {
+      const hw = w / 2;
+      const hh = h / 2;
+      const hd = d / 2;
+      const p000 = toWorld(cx - hw, cy0 - hh, cz - hd);
+      const p100 = toWorld(cx + hw, cy0 - hh, cz - hd);
+      const p101 = toWorld(cx + hw, cy0 - hh, cz + hd);
+      const p001 = toWorld(cx - hw, cy0 - hh, cz + hd);
+      const p010 = toWorld(cx - hw, cy0 + hh, cz - hd);
+      const p110 = toWorld(cx + hw, cy0 + hh, cz - hd);
+      const p111 = toWorld(cx + hw, cy0 + hh, cz + hd);
+      const p011 = toWorld(cx - hw, cy0 + hh, cz + hd);
+
+      return [
+        { verts: [p001, p101, p111, p011], rgb: sideRgb, emissive, isDrone: true },
+        { verts: [p100, p000, p010, p110], rgb: sideRgb, emissive, isDrone: true },
+        { verts: [p101, p100, p110, p111], rgb: sideRgb, emissive, isDrone: true },
+        { verts: [p000, p001, p011, p010], rgb: sideRgb, emissive, isDrone: true },
+        { verts: [p011, p111, p110, p010], rgb: topRgb || sideRgb, emissive, isDrone: true },
+        { verts: [p000, p100, p101, p001], rgb: [24, 28, 34], emissive, isDrone: true }
+      ];
+    }
+
+    const faces = [];
+
+    // 1. Central Aerodynamic DJI Fuselage Core
+    faces.push(...makeLocalBox(0, 0, 0, 1.85, 0.72, 3.3, [58, 66, 78], [108, 118, 132]));
+    // Upper faceted canopy ridge
+    faces.push(...makeLocalBox(0, 0.44, -0.1, 1.32, 0.34, 2.3, [78, 88, 102], [142, 152, 166]));
+    // Front DJI Copper Gimbal Visor
+    faces.push(...makeLocalBox(0, -0.12, 1.72, 1.05, 0.56, 0.55, [240, 123, 50], [255, 155, 85], 0.3));
+    // Rear Green Battery / Flight Status LED Bar
+    faces.push(...makeLocalBox(0, 0.08, -1.68, 1.15, 0.28, 0.18, [74, 222, 128], [74, 222, 128], 0.85));
+
+    // 2. Four Outrigger Motor Arms + Spinning 3D Propellers
+    const motors = [
+      { x: -2.45, y: 0.15, z: 2.15, dir: 1, front: true },  // Front-Left
+      { x: 2.45, y: 0.15, z: 2.15, dir: -1, front: true },  // Front-Right
+      { x: -2.25, y: 0.05, z: -2.05, dir: -1, front: false }, // Rear-Left
+      { x: 2.25, y: 0.05, z: -2.05, dir: 1, front: false }   // Rear-Right
+    ];
+
+    motors.forEach((m) => {
+      // Arm strut from body to motor hub
+      const armMidX = m.x * 0.55;
+      const armMidZ = m.z * 0.55;
+      faces.push(
+        ...makeLocalBox(armMidX, m.y * 0.6, armMidZ, Math.abs(m.x) * 0.78, 0.22, 0.34, [46, 52, 62], [82, 92, 104])
+      );
+      // Motor Hub Pod
+      const ledColor = m.front ? [240, 123, 50] : [68, 76, 88];
+      faces.push(...makeLocalBox(m.x, m.y, m.z, 0.52, 0.42, 0.52, ledColor, [120, 130, 142]));
+
+      // Spinning 3D Rotor Disc ( Octagonal translucent ring + 2 spinning carbon blades )
+      const rY = m.y + 0.26;
+      const bladeRadius = 1.48;
+      const discSegs = 8;
+      const discPts = [];
+      for (let i = 0; i < discSegs; i++) {
+        const a = (i / discSegs) * Math.PI * 2;
+        discPts.push(toWorld(m.x + Math.cos(a) * bladeRadius, rY, m.z + Math.sin(a) * bladeRadius));
+      }
+      faces.push({
+        verts: discPts,
+        rgb: m.front ? [240, 140, 80] : [180, 195, 210],
+        alpha: 0.24,
+        doubleSided: true,
+        emissive: 0.35,
+        isDrone: true
+      });
+
+      // 2 Spinning Carbon Propeller Blades
+      for (let b = 0; b < 2; b++) {
+        const ang = spinPhase * m.dir + b * (Math.PI / 2);
+        const c = Math.cos(ang);
+        const s = Math.sin(ang);
+        const bw = 0.16;
+        const p1 = toWorld(m.x + c * bladeRadius - s * bw, rY + 0.02, m.z + s * bladeRadius + c * bw);
+        const p2 = toWorld(m.x + c * bladeRadius + s * bw, rY + 0.02, m.z + s * bladeRadius - c * bw);
+        const p3 = toWorld(m.x - c * bladeRadius + s * bw, rY + 0.02, m.z - s * bladeRadius - c * bw);
+        const p4 = toWorld(m.x - c * bladeRadius - s * bw, rY + 0.02, m.z - s * bladeRadius + c * bw);
+        faces.push({
+          verts: [p1, p2, p3, p4],
+          rgb: [28, 32, 38],
+          doubleSided: true,
+          emissive: 0.15,
+          isDrone: true
+        });
+      }
+    });
+
+    // 3. Projected Ground Shadow directly under the drone at y = 0.3
+    const shadowScale = Math.max(0.25, Math.min(1.0, 48 / (dy + 18)));
+    const sr0 = 2.6 * shadowScale;
+    const shadowVerts = [
+      [dx - sr0, 0.3, dz + sr0],
+      [dx + sr0, 0.3, dz + sr0],
+      [dx + sr0, 0.3, dz - sr0],
+      [dx - sr0, 0.3, dz - sr0]
+    ];
+    faces.push({
+      verts: shadowVerts,
+      rgb: [5, 8, 12],
+      alpha: 0.38 * shadowScale,
+      doubleSided: true,
+      emissive: 0
+    });
+
+    return faces;
+  }
+
+  // =========================================================================
+  // Controls Guide Modal & Buttons
+  // =========================================================================
   function openControlsGuide() {
     if (!controlsModal) return;
     controlsModal.classList.add('is-open');
@@ -1988,11 +2571,24 @@ function initDroneFpvCard() {
     });
   }
 
+  function resizeCanvas() {
+    if (!canvas) return;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  }
+
+  window.addEventListener('resize', () => {
+    if (isActive) resizeCanvas();
+  });
+
   function openModal() {
     isActive = true;
     modal.classList.add('is-active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    resizeCanvas();
   }
 
   function closeModal() {
@@ -2016,14 +2612,15 @@ function initDroneFpvCard() {
   // Hover / RTH Reset Button
   if (rthBtn) {
     rthBtn.addEventListener('click', () => {
-      panX = 0;
-      panY = 0;
+      droneX = 0;
+      droneZ = 0;
+      droneY = activeSceneKey === 'mountain' ? 68 : activeSceneKey === 'grassland' ? 36 : 45;
+      vxWorld = 0;
+      vzWorld = 0;
+      vyWorld = 0;
       currentRoll = 0;
       currentPitch = 0;
-      headingDeg = 35;
-      altitude = 118.0;
-      distance = 245.0;
-      zoomScale = 1.12;
+      headingDeg = 0;
     });
   }
 
@@ -2035,27 +2632,23 @@ function initDroneFpvCard() {
     });
   });
 
-  // Aerial Scene Switcher
+  // 3 Minimalist 3D Geometric Scenes Switcher (City / Mountain / Grassland)
   sceneBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const src = btn.getAttribute('data-fpv-src');
-      const baseAlt = parseFloat(btn.getAttribute('data-fpv-alt') || '115');
+      const sceneKey = btn.getAttribute('data-fpv-scene') || 'city';
+      const baseAlt = parseFloat(btn.getAttribute('data-fpv-alt') || '45');
+      activeSceneKey = SCENES_3D[sceneKey] ? sceneKey : 'city';
       sceneBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
-      if (worldImg && src) {
-        worldImg.style.opacity = '0.35';
-        setTimeout(() => {
-          worldImg.src = src;
-          worldImg.style.opacity = '1';
-        }, 140);
-      }
-      altitude = baseAlt;
-      panX = 0;
-      panY = 0;
-      zoomScale = 1.12;
+      droneX = 0;
+      droneZ = 0;
+      droneY = baseAlt;
+      vxWorld = 0;
+      vzWorld = 0;
+      vyWorld = 0;
     });
   });
 
-  // Gimbal Pitch Preset Toggle (-35° / -90° / 0°)
+  // Gimbal Pitch Preset Toggle (-25° / -45° / -12°)
   function updateGimbalLabels() {
     const angle = gimbalPresets[gimbalIndex];
     const isEn = getSiteLanguage() === 'en';
@@ -2070,6 +2663,7 @@ function initDroneFpvCard() {
       gimbalBtn.textContent = isEn ? enLabel : zhLabel;
     }
   }
+  updateGimbalLabels();
 
   if (gimbalBtn) {
     gimbalBtn.addEventListener('click', () => {
@@ -2171,6 +2765,293 @@ function initDroneFpvCard() {
     delete keysPressed[k];
   });
 
+  // =========================================================================
+  // 3D Perspective Projection & Painter's Algorithm Renderer
+  // =========================================================================
+  const sunDir = [0.48, 0.76, -0.43]; // Normalized directional sunlight
+
+  function wrapCoord(val, center) {
+    let diff = ((val - center + HALF_WRAP) % WRAP_SIZE);
+    if (diff < 0) diff += WRAP_SIZE;
+    return center + diff - HALF_WRAP;
+  }
+
+  function render3DScene(scene) {
+    if (!ctx || !canvas) return;
+    const W = canvas.width;
+    const H = canvas.height;
+    if (W < 2 || H < 2) return;
+
+    const yawRad = (headingDeg * Math.PI) / 180;
+    const gimbalDeg = gimbalPresets[gimbalIndex];
+    const thetaDown = (Math.abs(gimbalDeg) * 0.58 * Math.PI) / 180; // Positive downward tilt angle
+
+    const fwdX = Math.sin(yawRad);
+    const fwdZ = Math.cos(yawRad);
+
+    // Third-person camera sits behind and above the 3D drone
+    const camDist = 15.5;
+    const camElev = 4.6 + Math.abs(gimbalDeg) * 0.12;
+    const camX = droneX - fwdX * camDist;
+    const camY = droneY + camElev;
+    const camZ = droneZ - fwdZ * camDist;
+
+    const cosYaw = Math.cos(yawRad);
+    const sinYaw = Math.sin(yawRad);
+    const cosPitch = Math.cos(thetaDown);
+    const sinPitch = Math.sin(thetaDown);
+
+    const fovScale = H * 0.88;
+    const cxScreen = W * 0.5;
+    const cyScreen = H * 0.5;
+
+    // 1. Draw Sky & Ground Horizon Background
+    const horizonY = cyScreen - Math.tan(thetaDown) * fovScale;
+    const clampedHorizon = Math.max(0, Math.min(H, horizonY));
+
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, Math.max(10, clampedHorizon));
+    skyGrad.addColorStop(0, scene.skyTop);
+    skyGrad.addColorStop(0.68, scene.skyMid);
+    skyGrad.addColorStop(1, scene.skyHorizon);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, clampedHorizon + 2);
+
+    ctx.fillStyle = scene.groundFill;
+    ctx.fillRect(0, clampedHorizon, W, H - clampedHorizon);
+
+    // Transform world point -> camera space [rx, ry, rz] (where rz > 0 is in front of camera)
+    function worldToCam(wx, wy, wz) {
+      const dx = wx - camX;
+      const dy = wy - camY;
+      const dz = wz - camZ;
+
+      // Rotate by -yawRad around Y
+      const x1 = dx * cosYaw - dz * sinYaw;
+      const z1 = dx * sinYaw + dz * cosYaw;
+      const y1 = dy;
+
+      // Tilt camera downward by thetaDown around X
+      const y2 = y1 * cosPitch + z1 * sinPitch;
+      const z2 = -y1 * sinPitch + z1 * cosPitch;
+      return [x1, y2, z2];
+    }
+
+    function camToScreen(pt) {
+      const invZ = fovScale / pt[2];
+      return [cxScreen + pt[0] * invZ, cyScreen - pt[1] * invZ];
+    }
+
+    // Clip polygon against near plane z = nearZ
+    const NEAR_Z = 1.2;
+    function clipPolygonNear(camVerts) {
+      const out = [];
+      const n = camVerts.length;
+      for (let i = 0; i < n; i++) {
+        const cur = camVerts[i];
+        const prev = camVerts[(i + n - 1) % n];
+        const curIn = cur[2] >= NEAR_Z;
+        const prevIn = prev[2] >= NEAR_Z;
+
+        if (curIn !== prevIn) {
+          const t = (NEAR_Z - prev[2]) / (cur[2] - prev[2]);
+          out.push([
+            prev[0] + (cur[0] - prev[0]) * t,
+            prev[1] + (cur[1] - prev[1]) * t,
+            NEAR_Z
+          ]);
+        }
+        if (curIn) {
+          out.push(cur);
+        }
+      }
+      return out;
+    }
+
+    // 2. Draw 3D Perspective Ground Grid Lines for strong 3D depth sense
+    ctx.strokeStyle = scene.gridStroke;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const gridStep = 32;
+    const gridRadius = 320;
+    const baseGX = Math.floor(droneX / gridStep) * gridStep;
+    const baseGZ = Math.floor(droneZ / gridStep) * gridStep;
+
+    for (let gx = baseGX - gridRadius; gx <= baseGX + gridRadius; gx += gridStep) {
+      const c0 = worldToCam(gx, 0, baseGZ - gridRadius);
+      const c1 = worldToCam(gx, 0, baseGZ + gridRadius);
+      const clipped = clipPolygonNear([c0, c1]);
+      if (clipped.length === 2) {
+        const s0 = camToScreen(clipped[0]);
+        const s1 = camToScreen(clipped[1]);
+        ctx.moveTo(s0[0], s0[1]);
+        ctx.lineTo(s1[0], s1[1]);
+      }
+    }
+    for (let gz = baseGZ - gridRadius; gz <= baseGZ + gridRadius; gz += gridStep) {
+      const c0 = worldToCam(baseGX - gridRadius, 0, gz);
+      const c1 = worldToCam(baseGX + gridRadius, 0, gz);
+      const clipped = clipPolygonNear([c0, c1]);
+      if (clipped.length === 2) {
+        const s0 = camToScreen(clipped[0]);
+        const s1 = camToScreen(clipped[1]);
+        ctx.moveTo(s0[0], s0[1]);
+        ctx.lineTo(s1[0], s1[1]);
+      }
+    }
+    ctx.stroke();
+
+    // 3. Collect & Project Visible 3D Faces (World Objects + Third-Person 3D Drone)
+    const renderList = [];
+    const MAX_DIST_SQ = 350 * 350;
+
+    function pushFace(face, shiftX, shiftZ) {
+      const verts = face.verts;
+      const n = verts.length;
+      const wVerts = new Array(n);
+      const cVerts = new Array(n);
+      let sumX = 0;
+      let sumY = 0;
+      let sumZ = 0;
+      let anyInFront = false;
+
+      for (let i = 0; i < n; i++) {
+        const wx = verts[i][0] + shiftX;
+        const wy = verts[i][1];
+        const wz = verts[i][2] + shiftZ;
+        wVerts[i] = [wx, wy, wz];
+        const cv = worldToCam(wx, wy, wz);
+        cVerts[i] = cv;
+        if (cv[2] >= NEAR_Z) anyInFront = true;
+        sumX += cv[0];
+        sumY += cv[1];
+        sumZ += cv[2];
+      }
+      if (!anyInFront) return;
+
+      // Compute world normal for flat shading & backface culling
+      const v0 = wVerts[0];
+      const v1 = wVerts[1];
+      const v2 = wVerts[2];
+      const ux = v1[0] - v0[0];
+      const uy = v1[1] - v0[1];
+      const uz = v1[2] - v0[2];
+      const vx = v2[0] - v0[0];
+      const vy = v2[1] - v0[1];
+      const vz = v2[2] - v0[2];
+
+      let nx = uy * vz - uz * vy;
+      let ny = uz * vx - ux * vz;
+      let nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      nx /= len;
+      ny /= len;
+      nz /= len;
+
+      // Backface check relative to camera
+      if (!face.doubleSided) {
+        const viewDot =
+          nx * (v0[0] - camX) + ny * (v0[1] - camY) + nz * (v0[2] - camZ);
+        if (viewDot >= 0) return;
+      }
+
+      const clipped = clipPolygonNear(cVerts);
+      if (clipped.length < 3) return;
+
+      const screenPts = clipped.map(camToScreen);
+
+      // Lighting + Distance Fog
+      const sunDot = Math.max(0, nx * sunDir[0] + ny * sunDir[1] + nz * sunDir[2]);
+      const emissive = face.emissive || 0;
+      const light = Math.min(1.22, 0.54 + sunDot * 0.56 + emissive);
+
+      const avgDepth = Math.hypot(sumX / n, sumY / n, sumZ / n);
+      const fogFactor = face.isDrone
+        ? 0
+        : Math.max(0, Math.min(0.78, (avgDepth - 90) / 270));
+
+      const base = face.rgb;
+      const fog = scene.fogRgb;
+      const r = Math.round((base[0] * light) * (1 - fogFactor) + fog[0] * fogFactor);
+      const g = Math.round((base[1] * light) * (1 - fogFactor) + fog[1] * fogFactor);
+      const b = Math.round((base[2] * light) * (1 - fogFactor) + fog[2] * fogFactor);
+
+      const alpha = face.alpha !== undefined ? face.alpha : 1;
+      const fillStyle =
+        alpha < 1 ? `rgba(${r},${g},${b},${alpha})` : `rgb(${r},${g},${b})`;
+
+      renderList.push({
+        pts: screenPts,
+        depth: face.isDrone ? avgDepth * 0.45 : avgDepth, // Ensure drone sorts cleanly in foreground
+        fillStyle,
+        isDrone: !!face.isDrone,
+        alpha
+      });
+    }
+
+    // Add Scene 3D Objects (wrapped seamlessly around the drone)
+    const objs = scene.objects;
+    for (let i = 0; i < objs.length; i++) {
+      const obj = objs[i];
+      const wrappedX = wrapCoord(obj.cx, droneX);
+      const wrappedZ = wrapCoord(obj.cz, droneZ);
+      const dSq =
+        (wrappedX - droneX) * (wrappedX - droneX) +
+        (wrappedZ - droneZ) * (wrappedZ - droneZ);
+      if (dSq > MAX_DIST_SQ) continue;
+
+      const shiftX = wrappedX - obj.cx;
+      const shiftZ = wrappedZ - obj.cz;
+      const faces = obj.faces;
+      for (let j = 0; j < faces.length; j++) {
+        pushFace(faces[j], shiftX, shiftZ);
+      }
+    }
+
+    // Add 3D Third-Person DJI Quadcopter Drone
+    const dronePitchRad = (currentPitch * Math.PI) / 180;
+    const droneRollRad = (-currentRoll * Math.PI) / 180;
+    const droneFaces = buildDrone3DFaces(
+      droneX,
+      droneY,
+      droneZ,
+      yawRad,
+      dronePitchRad,
+      droneRollRad,
+      rotorPhase
+    );
+    for (let i = 0; i < droneFaces.length; i++) {
+      pushFace(droneFaces[i], 0, 0);
+    }
+
+    // Painter's Algorithm: Sort back-to-front by depth
+    renderList.sort((a, b) => b.depth - a.depth);
+
+    // Draw all 3D polygons with crisp minimalist geometric edges
+    for (let i = 0; i < renderList.length; i++) {
+      const item = renderList[i];
+      const pts = item.pts;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let k = 1; k < pts.length; k++) {
+        ctx.lineTo(pts[k][0], pts[k][1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = item.fillStyle;
+      ctx.fill();
+
+      if (item.alpha === 1) {
+        ctx.strokeStyle = item.isDrone
+          ? 'rgba(255, 255, 255, 0.22)'
+          : 'rgba(255, 255, 255, 0.11)';
+        ctx.lineWidth = item.isDrone ? 1.1 : 0.75;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // =========================================================================
+  // Main 60fps Flight Physics & 3D Render Loop
+  // =========================================================================
   let lastFrame = performance.now();
 
   function stepFpvSimulation(now) {
@@ -2201,44 +3082,46 @@ function initDroneFpvCard() {
         knobRight.style.transform = `translate3d(${(effRightX * 16).toFixed(1)}px, ${(effRightY * 16).toFixed(1)}px, 0)`;
       }
 
-      // Attitude angles (Pitch & Roll) driven by WASD / Right Stick
-      const targetRoll = effRightX * 20 * mult;
-      const targetPitch = -effRightY * 16 * mult;
+      // 1. Yaw Heading Rotation (Q/E)
+      headingDeg = (headingDeg + effLeftX * 68 * mult * dt + 360) % 360;
+      const yawRad = (headingDeg * Math.PI) / 180;
+      const fwdX = Math.sin(yawRad);
+      const fwdZ = Math.cos(yawRad);
+      const rightVecX = Math.cos(yawRad);
+      const rightVecZ = -Math.sin(yawRad);
 
-      currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 9);
-      currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 9);
+      // 2. Pitch & Roll Attitude Angles (WASD)
+      const targetRoll = effRightX * 24 * mult;
+      const targetPitch = -effRightY * 18 * mult;
+      currentRoll += (targetRoll - currentRoll) * Math.min(1, dt * 10);
+      currentPitch += (targetPitch - currentPitch) * Math.min(1, dt * 10);
 
-      // Heading (Yaw) driven by Q/E
-      headingDeg = (headingDeg + effLeftX * 52 * mult * dt + 360) % 360;
+      // 3. 3D World Velocity & Position Integration
+      const forwardSpeed = -effRightY * 42 * mult;
+      const strafeSpeed = effRightX * 34 * mult;
+      const targetVx = fwdX * forwardSpeed + rightVecX * strafeSpeed;
+      const targetVz = fwdZ * forwardSpeed + rightVecZ * strafeSpeed;
+      const targetVy = -effLeftY * 22 * mult;
 
-      // Altitude (H) driven by Up/Down Arrow
-      const verticalSpeed = -effLeftY * 6.5 * mult;
-      altitude = Math.max(12, Math.min(500, altitude + verticalSpeed * dt));
+      vxWorld += (targetVx - vxWorld) * Math.min(1, dt * 6.5);
+      vzWorld += (targetVz - vzWorld) * Math.min(1, dt * 6.5);
+      vyWorld += (targetVy - vyWorld) * Math.min(1, dt * 7.5);
 
-      // Horizontal translation & forward zoom driven by WASD + QE
-      panX = Math.max(-95, Math.min(95, panX - (effRightX * 52 + effLeftX * 38) * mult * dt));
-      panY = Math.max(-70, Math.min(70, panY - effRightY * 44 * mult * dt));
+      droneX += vxWorld * dt;
+      droneZ += vzWorld * dt;
+      droneY = Math.max(8, Math.min(260, droneY + vyWorld * dt));
 
-      // Forward/backward (W/S) also smoothly modulates forward zoom & distance D
-      const forwardRate = -effRightY * 14.5 * mult;
-      const strafeRate = effRightX * 11.2 * mult;
-      const horizontalSpeed = Math.hypot(forwardRate, strafeRate);
-      distance = Math.max(10, Math.min(2800, distance + forwardRate * dt));
+      const horizontalSpeed = Math.hypot(vxWorld, vzWorld);
+      const homeDistance = Math.hypot(droneX, droneZ);
+      rotorPhase += dt * (26 + horizontalSpeed * 0.45);
 
-      const gimbalOffsetPitch = (gimbalPresets[gimbalIndex] + 35) * 0.14;
-      const targetZoom =
-        1.14 +
-        Math.max(-0.08, Math.min(0.18, -panY * 0.0018 + (118 - altitude) * 0.0007));
-      zoomScale += (targetZoom - zoomScale) * Math.min(1, dt * 6);
+      // Render 3D Minimalist Geometric World & Third-Person Drone
+      render3DScene(SCENES_3D[activeSceneKey] || SCENES_3D.city);
 
-      if (worldPlane) {
-        worldPlane.style.transform = `translate3d(${panX.toFixed(1)}px, ${(panY + gimbalOffsetPitch * 2.2).toFixed(1)}px, 0) rotateZ(${(-currentRoll * 0.72).toFixed(2)}deg) rotateX(${(currentPitch * 0.65 + gimbalOffsetPitch).toFixed(2)}deg) scale(${zoomScale.toFixed(3)})`;
-      }
-
+      // Update HUD Elements
       if (horizonGroup) {
-        horizonGroup.style.transform = `translate3d(0, ${(currentPitch * 2.5).toFixed(1)}px, 0) rotate(${(-currentRoll).toFixed(2)}deg)`;
+        horizonGroup.style.transform = `translate3d(0, ${(currentPitch * 2.2).toFixed(1)}px, 0) rotate(${(-currentRoll).toFixed(2)}deg)`;
       }
-
       if (compassTrack) {
         const compassShift = -((headingDeg / 360) * 320);
         compassTrack.style.transform = `translate3d(${compassShift.toFixed(1)}px, 0, 0)`;
@@ -2246,8 +3129,6 @@ function initDroneFpvCard() {
       if (headingVal) {
         headingVal.textContent = `${Math.round(headingDeg).toString().padStart(3, '0')}°`;
       }
-
-      // Update Bottom-Left DJI Attitude Radar Ball
       if (radarCompass) {
         radarCompass.style.transform = `rotate(${(-headingDeg).toFixed(1)}deg)`;
       }
@@ -2255,10 +3136,9 @@ function initDroneFpvCard() {
         radarHorizon.style.transform = `translateY(${(currentPitch * 0.9).toFixed(1)}px) rotate(${(-currentRoll).toFixed(1)}deg)`;
       }
 
-      // Update DJI Telemetry Readouts (H, D, V.S, H.S, Pitch, Roll)
-      if (altVal) altVal.textContent = altitude.toFixed(1);
-      if (vsVal) vsVal.textContent = verticalSpeed.toFixed(1);
-      if (distVal) distVal.textContent = distance.toFixed(1);
+      if (altVal) altVal.textContent = droneY.toFixed(1);
+      if (vsVal) vsVal.textContent = vyWorld.toFixed(1);
+      if (distVal) distVal.textContent = homeDistance.toFixed(1);
       if (spdVal) spdVal.textContent = horizontalSpeed.toFixed(1);
       if (pitchReadout) pitchReadout.textContent = `PITCH ${currentPitch.toFixed(1)}°`;
       if (rollReadout) rollReadout.textContent = `ROLL ${currentRoll.toFixed(1)}°`;

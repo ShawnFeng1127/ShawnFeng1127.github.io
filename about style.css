@@ -316,36 +316,15 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   height: 100%;
   flex: 1;
   overflow: hidden;
-  background: #05080C;
-  perspective: 950px;
+  background: #080E16;
 }
 
-.fpv-world-plane {
-  position: absolute;
-  inset: -16%;
-  width: 132%;
-  height: 132%;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.fpv-world-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: contrast(1.05) saturate(1.08);
-  transition: opacity 0.26s ease;
-  pointer-events: none;
-}
-
-.fpv-cloud-stream {
+.fpv-3d-canvas {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.52) 0%, transparent 18%, transparent 76%, rgba(0, 0, 0, 0.68) 100%),
-    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.06) 0%, transparent 62%);
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* DJI 3x3 Rule-of-Thirds Gridlines */
