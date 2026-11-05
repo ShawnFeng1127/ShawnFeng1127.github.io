@@ -36,6 +36,8 @@ body {
   color: var(--ink-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   background-color: #08090A;
+  background: linear-gradient(260deg, #08090A 5%, #162533 55%, #596470 100%);
+  background-attachment: fixed;
   position: relative;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -907,23 +909,60 @@ body {
 }
 
 /* ==========================================================================
-   Page Transitions & Multi-Stage Cinematic Entrance Animation
+   Page Transitions & Unified Continuous Canvas Atmosphere
+   - Home Page: Elegant entrance reveal & smooth transition
+   - Canvas Sub-pages (About, Work, Help): Seamless continuous canvas with NO
+     page-switching blackout / fade-out or jarring reload animations
    ========================================================================== */
-.fade-in {
-  animation: pageFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@view-transition {
+  navigation: auto;
 }
 
-.page-leaving {
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.16s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-nav {
+  view-transition-name: site-glass-nav;
+}
+
+/* Home Page entrance and leaving transitions */
+body.home-page.fade-in {
+  animation: homeFadeIn 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body.home-page.page-leaving {
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transform: translateY(-16px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
-@keyframes pageFadeIn {
+/* Canvas Sub-pages (About, Work, Help): Zero switching animation — continuous canvas */
+body.about-page,
+body.work-page,
+body.help-page {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+body.about-page.page-leaving,
+body.work-page.page-leaving,
+body.help-page.page-leaving {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+@keyframes homeFadeIn {
   from {
     opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 

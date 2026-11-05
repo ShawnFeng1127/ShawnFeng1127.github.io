@@ -21,7 +21,9 @@ let isNavigatingPage = false;
 let openDroneFpvCardFn = null;
 
 /**
- * Navigate to another page (triggers drone departure choreography if leaving About Page)
+ * Navigate to another page:
+ * - Home <-> sub-pages: subtle smooth entrance/exit transition
+ * - Canvas sub-pages (About <-> Work <-> Help): instant, seamless continuous canvas (no switching animation)
  */
 function navigateToPage(targetUrl, clickEvent, scrollDirection) {
   if (!targetUrl || targetUrl.startsWith('#') || isNavigatingPage) return;
@@ -34,19 +36,26 @@ function navigateToPage(targetUrl, clickEvent, scrollDirection) {
     }
   } catch (_) {}
 
-  const isAboutPage = document.body.getAttribute('data-page') === 'about';
-  if (isAboutPage && droneController && droneController.isDockedOrDocking()) {
-    droneController.departFromPerchAndNavigate(targetUrl, clickEvent);
-    return;
-  }
+  const currentPage = document.body.getAttribute('data-page') || '';
+  const isTargetHome = targetUrl.toLowerCase().includes('home page.html');
+  const isCurrentHome = currentPage === 'home';
 
   if (droneController) {
     droneController.saveStateToSession();
   }
-  document.body.classList.add('page-leaving');
-  setTimeout(() => {
-    window.location.href = targetUrl;
-  }, 240);
+
+  // Home and pages below Home: subtle smooth transition animation
+  if (isCurrentHome || isTargetHome) {
+    document.body.classList.add('page-leaving');
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 220);
+    return;
+  }
+
+  // Canvas sub-pages (About <-> Work <-> Help):
+  // Instantaneous transition without page-leaving blackout or setTimeout delay
+  window.location.href = targetUrl;
 }
 
 /**
@@ -80,6 +89,11 @@ function initSiteEntranceAnimation() {
   }
 
   if (isInternalNav) {
+    return;
+  }
+
+  const isHomePage = document.body.getAttribute('data-page') === 'home';
+  if (!isHomePage) {
     return;
   }
 
@@ -526,26 +540,8 @@ function initInteractiveDrone() {
     departFromPerchAndNavigate: (targetUrl, clickEvent) => {
       mode = 'DEPART_FROM_PERCH';
       hasSettledOnPerch = false;
-
-      if (clickEvent && typeof clickEvent.clientX === 'number' && clickEvent.clientX > 0) {
-        departTargetX = clickEvent.clientX;
-        departTargetY = clickEvent.clientY;
-      } else {
-        departTargetX = Math.max(mouseX, window.innerWidth * 0.55);
-        departTargetY = Math.max(mouseY, window.innerHeight * 0.62);
-      }
-
-      vx += 260;
-      vy += 190;
-
-      setTimeout(() => {
-        document.body.classList.add('page-leaving');
-      }, 320);
-
-      setTimeout(() => {
-        saveStateToSession();
-        window.location.href = targetUrl;
-      }, 560);
+      saveStateToSession();
+      navigateToPage(targetUrl, clickEvent);
     }
   };
 
