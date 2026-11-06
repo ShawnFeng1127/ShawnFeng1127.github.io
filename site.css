@@ -1309,13 +1309,18 @@ body.help-page.page-leaving {
    (Preserves 100% of Original Layout While Adding Depth & Entrance Motion)
    ========================================================================== */
 body.home-page .home-bg-photo {
-  transform: translate3d(calc(-50% + var(--px, 0px) * -0.35), calc(var(--py, 0px) * -0.35), 0) scale(var(--bg-intro-scale, 1));
+  transform: translate3d(calc(-50% + var(--px, 0px) * -0.45), calc(var(--py, 0px) * -0.4), 0) scale(var(--bg-intro-scale, 1));
   filter: blur(var(--bg-intro-blur, 0px));
   transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), filter 0.95s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+body.home-page .home-editorial-layer {
+  transform: translate3d(calc(var(--px, 0px) * -0.18), calc(var(--py, 0px) * -0.15), 0);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 body.home-page .home-subject-photo {
-  transform: translate3d(calc(-50% + var(--px, 0px) * 0.55), calc(var(--py, 0px) * 0.45 + var(--subject-intro-y, 0px)), 0) scale(var(--subject-intro-scale, 1));
+  transform: translate3d(calc(-50% + var(--px, 0px) * 0.85), calc(var(--py, 0px) * 0.65 + var(--subject-intro-y, 0px)), 0) scale(var(--subject-intro-scale, 1));
   transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease;
 }
 

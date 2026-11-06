@@ -58,11 +58,11 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
 /* Layer 1: Atmospheric Pavilion Background Photo (home page背景.png) */
 .home-bg-photo {
   position: absolute;
-  bottom: 0;
+  bottom: -2vh;
   left: 50%;
   transform: translateX(-50%);
-  height: 100%;
-  max-height: 100vh;
+  height: 112vh;
+  max-height: none;
   width: auto;
   max-width: none;
   aspect-ratio: 1440 / 1080;
@@ -71,8 +71,8 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   z-index: 1;
   pointer-events: none;
   user-select: none;
-  mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
 }
 
 /* Layer 2: Minimalist Editorial Typography (Behind Subject Cutout) */
@@ -156,14 +156,14 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
 }
 
 /* Layer 3: Foreground Cutout Portrait of Shawn Feng (home page人物.png)
-   100% Complete & Unclipped: Scaled to fit viewport height */
+   Enlarged for 3D Depth Overlap with Typography while keeping full figure visible */
 .home-subject-photo {
   position: absolute;
-  bottom: 0;
+  bottom: -2vh;
   left: 50%;
   transform: translateX(-50%);
-  height: 100%;
-  max-height: 100vh;
+  height: 112vh;
+  max-height: none;
   width: auto;
   max-width: none;
   aspect-ratio: 1440 / 1080;
@@ -172,7 +172,7 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   z-index: 5;
   pointer-events: none;
   user-select: none;
-  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.42));
+  filter: drop-shadow(0 20px 42px rgba(0, 0, 0, 0.75)) drop-shadow(-10px 6px 22px rgba(0, 0, 0, 0.52));
 }
 
 @media (max-width: 1024px) {
@@ -197,8 +197,8 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
 @media (max-width: 768px) {
   .home-bg-photo,
   .home-subject-photo {
-    height: 68svh;
-    max-height: 600px;
-    bottom: 0;
+    height: 78svh;
+    max-height: 700px;
+    bottom: -1svh;
   }
 }
