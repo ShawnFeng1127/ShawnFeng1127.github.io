@@ -14,23 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initInteractiveDrone();
   initDroneFpvCard();
   initInfiniteRingGallery();
-  initArchiveGallery();
   initHelpPageInteractions();
   initScrollAndKeyGuidance();
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const previewMode = urlParams.get('preview');
-  if (previewMode === 'cylinder') {
-    const sec = document.getElementById('section-work');
-    if (sec) sec.scrollIntoView();
-  } else if (previewMode === 'curation') {
-    const sec = document.querySelector('.curation-showcase-section');
-    if (sec) sec.scrollIntoView();
-  } else if (previewMode === 'archive') {
-    setTimeout(() => { if (typeof window.openArchiveModal === 'function') window.openArchiveModal(); }, 150);
-  } else if (previewMode === 'lightbox') {
-    setTimeout(() => { if (typeof window.openPhotoLightbox === 'function') window.openPhotoLightbox('1'); }, 150);
-  }
 });
 
 let galleryWasDragged = false;
@@ -801,123 +786,94 @@ function initPageTransitions() {
 function initInfiniteRingGallery() {
   const viewport = document.getElementById('projects-gallery-viewport');
   const track = document.getElementById('projects-gallery-track');
-  const dragBadge = document.getElementById('cylinder-drag-badge');
   if (!viewport || !track) return;
 
   const originalCards = Array.from(track.querySelectorAll('.project-card'));
   if (!originalCards.length) return;
-  const allCards = originalCards;
 
-  const count = originalCards.length;
-  const angleStep = 360 / count;
+  const beforeClones = originalCards.map((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('data-clone', 'before');
+    return clone;
+  });
+  const afterClones = originalCards.map((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('data-clone', 'after');
+    return clone;
+  });
 
-  let radius = 580;
-  function updateCylinderDimensions() {
-    const w = window.innerWidth;
-    if (w < 768) {
-      radius = 330;
-    } else if (w < 1100) {
-      radius = 460;
-    } else {
-      radius = 580;
+  beforeClones.forEach((clone) => track.insertBefore(clone, originalCards[0]));
+  afterClones.forEach((clone) => track.appendChild(clone));
+
+  const allCards = Array.from(track.querySelectorAll('.project-card'));
+  const firstBeforeCard = beforeClones[0];
+  const firstPrimaryCard = originalCards[0];
+
+  function getSingleRingWidth() {
+    const w = firstPrimaryCard.offsetLeft - firstBeforeCard.offsetLeft;
+    return w > 0 ? w : 4200;
+  }
+
+  let ringInitialized = false;
+  let currentOffset = 0;
+  let targetOffset = 0;
+
+  function ensureInitialPosition() {
+    const w = getSingleRingWidth();
+    if (!ringInitialized && w > 500) {
+      currentOffset = w;
+      targetOffset = w;
+      ringInitialized = true;
     }
-    originalCards.forEach((card, i) => {
-      const cardAngle = i * angleStep;
-      card.style.transform = `rotateY(${cardAngle}deg) translateZ(${radius}px)`;
+  }
+
+  allCards.forEach((card) => {
+    const img = card.querySelector('.project-card-image');
+    if (img && !img.complete) {
+      img.addEventListener('load', ensureInitialPosition, { once: true });
+    }
+  });
+  ensureInitialPosition();
+
+  function animateRing() {
+    ensureInitialPosition();
+    const ringWidth = getSingleRingWidth();
+
+    currentOffset += (targetOffset - currentOffset) * 0.14;
+
+    if (ringWidth > 500) {
+      while (currentOffset >= ringWidth * 2) {
+        currentOffset -= ringWidth;
+        targetOffset -= ringWidth;
+      }
+      while (currentOffset < ringWidth * 0.5) {
+        currentOffset += ringWidth;
+        targetOffset += ringWidth;
+      }
+    }
+
+    track.style.transform = `translate3d(${-currentOffset.toFixed(2)}px, 0, 0)`;
+    requestAnimationFrame(animateRing);
+  }
+  requestAnimationFrame(animateRing);
+
+  const prevBtn = document.querySelector('.gallery-prev-btn');
+  const nextBtn = document.querySelector('.gallery-next-btn');
+  const buttonStep = 560;
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      targetOffset -= buttonStep;
     });
   }
-  updateCylinderDimensions();
-  window.addEventListener('resize', updateCylinderDimensions, { passive: true });
-
-  let currentAngle = 0;
-  let targetAngle = 0;
-  const autoRotateSpeed = 0.12; // Hypnotic, smooth self-rotation (Microdose Studio style)
-  let isDragging = false;
-  let startX = 0;
-  let lastDragX = 0;
-  let dragVelocity = 0;
-
-  function stepCylinder() {
-    if (!isDragging) {
-      targetAngle += autoRotateSpeed;
-    }
-    currentAngle += (targetAngle - currentAngle) * 0.085;
-    track.style.transform = `rotateY(${-currentAngle.toFixed(3)}deg)`;
-    requestAnimationFrame(stepCylinder);
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      targetOffset += buttonStep;
+    });
   }
-  requestAnimationFrame(stepCylinder);
 
-  // Mouse drag interaction
-  viewport.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return;
-    isDragging = true;
-    startX = e.clientX;
-    lastDragX = e.clientX;
-    dragVelocity = 0;
-    viewport.classList.add('is-dragging');
-  });
-
-  window.addEventListener('mousemove', (e) => {
-    if (dragBadge) {
-      dragBadge.style.left = `${e.clientX}px`;
-      dragBadge.style.top = `${e.clientY}px`;
-    }
-
-    if (!isDragging) return;
-    const dx = e.clientX - lastDragX;
-    targetAngle += -dx * 0.32;
-    dragVelocity = -dx * 0.32;
-    lastDragX = e.clientX;
-  });
-
-  window.addEventListener('mouseup', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    viewport.classList.remove('is-dragging');
-    targetAngle += dragVelocity * 6.5;
-  });
-
-  // Touch Swipe Drag on Mobile
-  let touchStartX = 0;
-  let lastTouchX = 0;
-  let touchVelocity = 0;
-
-  viewport.addEventListener(
-    'touchstart',
-    (e) => {
-      if (e.touches.length !== 1) return;
-      isDragging = true;
-      touchStartX = e.touches[0].clientX;
-      lastTouchX = touchStartX;
-      touchVelocity = 0;
-    },
-    { passive: true }
-  );
-
-  viewport.addEventListener(
-    'touchmove',
-    (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      const currentX = e.touches[0].clientX;
-      const dx = currentX - lastTouchX;
-      targetAngle += -dx * 0.42;
-      touchVelocity = -dx * 0.42;
-      lastTouchX = currentX;
-    },
-    { passive: true }
-  );
-
-  viewport.addEventListener(
-    'touchend',
-    () => {
-      if (!isDragging) return;
-      isDragging = false;
-      targetAngle += touchVelocity * 6.0;
-    },
-    { passive: true }
-  );
-
-  // Wheel to rotate 3D cylinder
+  // When mouse hovers on the portfolio gallery, rolling the mouse wheel (vertical or horizontal)
+  // scrolls through the photographs smoothly in an infinite ring!
   const gallerySection = document.querySelector('.projects-gallery-section') || viewport;
   const modal = document.getElementById('project-lightbox');
 
@@ -929,32 +885,159 @@ function initInfiniteRingGallery() {
     e.preventDefault();
     e.stopPropagation();
 
-    const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    targetAngle += delta * 0.12;
+    let delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (e.deltaMode === 1) {
+      delta *= 33;
+    } else if (e.deltaMode === 2) {
+      delta *= 320;
+    }
+
+    targetOffset += delta * 1.8;
   }
 
   gallerySection.addEventListener('wheel', handleGalleryWheel, { passive: false });
-  viewport.addEventListener('wheel', handleGalleryWheel, { passive: false });
-
-  // Floating "Drag" cursor badge visibility
-  if (dragBadge) {
-    viewport.addEventListener('mouseenter', () => dragBadge.classList.add('is-visible'));
-    viewport.addEventListener('mouseleave', () => dragBadge.classList.remove('is-visible'));
+  if (gallerySection !== viewport) {
+    viewport.addEventListener('wheel', handleGalleryWheel, { passive: false });
   }
 
-  // Slide navigation arrows
-  const prevBtn = document.querySelector('.gallery-prev-btn');
-  const nextBtn = document.querySelector('.gallery-next-btn');
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      targetAngle -= angleStep;
+  // Keyboard Left / Right Arrows to slide the gallery when lightbox is closed
+  window.addEventListener('keydown', (e) => {
+    if (modal && modal.classList.contains('is-active')) return;
+    if (e.key === 'ArrowRight') {
+      targetOffset += buttonStep;
+    } else if (e.key === 'ArrowLeft') {
+      targetOffset -= buttonStep;
+    }
+  });
+
+  // Mouse Drag with Release Momentum
+  let isDragging = false;
+  let lastDragX = 0;
+  let dragVelocity = 0;
+  let totalDragDistance = 0;
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isDragging = true;
+    galleryWasDragged = false;
+    totalDragDistance = 0;
+    lastDragX = e.clientX;
+    dragVelocity = 0;
+    viewport.classList.add('is-dragging');
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastDragX;
+    lastDragX = e.clientX;
+    totalDragDistance += Math.abs(dx);
+
+    if (totalDragDistance > 5) {
+      galleryWasDragged = true;
+    }
+
+    dragVelocity = -dx * 1.65;
+    targetOffset += dragVelocity;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    viewport.classList.remove('is-dragging');
+    targetOffset += dragVelocity * 5.5;
+  });
+
+  // Mobile Touch Swipe Drag with Inertial Momentum
+  let isTouchDragging = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let lastTouchX = 0;
+  let touchVelocity = 0;
+  let isHorizontalTouchMove = false;
+
+  viewport.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1) return;
+      isTouchDragging = true;
+      galleryWasDragged = false;
+      isHorizontalTouchMove = false;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      lastTouchX = touchStartX;
+      touchVelocity = 0;
+    },
+    { passive: true }
+  );
+
+  viewport.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!isTouchDragging || e.touches.length !== 1) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const dx = currentX - lastTouchX;
+      const totalDx = currentX - touchStartX;
+      const totalDy = currentY - touchStartY;
+
+      if (!isHorizontalTouchMove) {
+        if (Math.abs(totalDx) > 8 && Math.abs(totalDx) > Math.abs(totalDy)) {
+          isHorizontalTouchMove = true;
+        } else if (Math.abs(totalDy) > 8) {
+          isTouchDragging = false;
+          return;
+        }
+      }
+
+      if (isHorizontalTouchMove) {
+        targetOffset -= dx * 1.65;
+        touchVelocity = dx;
+        lastTouchX = currentX;
+        galleryWasDragged = true;
+      }
+    },
+    { passive: true }
+  );
+
+  viewport.addEventListener(
+    'touchend',
+    () => {
+      if (isTouchDragging && isHorizontalTouchMove) {
+        targetOffset -= touchVelocity * 6.0;
+      }
+      isTouchDragging = false;
+      isHorizontalTouchMove = false;
+    },
+    { passive: true }
+  );
+
+  // Hover Spotlight Effect across all ring cards
+  function activateCardHover(hoveredCard) {
+    document.body.classList.add('is-gallery-dimmed');
+    allCards.forEach((card) => {
+      if (card === hoveredCard) {
+        card.classList.add('is-active-hover');
+        card.classList.remove('is-sibling-shrunk');
+      } else {
+        card.classList.add('is-sibling-shrunk');
+        card.classList.remove('is-active-hover');
+      }
     });
   }
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      targetAngle += angleStep;
+
+  function clearCardHover() {
+    document.body.classList.remove('is-gallery-dimmed');
+    allCards.forEach((card) => {
+      card.classList.remove('is-active-hover', 'is-sibling-shrunk');
     });
   }
+
+  allCards.forEach((card) => {
+    card.addEventListener('mouseenter', () => activateCardHover(card));
+    card.addEventListener('mouseleave', () => clearCardHover());
+    card.addEventListener('focus', () => activateCardHover(card));
+    card.addEventListener('blur', () => clearCardHover());
+  });
 
   // Editorial Database for All 12 Photographs (Bilingual CN/EN + Orientation-Adaptive Popup Window)
   const PHOTO_CATALOG = [
@@ -1358,16 +1441,27 @@ function initInfiniteRingGallery() {
     });
   }
 
-  // On the main page 3D rotating cylinder, clicking on cards does NOT open details (as requested: "在这个页面不能打开详情，仅供大致浏览")
+  // Clicking ANY card on the main gallery page ONLY opens the detail popup (never switches A/B on the gallery card)
   allCards.forEach((card) => {
     card.addEventListener('click', (e) => {
-      e.preventDefault();
+      if (galleryWasDragged) {
+        e.preventDefault();
+        galleryWasDragged = false;
+        return;
+      }
+
+      const photoId = card.getAttribute('data-photo-id') || card.getAttribute('data-series');
+      openLightboxByPhotoId(photoId);
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const photoId = card.getAttribute('data-photo-id') || card.getAttribute('data-series');
+        openLightboxByPhotoId(photoId);
+      }
     });
   });
-
-  // Expose lightbox trigger globally so the Image 3 archive modal can open any photo detail
-  window.openPhotoLightbox = openLightboxByPhotoId;
-  window.PHOTO_CATALOG = PHOTO_CATALOG;
 
   if (prevLightboxBtn) {
     prevLightboxBtn.addEventListener('click', (e) => {
@@ -5376,213 +5470,4 @@ function initCursorTrail() {
       ctx.clearRect(0, 0, width, height);
     }
   }
-}
-
-/**
- * 12. Fullscreen Photography Archive Gallery (Matching Image 2 & Image 3)
- *     - Opened via #open-archive-modal-btn or #curation-callout-card
- *     - Displays expansive grid of all 10 photo series with category filtering
- *     - Clicking ANY photo card opens the exact detail lightbox (#project-lightbox)
- */
-function initArchiveGallery() {
-  const modal = document.getElementById('archive-gallery-modal');
-  const openBtn = document.getElementById('open-archive-modal-btn');
-  const calloutCard = document.getElementById('curation-callout-card');
-  const closeBtn = document.getElementById('archive-close-btn');
-  const backdrop = document.getElementById('archive-modal-backdrop');
-  const grid = document.getElementById('archive-gallery-grid');
-  const filterChips = document.querySelectorAll('.archive-chip');
-
-  if (!modal || !grid) return;
-
-  const ARCHIVE_ITEMS = [
-    {
-      id: '1',
-      series: 'SERIES 01',
-      title: '郑州 · 黑川纪章纪念馆',
-      subtitle: 'KISHO KUROKAWA MEMORIAL HALL',
-      src: 'Project pictures/Project 1.png',
-      category: 'architecture',
-      catLabel: 'ARCHITECTURE'
-    },
-    {
-      id: '2',
-      series: 'SERIES 02',
-      title: '甘肃 · 苦水丹霞',
-      subtitle: 'GEOLOGY · AERIAL · TEXTURE',
-      src: 'Project pictures/Project 2.jpg',
-      category: 'aerial',
-      catLabel: 'AERIAL'
-    },
-    {
-      id: '3',
-      series: 'SERIES 03',
-      title: '北京 · CBD 极简蓝调',
-      subtitle: 'METROPOLIS · LIGHT · AXIS',
-      src: 'Project pictures/Project 3.png',
-      category: 'architecture blue-hour',
-      catLabel: 'ARCHITECTURE / BLUE HOUR'
-    },
-    {
-      id: '4a',
-      series: 'SERIES 04',
-      title: '西安 · 中轴线永宁门航拍',
-      subtitle: 'HERITAGE · CENTRAL AXIS · BLUE HOUR',
-      src: 'Project pictures/project 4a.jpg',
-      category: 'aerial blue-hour',
-      catLabel: 'AERIAL / BLUE HOUR'
-    },
-    {
-      id: '5',
-      series: 'SERIES 05',
-      title: '川西 · 九寨沟航拍',
-      subtitle: 'EMERALD · SHORELINE · WILDERNESS',
-      src: 'Project pictures/project 5.jpg',
-      category: 'aerial',
-      catLabel: 'AERIAL'
-    },
-    {
-      id: '6',
-      series: 'SERIES 06',
-      title: '上海 · 陆家嘴天际线',
-      subtitle: 'VERTICAL · SKYLINE · TWILIGHT',
-      src: 'Project pictures/project 6.jpg',
-      category: 'architecture blue-hour',
-      catLabel: 'ARCHITECTURE / BLUE HOUR'
-    },
-    {
-      id: '7',
-      series: 'SERIES 07',
-      title: '郑州 · 龙湖湿地公园',
-      subtitle: 'PANORAMA · SYMMETRY · STILLNESS',
-      src: 'Project pictures/project 7.jpg',
-      category: 'aerial architecture',
-      catLabel: 'AERIAL / ARCHITECTURE'
-    },
-    {
-      id: '8',
-      series: 'SERIES 08',
-      title: '敦煌 · 鸣沙山月牙泉',
-      subtitle: 'OASIS · DUNES · GOLDEN HOUR',
-      src: 'Project pictures/project 8.jpg',
-      category: 'aerial',
-      catLabel: 'AERIAL'
-    },
-    {
-      id: '9',
-      series: 'SERIES 09',
-      title: '川西 · 贡嘎雪山群峰',
-      subtitle: 'GLACIER · SUMMIT · RIDGE',
-      src: 'Project pictures/project 9.jpg',
-      category: 'aerial',
-      catLabel: 'AERIAL'
-    },
-    {
-      id: '10a',
-      series: 'SERIES 10',
-      title: '郑州 · 二七塔与大玉米',
-      subtitle: 'GEOMETRY · BLUE HOUR & DUSK',
-      src: 'Project pictures/project 10a.jpg',
-      category: 'architecture blue-hour',
-      catLabel: 'ARCHITECTURE / BLUE HOUR'
-    }
-  ];
-
-  function renderGrid(filter = 'all') {
-    grid.innerHTML = '';
-    const filtered = filter === 'all'
-      ? ARCHIVE_ITEMS
-      : ARCHIVE_ITEMS.filter((item) => item.category.includes(filter));
-
-    filtered.forEach((item) => {
-      const card = document.createElement('article');
-      card.className = 'archive-grid-card';
-      card.setAttribute('data-photo-id', item.id);
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', `${item.series}: ${item.title}`);
-      card.innerHTML = `
-        <div class="archive-card-thumb">
-          <img src="${item.src}" alt="${item.title}" loading="lazy">
-          <div class="archive-card-hover-overlay">
-            <span class="archive-inspect-badge">INSPECT EXIF ↗</span>
-          </div>
-        </div>
-        <div class="archive-card-info">
-          <div class="archive-card-top-row">
-            <span class="archive-card-series">${item.series}</span>
-            <span class="archive-card-cat">${item.catLabel}</span>
-          </div>
-          <h4 class="archive-card-title">${item.title}</h4>
-          <p class="archive-card-subtitle">${item.subtitle}</p>
-        </div>
-      `;
-
-      // Crucial: Clicking ANY photo card in this archive grid opens the exact detail lightbox
-      card.addEventListener('click', () => {
-        if (typeof window.openPhotoLightbox === 'function') {
-          window.openPhotoLightbox(item.id);
-        }
-      });
-
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (typeof window.openPhotoLightbox === 'function') {
-            window.openPhotoLightbox(item.id);
-          }
-        }
-      });
-
-      grid.appendChild(card);
-    });
-  }
-  renderGrid('all');
-
-  // Category filter chips
-  filterChips.forEach((chip) => {
-    chip.addEventListener('click', () => {
-      filterChips.forEach((c) => c.classList.remove('active'));
-      chip.classList.add('active');
-      const cat = chip.getAttribute('data-filter') || 'all';
-      renderGrid(cat);
-    });
-  });
-
-  function openArchiveModal() {
-    modal.classList.add('is-active');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeArchiveModal() {
-    modal.classList.remove('is-active');
-    modal.setAttribute('aria-hidden', 'true');
-    const lightbox = document.getElementById('project-lightbox');
-    if (!lightbox || !lightbox.classList.contains('is-active')) {
-      document.body.style.overflow = '';
-    }
-  }
-
-  window.openArchiveModal = openArchiveModal;
-  window.closeArchiveModal = closeArchiveModal;
-
-  if (openBtn) openBtn.addEventListener('click', openArchiveModal);
-  if (calloutCard) {
-    calloutCard.addEventListener('click', (e) => {
-      if (e.target !== openBtn && !openBtn.contains(e.target)) {
-        openArchiveModal();
-      }
-    });
-  }
-  if (closeBtn) closeBtn.addEventListener('click', closeArchiveModal);
-  if (backdrop) backdrop.addEventListener('click', closeArchiveModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('is-active')) {
-      const lightbox = document.getElementById('project-lightbox');
-      if (lightbox && lightbox.classList.contains('is-active')) return;
-      closeArchiveModal();
-    }
-  });
 }
