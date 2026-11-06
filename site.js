@@ -133,9 +133,9 @@ function playFullEntranceSequence(isManualReplay) {
       <svg class="intro-aperture-svg" viewBox="0 0 500 500" aria-hidden="true">
         <defs>
           <linearGradient id="lens-coating-amber" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(196, 122, 69, 0.55)" />
+            <stop offset="0%" stop-color="rgba(255, 255, 255, 0.48)" />
             <stop offset="50%" stop-color="rgba(255, 255, 255, 0.08)" />
-            <stop offset="100%" stop-color="rgba(120, 175, 215, 0.32)" />
+            <stop offset="100%" stop-color="rgba(215, 220, 230, 0.28)" />
           </linearGradient>
         </defs>
 
@@ -146,7 +146,7 @@ function playFullEntranceSequence(isManualReplay) {
         <!-- 9-Blade Mechanical Camera Aperture Diaphragm -->
         <g class="intro-aperture-blades">
           ${bladesMarkup}
-          <circle cx="250" cy="250" r="144" fill="none" stroke="rgba(196, 122, 69, 0.42)" stroke-width="1.2" />
+          <circle cx="250" cy="250" r="144" fill="none" stroke="rgba(255, 255, 255, 0.42)" stroke-width="1.2" />
         </g>
       </svg>
 
@@ -296,16 +296,16 @@ function initInteractiveDrone() {
         <g opacity="0.34" transform="rotate(28 100 100)">
           <path d="M 100 96 C 64 90, 26 93, 6 98 L 6 103 C 26 106, 64 104, 100 104 Z" fill="#23272B" />
           <path d="M 100 104 C 136 110, 174 107, 194 102 L 194 97 C 174 94, 136 96, 100 96 Z" fill="#23272B" />
-          <rect x="4" y="97" width="11" height="6" rx="2" fill="#F07B32" />
-          <rect x="185" y="97" width="11" height="6" rx="2" fill="#F07B32" />
+          <rect x="4" y="97" width="11" height="6" rx="2" fill="#E2E8F0" />
+          <rect x="185" y="97" width="11" height="6" rx="2" fill="#E2E8F0" />
         </g>
-        <!-- Primary carbon-fiber twin propeller blades with DJI orange tips -->
+        <!-- Primary carbon-fiber twin propeller blades with silver platinum tips -->
         <g>
           <path d="M 100 95 C 62 88, 24 92, 4 97.5 L 4 103.5 C 24 107, 62 105, 100 105 Z" fill="#181B1E" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" />
           <path d="M 100 105 C 138 112, 176 108, 196 102.5 L 196 96.5 C 176 93, 138 95, 100 95 Z" fill="#181B1E" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" />
-          <!-- Orange blade tips -->
-          <path d="M 4 97.5 L 16 95.8 L 16 105.2 L 4 103.5 Z" fill="#F07B32" />
-          <path d="M 196 102.5 L 184 104.2 L 184 94.8 L 196 96.5 Z" fill="#F07B32" />
+          <!-- Silver blade tips -->
+          <path d="M 4 97.5 L 16 95.8 L 16 105.2 L 4 103.5 Z" fill="#E2E8F0" />
+          <path d="M 196 102.5 L 184 104.2 L 184 94.8 L 196 96.5 Z" fill="#E2E8F0" />
           <!-- Center motor hub cap -->
           <circle cx="100" cy="100" r="10.5" fill="#121417" stroke="rgba(255,255,255,0.28)" stroke-width="1.2" />
           <circle cx="100" cy="100" r="4" fill="#8C9398" />
@@ -1433,7 +1433,8 @@ function initScrollSpy() {
         const nav = document.getElementById('main-glass-nav');
         const navOffset = nav ? nav.offsetHeight + 18 : 72;
         const targetY = hashTarget.getBoundingClientRect().top + window.pageYOffset - navOffset;
-        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+        const isAuto = window.location.search.includes('nointro');
+        window.scrollTo({ top: Math.max(0, targetY), behavior: isAuto ? 'auto' : 'smooth' });
       }, 120);
     }
   }
