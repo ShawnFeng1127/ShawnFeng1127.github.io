@@ -163,6 +163,9 @@
 
       <!-- Infinite Ring Photography Exhibition Gallery (10 Series) -->
       <div class="projects-gallery-section" aria-label="Photography Exhibition Gallery">
+        <div class="cylinder-drag-badge" id="cylinder-drag-badge" aria-hidden="true">
+          <span>Drag</span>
+        </div>
         <div class="projects-gallery-viewport" id="projects-gallery-viewport">
           <div class="projects-gallery-track" id="projects-gallery-track">
             <!-- 01: Project 1.png (郑州黑川纪章纪念馆) -->
@@ -311,6 +314,51 @@
               一份持续生长的摄影作品档案，记录下不同城市与地貌中的光线实验与观察。
             </p>
           </div>
+        </div>
+      </div>
+
+      <!-- ==========================================================================
+           Curation Archive Showcase Section (Matching Image 2)
+           - Floating photo cards collage scattered around the borders
+           - Centered callout: "Ready for the full collection?" + "Enter Full Archive →" button
+           ========================================================================== -->
+      <div class="curation-showcase-section" id="curation-showcase-section">
+        <!-- Floating scattered decorative photo preview cards around borders -->
+        <div class="scattered-cards-backdrop" aria-hidden="true">
+          <div class="scatter-card scatter-card-1">
+            <img src="Project pictures/Project 1.png" alt="Zhengzhou Architecture" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-2">
+            <img src="Project pictures/Project 2.jpg" alt="Danxia Aerial" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-3">
+            <img src="Project pictures/Project 3.png" alt="Beijing CBD" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-4">
+            <img src="Project pictures/project 5.jpg" alt="Jiuzhaigou Aerial" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-5">
+            <img src="Project pictures/project 6.jpg" alt="Lujiazui Skyline" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-6">
+            <img src="Project pictures/project 7.jpg" alt="Longhu Park" loading="lazy">
+          </div>
+          <div class="scatter-card scatter-card-7">
+            <img src="Project pictures/project 9.jpg" alt="CBD Twilight" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Center Callout Box matching Image 2 -->
+        <div class="curation-callout-card" id="curation-callout-card">
+          <h3 class="curation-callout-title" data-i18n-zh="想要探索完整摄影细节？" data-i18n-en="Ready for the full collection?">
+            想要探索完整摄影细节？
+          </h3>
+          <p class="curation-callout-desc" data-i18n-zh="进入全景摄影档案库，浏览全部 10 组独立摄影作品的高清画质、拍摄参数与创作手记" data-i18n-en="Visit the Full Archive to explore all 10 series in high resolution with complete EXIF parameters and editorial stories.">
+            进入全景摄影档案库，浏览全部 10 组独立摄影作品的高清画质、拍摄参数与创作手记
+          </p>
+          <button type="button" class="curation-enter-btn" id="open-archive-modal-btn" aria-label="进入全景档案库">
+            <span class="enter-btn-text" data-i18n-zh="进入全景档案库 →" data-i18n-en="Enter Full Archive →">进入全景档案库 →</span>
+          </button>
         </div>
       </div>
     </section>
@@ -777,6 +825,56 @@
   <!-- Copy Success Toast -->
   <div id="help-copy-toast" class="help-toast" role="status" aria-live="polite">
     ✓ 已复制邮箱地址 shawnfeng@moonshotacademy.cn！欢迎随时发邮件获取线上指导
+  </div>
+
+  <!-- ==========================================================================
+       Fullscreen Archive Gallery Modal (Matching Image 3)
+       - Large subtle "ARCHIVE" watermark background
+       - Header with Category Filter Chips (ALL, ARCHITECTURE, AERIAL, BLUE HOUR)
+       - Expansive masonry/grid layout of all 10 series photos
+       - Clicking any photo opens the unchanged #project-lightbox
+       ========================================================================== -->
+  <div id="archive-gallery-modal" class="archive-gallery-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="archive-modal-backdrop" id="archive-modal-backdrop"></div>
+    <div class="archive-modal-scroll">
+      <div class="archive-modal-content">
+        <!-- Watermark matching "Labs" in Image 3 -->
+        <div class="archive-watermark-bg" aria-hidden="true">ARCHIVE</div>
+
+        <!-- Header Bar -->
+        <header class="archive-modal-header">
+          <div class="archive-header-left">
+            <span class="archive-sys-tag">// FULL CURATION : 10 SERIES ARCHIVE</span>
+            <h2 class="archive-modal-title">PHOTOGRAPHY ARCHIVE</h2>
+          </div>
+
+          <!-- Filter Category Chips -->
+          <div class="archive-filter-chips" id="archive-filter-chips">
+            <button type="button" class="archive-chip active" data-filter="all">ALL / 全部</button>
+            <button type="button" class="archive-chip" data-filter="architecture">ARCHITECTURE / 建筑</button>
+            <button type="button" class="archive-chip" data-filter="aerial">AERIAL / 航拍</button>
+            <button type="button" class="archive-chip" data-filter="blue-hour">BLUE HOUR / 蓝调</button>
+          </div>
+
+          <div class="archive-header-right">
+            <button type="button" class="archive-close-btn" id="archive-close-btn" aria-label="关闭全景档案库 / Close (Esc)">
+              <span>CLOSE // ESC</span>
+              <span class="archive-close-x">&times;</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Masonry / Expansive Gallery Grid matching Image 3 -->
+        <main class="archive-gallery-grid" id="archive-gallery-grid" role="list">
+          <!-- Live cards rendered via JavaScript -->
+        </main>
+
+        <footer class="archive-modal-footer">
+          <span>SHAWN FENG · INDEPENDENT VISUAL ARCHIVE 2024–2026</span>
+          <span>CLICK ANY PHOTO TO INSPECT FULL EXIF &amp; DETAILS</span>
+        </footer>
+      </div>
+    </div>
   </div>
 
   <!-- ==========================================================================
