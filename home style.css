@@ -36,6 +36,26 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   background-color: #08090A;
 }
 
+/* Atmospheric Left & Right Edge Dissolve: Softens pavilion photo edges seamlessly into canvas */
+.home-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #08090A 0%,
+    rgba(8, 9, 10, 0.72) 4%,
+    rgba(8, 9, 10, 0.20) 10%,
+    transparent 18%,
+    transparent 82%,
+    rgba(8, 9, 10, 0.20) 90%,
+    rgba(8, 9, 10, 0.72) 96%,
+    #08090A 100%
+  );
+  pointer-events: none;
+  z-index: 2; /* In front of .home-bg-photo (z:1), but BEHIND .home-subject-photo (z:5) */
+}
+
 /* Atmospheric Bottom Dissolve: Blends the pavilion photo seamlessly into the canvas */
 .home-stage::after {
   content: "";
@@ -43,12 +63,13 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 140px;
+  height: 200px;
   background: linear-gradient(
     180deg,
     rgba(8, 9, 10, 0) 0%,
-    rgba(8, 9, 10, 0.35) 40%,
-    rgba(8, 9, 10, 0.85) 75%,
+    rgba(8, 9, 10, 0.18) 28%,
+    rgba(8, 9, 10, 0.58) 58%,
+    rgba(8, 9, 10, 0.92) 84%,
     #08090A 100%
   );
   pointer-events: none;
@@ -71,8 +92,8 @@ body.home-page:not(.unified-canvas-page) .glass-nav {
   z-index: 1;
   pointer-events: none;
   user-select: none;
-  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
 }
 
 /* Layer 2: Minimalist Editorial Typography (Behind Subject Cutout) */
