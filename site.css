@@ -3078,3 +3078,18 @@ body.unified-canvas-page {
     max-width: 100%;
   }
 }
+
+/* ==========================================================================
+   Subtle White Mouse Trailing Glow Canvas
+   ========================================================================== */
+.cursor-trail-canvas {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 9998 !important;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSiteEntranceAnimation();
   initSiteSearch();
   initFullscreenNavDrawer();
+  initCursorTrail();
   initAmbientGlow();
   initDepthParallax();
   initInteractiveDrone();
@@ -5278,4 +5279,195 @@ function initFullscreenNavDrawer() {
       closeDrawer();
     }
   });
+}
+
+/**
+ * 11. Subtle White Mouse Cursor Trailing Glow Effect
+ *     - Smooth tapered white ribbon with soft radial glow falloff
+ *     - Micro sparkling dust particles that gently disperse and fade
+ *     - GPU-accelerated canvas with High-DPI crisp rendering
+ *     - Idle detection: stops RAF rendering loop when stationary to save 100% CPU/GPU
+ *     - Touch screen auto-detection to preserve mobile battery
+ */
+function initCursorTrail() {
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    return; // Touch devices don't have cursor
+  }
+
+  let canvas = document.getElementById('cursor-trail-canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'cursor-trail-canvas';
+    canvas.className = 'cursor-trail-canvas';
+    document.body.appendChild(canvas);
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resizeCanvas() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.scale(dpr, dpr);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+
+  const points = [];
+  const MAX_POINTS = 26;
+  const sparks = [];
+  let isRunning = false;
+  let lastX = -1;
+  let lastY = -1;
+  let lastMoveTime = 0;
+
+  function addPoint(x, y) {
+    const now = performance.now();
+    lastMoveTime = now;
+    if (lastX >= 0) {
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 2.5) return;
+
+      // Spawn 1 micro-spark occasionally when moving fast
+      if (Math.random() < 0.4 && dist > 5) {
+        sparks.push({
+          x: x + (Math.random() - 0.5) * 6,
+          y: y + (Math.random() - 0.5) * 6,
+          vx: (Math.random() - 0.5) * 0.9,
+          vy: (Math.random() - 0.5) * 0.9 - 0.15,
+          life: 1.0,
+          decay: 0.032 + Math.random() * 0.02,
+          size: 0.8 + Math.random() * 1.3
+        });
+      }
+    }
+    lastX = x;
+    lastY = y;
+
+    points.push({ x, y, age: 0 });
+    if (points.length > MAX_POINTS) {
+      points.shift();
+    }
+
+    if (!isRunning) {
+      isRunning = true;
+      requestAnimationFrame(render);
+    }
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    addPoint(e.clientX, e.clientY);
+  }, { passive: true });
+
+  window.addEventListener('mouseleave', () => {
+    lastX = -1;
+    lastY = -1;
+  });
+
+  function render(time) {
+    ctx.clearRect(0, 0, width, height);
+
+    // Fade and age older points when mouse slows down or stops
+    if (time - lastMoveTime > 28 && points.length > 0) {
+      points.shift();
+    }
+
+    // 1. Draw glowing connecting ribbon with smooth tapered line
+    if (points.length > 2) {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+      ctx.shadowBlur = 10;
+
+      for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const progress = (i + 1) / points.length; // 0 is tail, 1 is head
+        const alpha = Math.pow(progress, 1.8) * 0.28; // Subtle faint white
+        const lineWidth = 1 + progress * 3.5; // Tapers from 1px to 4.5px
+
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
+        ctx.lineWidth = lineWidth;
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 2. Draw soft radial glow halos around points
+    for (let i = 0; i < points.length; i++) {
+      const pt = points[i];
+      const progress = (i + 1) / points.length;
+      if (progress < 0.2) continue; // Skip very tail for performance
+
+      const radius = 2 + progress * 8.5;
+      const alpha = Math.pow(progress, 2.2) * 0.24; // Very delicate white glow
+
+      const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius * 2);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${alpha.toFixed(3)})`);
+      grad.addColorStop(0.4, `rgba(255, 255, 255, ${(alpha * 0.4).toFixed(3)})`);
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, radius * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Draw subtle radiant head light tip
+    if (points.length > 0) {
+      const head = points[points.length - 1];
+      const headGrad = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 14);
+      headGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+      headGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.15)');
+      headGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.fillStyle = headGrad;
+      ctx.beginPath();
+      ctx.arc(head.x, head.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 4. Draw & update micro sparks
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.life -= s.decay;
+
+      if (s.life <= 0) {
+        sparks.splice(i, 1);
+        continue;
+      }
+
+      ctx.fillStyle = `rgba(255, 255, 255, ${(s.life * 0.35).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Continue loop if active, or sleep if fully faded
+    if (points.length > 0 || sparks.length > 0) {
+      requestAnimationFrame(render);
+    } else {
+      isRunning = false;
+      ctx.clearRect(0, 0, width, height);
+    }
+  }
 }
