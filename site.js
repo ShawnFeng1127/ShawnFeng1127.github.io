@@ -383,6 +383,10 @@ function initInteractiveDrone() {
   });
 
   function triggerAboutDroneFpv(e) {
+    // Only allow simulation when the drone is perched on the About section (never while following the mouse)
+    if (mode !== 'RETURN_TO_PERCH' || !hasSettledOnPerch || droneEl.classList.contains('is-airborne')) {
+      return;
+    }
     if (typeof openDroneFpvCardFn === 'function') {
       if (e) e.stopPropagation();
       openDroneFpvCardFn();
@@ -392,6 +396,9 @@ function initInteractiveDrone() {
   droneEl.addEventListener('click', triggerAboutDroneFpv);
   droneEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
+      if (mode !== 'RETURN_TO_PERCH' || !hasSettledOnPerch || droneEl.classList.contains('is-airborne')) {
+        return;
+      }
       e.preventDefault();
       triggerAboutDroneFpv(e);
     }
@@ -401,12 +408,17 @@ function initInteractiveDrone() {
     perchTarget.addEventListener('click', triggerAboutDroneFpv);
     perchTarget.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
+        if (mode !== 'RETURN_TO_PERCH' || !hasSettledOnPerch || droneEl.classList.contains('is-airborne')) {
+          return;
+        }
         e.preventDefault();
         triggerAboutDroneFpv(e);
       }
     });
     perchTarget.addEventListener('mouseenter', () => {
-      droneEl.classList.add('is-drone-hovered');
+      if (mode === 'RETURN_TO_PERCH' && hasSettledOnPerch) {
+        droneEl.classList.add('is-drone-hovered');
+      }
     });
     perchTarget.addEventListener('mouseleave', () => {
       droneEl.classList.remove('is-drone-hovered');
@@ -442,6 +454,9 @@ function initInteractiveDrone() {
       } else if (!isPerchInView && mode === 'RETURN_TO_PERCH') {
         mode = 'CURSOR_ORBIT';
         hasSettledOnPerch = false;
+        droneEl.classList.add('is-airborne');
+        droneEl.classList.remove('is-drone-hovered');
+        perchTarget.classList.remove('is-active-perch');
       }
     }
 
@@ -453,6 +468,8 @@ function initInteractiveDrone() {
 
     if (mode === 'CURSOR_ORBIT') {
       droneEl.classList.add('is-airborne');
+      droneEl.classList.remove('is-drone-hovered');
+      if (perchTarget) perchTarget.classList.remove('is-active-perch');
       const orbitOffsetX = Math.cos(orbitPhase) * 56;
       const orbitOffsetY = Math.sin(orbitPhase * 2) * 26 - 16;
       targetX = mouseX + orbitOffsetX;
@@ -469,18 +486,23 @@ function initInteractiveDrone() {
 
       const distToPerch = Math.hypot(targetX - droneX, targetY - droneY);
       const currentSpeed = Math.hypot(vx, vy);
-      if (distToPerch < 10 && currentSpeed < 18 && !hasSettledOnPerch) {
+      if (distToPerch < 18 && currentSpeed < 30 && !hasSettledOnPerch) {
         hasSettledOnPerch = true;
         droneEl.style.zIndex = '15';
         droneEl.classList.remove('is-airborne');
-      } else if (distToPerch >= 22 && hasSettledOnPerch) {
+        if (perchTarget) perchTarget.classList.add('is-active-perch');
+      } else if (distToPerch >= 64 && hasSettledOnPerch) {
         hasSettledOnPerch = false;
         droneEl.style.zIndex = '45';
         droneEl.classList.add('is-airborne');
+        droneEl.classList.remove('is-drone-hovered');
+        if (perchTarget) perchTarget.classList.remove('is-active-perch');
       }
     } else if (mode === 'DEPART_FROM_PERCH') {
       droneEl.style.zIndex = '45';
       droneEl.classList.add('is-airborne');
+      droneEl.classList.remove('is-drone-hovered');
+      if (perchTarget) perchTarget.classList.remove('is-active-perch');
       targetX = departTargetX;
       targetY = departTargetY;
       targetScale = FLY_SCALE;

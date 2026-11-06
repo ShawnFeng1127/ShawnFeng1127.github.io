@@ -19,28 +19,37 @@ body.about-page {
   justify-content: space-between;
 }
 
-/* Original Top-Left Perch Target for the Drone on About Page (Clickable to Open FPV Flight Card) */
+/* Original Top-Left Perch Target for the Drone on About Page (Clickable ONLY when Drone is Perched on About) */
 .drone-perch-target {
   position: absolute;
   left: 0;
   top: 0;
   width: 338px;
   height: 368px;
-  pointer-events: auto;
-  cursor: pointer;
+  pointer-events: none;
+  cursor: default;
   z-index: 16;
 }
 
-body.about-page .interactive-drone-layer {
+.drone-perch-target.is-active-perch {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Drone is non-interactive when airborne / following cursor; only clickable when perched on About */
+body.about-page .interactive-drone-layer.is-airborne {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+body.about-page .interactive-drone-layer:not(.is-airborne) {
   pointer-events: auto;
   cursor: pointer;
   transition: filter 0.28s ease;
 }
 
-body.about-page .interactive-drone-layer:hover .interactive-drone-img,
-body.about-page .interactive-drone-layer:hover .interactive-drone-img-airborne,
-body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img,
-body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img-airborne {
+body.about-page .interactive-drone-layer:not(.is-airborne):hover .interactive-drone-img,
+body.about-page .interactive-drone-layer:not(.is-airborne).is-drone-hovered .interactive-drone-img {
   filter: drop-shadow(0 0 18px rgba(240, 123, 50, 0.55)) brightness(1.06);
 }
 
