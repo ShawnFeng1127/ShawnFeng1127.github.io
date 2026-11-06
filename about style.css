@@ -1153,93 +1153,90 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   background: linear-gradient(0deg, rgba(5, 8, 12, 0.86) 0%, rgba(5, 8, 12, 0.45) 65%, transparent 100%);
 }
 
-/* Bottom-Left: Iconic DJI Attitude Radar + H / D Telemetry */
-.dji-bottom-left {
+/* Bottom HUD Left: H / V.S / D / H.S Flight Telemetry */
+.dji-telemetry-group {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-end;
+  gap: 16px;
+  font-variant-numeric: tabular-nums;
 }
 
-.dji-attitude-radar {
+.dji-tel-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.05;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+}
+
+.metric-unit {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Bottom HUD Center: Iconic DJI Attitude Radar Ball (No blue bar) */
+.dji-radar-pod {
   position: relative;
-  width: 78px;
-  height: 78px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: rgba(12, 18, 26, 0.85);
+  background: rgba(12, 18, 26, 0.88);
   border: 1.5px solid rgba(255, 255, 255, 0.32);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+.dji-radar-circle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dji-radar-compass {
   position: absolute;
-  inset: -4px;
-  border-radius: 50%;
+  inset: 0;
   pointer-events: none;
   will-change: transform;
 }
 
-.dji-radar-north {
+.radar-n {
   position: absolute;
-  top: 2px;
+  top: 3px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0 4px;
-  border-radius: 3px;
   background: #EF4444;
   color: #FFFFFF;
   font-size: 8px;
-  font-weight: 900;
-  line-height: 1.3;
-}
-
-.dji-radar-sphere {
-  position: relative;
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: rgba(24, 34, 46, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dji-radar-horizon {
-  position: absolute;
-  left: -30%;
-  right: -30%;
-  bottom: -40%;
-  height: 90%;
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.55) 0%, rgba(14, 116, 144, 0.35) 100%);
-  border-top: 1.5px solid #38BDF8;
-  will-change: transform;
-}
-
-.dji-radar-center-line {
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.dji-radar-aircraft {
-  position: relative;
-  z-index: 3;
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  font-weight: 800;
+  padding: 0 3px;
+  border-radius: 3px;
+  line-height: 1.2;
 }
 
 .dji-radar-home {
   position: absolute;
-  bottom: 6px;
-  right: 10px;
-  z-index: 2;
+  bottom: 5px;
+  right: 8px;
   width: 13px;
   height: 13px;
   border-radius: 50%;
@@ -1247,69 +1244,43 @@ body.about-page .interactive-drone-layer.is-drone-hovered .interactive-drone-img
   color: #090D12;
   font-size: 8px;
   font-weight: 900;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.dji-telemetry-block {
+.dji-radar-drone {
+  position: relative;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dji-drone-wedge {
+  color: #4ADE80;
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Blue bar completely deleted per user request */
+.dji-radar-horizon {
+  display: none !important;
+}
+
+/* Bottom HUD Right: Camera Feed Metadata */
+.dji-camera-feed-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
   font-variant-numeric: tabular-nums;
 }
 
-.dji-tele-row {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-
-.dji-tele-symbol {
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.65);
-  width: 14px;
-}
-
-.dji-tele-num {
-  font-size: 22px;
-  font-weight: 800;
-  color: #FFFFFF;
-  line-height: 1.05;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
-}
-
-.dji-tele-unit {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.dji-tele-sep {
-  color: rgba(255, 255, 255, 0.25);
-  margin: 0 4px;
-}
-
-.dji-tele-sub {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.dji-tele-sub strong {
-  color: #FFFFFF;
-  font-weight: 800;
-}
-
-.dji-tele-attitude {
-  display: flex;
-  gap: 10px;
-  margin-top: 2px;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: rgba(240, 123, 50, 0.95);
+.dji-meta-tag {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* Bottom-Center: Dual DJI Virtual RC Joysticks */

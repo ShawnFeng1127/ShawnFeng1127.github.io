@@ -704,31 +704,33 @@ function initInfiniteRingGallery() {
     });
   }
 
-  // Horizontal wheel / trackpad swipe / Shift + Wheel scrolls the gallery horizontally;
-  // Vertical wheel bubbles up to window to seamlessly browse between website pages!
+  // When mouse hovers on the portfolio gallery, rolling the mouse wheel (vertical or horizontal)
+  // scrolls through the photographs smoothly in an infinite ring!
+  const gallerySection = document.querySelector('.projects-gallery-section') || viewport;
   const modal = document.getElementById('project-lightbox');
-  viewport.addEventListener(
-    'wheel',
-    (e) => {
-      if (modal && modal.classList.contains('is-active')) return;
 
-      const isHorizontalScroll = Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.7 || e.shiftKey;
-      if (isHorizontalScroll) {
-        e.preventDefault();
-        e.stopPropagation();
+  function handleGalleryWheel(e) {
+    if (modal && modal.classList.contains('is-active')) return;
+    if (e.__galleryWheelHandled) return;
+    e.__galleryWheelHandled = true;
 
-        let rawDelta = e.shiftKey ? e.deltaY : e.deltaX;
-        if (e.deltaMode === 1) {
-          rawDelta *= 36;
-        } else if (e.deltaMode === 2) {
-          rawDelta *= 360;
-        }
+    e.preventDefault();
+    e.stopPropagation();
 
-        targetOffset += rawDelta * 2.8;
-      }
-    },
-    { passive: false }
-  );
+    let delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (e.deltaMode === 1) {
+      delta *= 33;
+    } else if (e.deltaMode === 2) {
+      delta *= 320;
+    }
+
+    targetOffset += delta * 1.8;
+  }
+
+  gallerySection.addEventListener('wheel', handleGalleryWheel, { passive: false });
+  if (gallerySection !== viewport) {
+    viewport.addEventListener('wheel', handleGalleryWheel, { passive: false });
+  }
 
   // Keyboard Left / Right Arrows to slide the gallery when lightbox is closed
   window.addEventListener('keydown', (e) => {
