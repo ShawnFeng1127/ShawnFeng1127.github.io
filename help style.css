@@ -1,718 +1,218 @@
 /* ==========================================================================
-   Minimalist How Can I Help Styles — (help style.css)
-   Matches Density of projects detail.html & about.html
-   Visual Hierarchy: 1. 标题 (Title) > 2. 图片 (Image) > 3. 展示出的内容 (Summary) > 4. 了解更多 (Learn More)
+   Editorial FAQ Accordion Layout — (help style.css)
+   Replicates user-specified design:
+   - Left: Monospace tag, bold headline, brief description, white pill button
+   - Right: Interactive FAQ accordion with animated expand/collapse & chevron
+   - Fully responsive, dark-mode tuned, and bilingual compatible
    ========================================================================== */
-
-body.help-page {
-  background: linear-gradient(260deg, #08090A 5%, #0F1114 55%, #15171A 100%);
-  background-attachment: fixed;
-}
 
 .help-stage {
   position: relative;
   width: 100%;
-  max-width: 1440px;
   min-height: 100vh;
   margin: 0 auto;
-  padding: 28px 40px 24px;
+  padding: 120px 48px 100px;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 22px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   overflow-x: hidden;
 }
 
-/* ==========================================================================
-   Level 1: Minimalist Header & Top Horizontal Switcher Bar
-   (Matches .work-header in projects detail style.css)
-   ========================================================================== */
-.help-header {
-  position: relative;
-  z-index: 10;
+.help-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 8px auto 0;
+  max-width: 1220px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(460px, 1.45fr);
+  gap: 72px;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Left Column: Monospace Tag, Headline, Description & CTA Button
+   ========================================================================== */
+.help-intro-col {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
 }
 
-.help-header-title {
-  font-size: clamp(40px, 4.8vw, 64px);
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  color: var(--ink-primary);
-  line-height: 1;
-  margin-top: 10px;
+.help-eyebrow-tag {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.42);
+  margin-bottom: 26px;
+  text-transform: uppercase;
 }
 
-.help-filter-group {
+.help-main-headline {
+  font-size: clamp(38px, 4.4vw, 54px);
+  font-weight: 800;
+  line-height: 1.18;
+  color: #FFFFFF;
+  letter-spacing: -1px;
+  margin: 0 0 24px;
+}
+
+.help-main-desc {
+  font-size: 15px;
+  line-height: 1.82;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 440px;
+  margin: 0 0 36px;
+  letter-spacing: 0.2px;
+}
+
+.help-cta-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.help-email-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(18, 22, 28, 0.52);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-}
-
-.help-filter-btn {
-  border: none;
-  background: transparent;
-  color: var(--ink-secondary);
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  padding: 8px 18px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.help-filter-btn:hover {
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.help-filter-btn.is-active {
+  justify-content: center;
+  gap: 6px;
   background: #FFFFFF;
   color: #08090A;
+  font-family: inherit;
+  font-size: 15px;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.3px;
+  padding: 13px 28px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.14);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease;
+}
+
+.help-email-pill-btn:hover {
+  background: #F4F4F0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
+}
+
+.help-email-pill-btn:active {
+  transform: translateY(0);
 }
 
 /* ==========================================================================
-   Single-Proposal Stage (Only 1 Card Displayed at a Time)
-   Hierarchy inside card: 1. 标题 (Title) > 2. 图片 (Image) > 3. 展示出的内容 (Summary) > 4. 了解更多 (Learn More)
+   Right Column: Interactive FAQ Accordion
    ========================================================================== */
-.help-proposals-grid {
-  position: relative;
-  z-index: 10;
+.help-faq-col {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.help-card {
   position: relative;
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.11) 0%,
-    rgba(23, 25, 27, 0.32) 50%,
-    rgba(16, 20, 26, 0.46) 100%
-  );
-  backdrop-filter: url(#liquid-glass-refract) blur(20px) saturate(155%);
-  -webkit-backdrop-filter: url(#liquid-glass-refract) blur(20px) saturate(155%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
-  box-shadow:
-    inset 0 1.5px 2px rgba(255, 255, 255, 0.42),
-    inset 2px 0 6px rgba(255, 255, 255, 0.16),
-    inset 0 -1.5px 3px rgba(255, 255, 255, 0.12),
-    0 20px 48px rgba(0, 0, 0, 0.36);
-  padding: 26px 34px;
-  display: none;
-  flex-direction: column;
-  gap: 20px;
+  z-index: 2;
 }
 
-.help-card.is-active-panel {
-  display: flex;
-  animation: helpPanelSwitchIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes helpPanelSwitchIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.994);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* 1. 标题 (Card Title Row — Most Prominent Typography inside Card) */
-.help-card-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.help-card-title-group {
+.help-accordion-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.help-card-eyebrow {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 2.2px;
-  color: rgba(255, 255, 255, 0.75);
-  text-transform: uppercase;
-}
-
-.help-card-title {
-  font-family: 'Noto Sans SC', 'Inter', sans-serif;
-  font-size: clamp(26px, 2.8vw, 34px);
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: -0.5px;
-  line-height: 1.2;
-}
-
-.help-badge-pill {
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: var(--ink-primary);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.6px;
-}
-
-/* 2. 图片与视觉展示层 (Two Proportionally Scaled Uncropped Photos + Visual Spec Card Filling the Row) */
-.help-visual-row {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 18px;
   width: 100%;
-  height: clamp(205px, 26.5vh, 250px);
 }
 
-.help-card-media {
-  position: relative;
-  width: auto;
-  height: 100%;
-  flex: 0 0 auto;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
+.help-accordion-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 24px 0;
+  transition: border-color 0.2s ease;
 }
 
-.help-card-media img {
-  width: auto;
-  height: 100%;
-  display: block;
-  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.help-card-media:hover img {
-  transform: scale(1.035);
-}
-
-.help-media-caption {
-  position: absolute;
-  left: 12px;
-  bottom: 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(10, 14, 20, 0.68);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  color: rgba(241, 240, 235, 0.92);
-  pointer-events: none;
-}
-
-/* Right-Side Visual Spec & Color Palette Card to Fill the Row Naturally */
-.help-visual-spec-card {
-  flex: 1 1 220px;
-  min-width: 210px;
-  border-radius: 16px;
-  padding: 18px 20px;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(15, 20, 28, 0.52) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  transition: border-color var(--transition-fast), transform var(--transition-fast);
-}
-
-.help-visual-spec-card:hover {
-  border-color: rgba(255, 255, 255, 0.55);
-  transform: translateY(-2px);
-}
-
-.spec-card-top {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.spec-card-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.8px;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-}
-
-.spec-palette-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.palette-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-}
-
-.spec-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(8, 12, 16, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-.spec-metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.spec-metric-num {
-  font-size: 20px;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-}
-
-.spec-metric-tag {
-  font-size: 10.5px;
-  color: var(--ink-secondary);
-}
-
-.spec-tags-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.spec-mini-pill {
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  color: var(--ink-primary);
-}
-
-/* 3. 展示出的内容 (Minimalist 3-Column Core Summary — Matches projects detail.html) */
-.help-summary-columns {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+.help-accordion-item:first-child {
   padding-top: 4px;
 }
 
-.help-summary-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.help-summary-col-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-}
-
-.help-summary-col-desc {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.68;
-  color: var(--ink-primary);
-}
-
-/* 4. 了解更多 (Bottom Action Row — Subtle & Refined) */
-.help-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  flex-wrap: wrap;
-}
-
-.help-learn-more-btn {
-  padding: 10px 20px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #FFFFFF;
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.help-learn-more-btn:hover {
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-  color: #08090A;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(255, 255, 255, 0.28);
-}
-
-.help-copy-btn {
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #FFFFFF;
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.6px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.help-copy-btn:hover {
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-  color: #08090A;
-}
-
-/* ==========================================================================
-   Photo Preview Lightbox (Opens When Clicking Any Image on help.html)
-   ========================================================================== */
-.help-photo-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 450;
-  background: rgba(5, 8, 12, 0.86);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.help-photo-lightbox.is-active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.help-photo-lightbox-inner {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  max-width: 92vw;
-  max-height: 90vh;
-  transform: scale(0.96);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.help-photo-lightbox.is-active .help-photo-lightbox-inner {
-  transform: scale(1);
-}
-
-.help-photo-lightbox-img {
-  max-width: 90vw;
-  max-height: 82vh;
-  width: auto;
-  height: auto;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.72);
-  display: block;
-}
-
-.help-photo-lightbox-caption {
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: rgba(16, 22, 30, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  color: var(--ink-primary);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.4px;
-}
-
-.help-photo-lightbox-close {
-  position: absolute;
-  top: -14px;
-  right: -14px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  background: rgba(16, 22, 30, 0.88);
-  color: #FFFFFF;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-  transition: all var(--transition-fast);
-}
-
-.help-photo-lightbox-close:hover {
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-  color: #08090A;
-}
-
-/* ==========================================================================
-   Liquid Glass Full Details Modal (Opens When Clicking "了解更多 / Learn More")
-   ========================================================================== */
-.help-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 400;
-  background: rgba(6, 9, 13, 0.76);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.help-modal.is-active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.help-modal-card {
+.help-accordion-trigger {
   width: 100%;
-  max-width: 860px;
-  max-height: 88vh;
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(22, 24, 28, 0.88) 50%,
-    rgba(12, 14, 18, 0.94) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.30);
-  box-shadow:
-    inset 0 1.5px 2px rgba(255, 255, 255, 0.45),
-    0 28px 72px rgba(0, 0, 0, 0.65);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: #FFFFFF;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.help-accordion-question {
+  font-size: clamp(17px, 1.25vw, 19px);
+  font-weight: 600;
+  line-height: 1.45;
+  color: #FFFFFF;
+  transition: color 0.2s ease;
+}
+
+.help-accordion-trigger:hover .help-accordion-question {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.help-accordion-icon-wrap {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.help-accordion-icon {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(255, 255, 255, 0.65);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease;
+}
+
+.help-accordion-item.is-open .help-accordion-icon {
+  transform: rotate(180deg);
+  stroke: #FFFFFF;
+}
+
+/* Butter-Smooth Grid Expansion */
+.help-accordion-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.26s ease,
+              margin-top 0.32s ease;
   overflow: hidden;
-  transform: translateY(12px) scale(0.98);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.help-modal.is-active .help-modal-card {
-  transform: translateY(0) scale(1);
+.help-accordion-item.is-open .help-accordion-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 14px;
 }
 
-.help-modal-header {
-  padding: 22px 28px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+.help-accordion-inner {
+  min-height: 0;
 }
 
-.help-modal-tag {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
+.help-accordion-answer {
+  font-size: 14.5px;
+  line-height: 1.88;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+  letter-spacing: 0.15px;
 }
 
-.help-modal-title {
-  font-family: 'Noto Sans SC', 'Inter', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin-top: 4px;
-}
-
-.help-modal-close {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.help-modal-close:hover {
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-  color: #08090A;
-}
-
-.help-modal-body {
-  padding: 20px 28px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.modal-meta-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  background: rgba(8, 12, 16, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.modal-meta-row {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 12px;
-  align-items: baseline;
-  font-size: 13.5px;
-  line-height: 1.65;
-}
-
-.modal-meta-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-}
-
-.modal-meta-value {
-  color: rgba(241, 240, 235, 0.94);
-}
-
-.drawer-section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.8px;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.drawer-steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.drawer-step-box {
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.drawer-step-num {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  color: #FFFFFF;
-  margin-bottom: 5px;
-}
-
-.drawer-step-text {
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: rgba(241, 240, 235, 0.90);
-}
-
-.drawer-checklist {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.drawer-check-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  font-size: 13px;
-  color: var(--ink-primary);
-  cursor: pointer;
-}
-
-.drawer-check-item input[type="checkbox"] {
-  accent-color: #FFFFFF;
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
-}
-
-.help-modal-footer {
-  padding: 16px 28px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.help-modal-email-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-primary);
-}
-
-/* Copy Confirmation Toast */
+/* ==========================================================================
+   Copy Toast Notification
+   ========================================================================== */
 .help-toast {
   position: fixed;
   bottom: 32px;
@@ -723,6 +223,7 @@ body.help-page {
   border-radius: 999px;
   background: rgba(18, 20, 24, 0.94);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
   color: #FFFFFF;
@@ -738,25 +239,54 @@ body.help-page {
   transform: translate3d(-50%, 0, 0);
 }
 
-@media (max-width: 1024px) {
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 960px) {
   .help-stage {
-    padding: 20px;
+    padding: 100px 32px 70px;
+    min-height: auto;
   }
-  .help-visual-row {
-    flex-direction: column;
-    height: auto;
+
+  .help-container {
+    grid-template-columns: 1fr;
+    gap: 48px;
   }
-  .help-card-media,
-  .help-card-media img {
+
+  .help-main-headline {
+    font-size: 34px;
+  }
+
+  .help-main-desc {
+    max-width: 100%;
+    margin-bottom: 28px;
+  }
+
+  .help-accordion-item {
+    padding: 20px 0;
+  }
+
+  .help-accordion-question {
+    font-size: 16px;
+  }
+
+  .help-accordion-answer {
+    font-size: 14px;
+    line-height: 1.78;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-stage {
+    padding: 80px 20px 50px;
+  }
+
+  .help-main-headline {
+    font-size: 28px;
+  }
+
+  .help-email-pill-btn {
     width: 100%;
-    height: auto;
-  }
-  .help-summary-columns,
-  .drawer-steps {
-    grid-template-columns: 1fr;
-  }
-  .modal-meta-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
+    padding: 12px 20px;
   }
 }

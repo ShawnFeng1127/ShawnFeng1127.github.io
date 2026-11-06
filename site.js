@@ -2081,6 +2081,61 @@ function initHelpPageInteractions() {
       }, 2600);
     });
   });
+
+  // Help FAQ Accordion (Expand / Collapse)
+  const accordionItems = document.querySelectorAll('.help-accordion-item');
+  accordionItems.forEach((item) => {
+    const trigger = item.querySelector('.help-accordion-trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', () => {
+      const wasOpen = item.classList.contains('is-open');
+      accordionItems.forEach((other) => {
+        if (other !== item) {
+          other.classList.remove('is-open');
+          const otherTrigger = other.querySelector('.help-accordion-trigger');
+          if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+      item.classList.toggle('is-open', !wasOpen);
+      trigger.setAttribute('aria-expanded', String(!wasOpen));
+    });
+  });
+
+  // Help Email Pill Button
+  const helpEmailBtns = document.querySelectorAll('.help-email-pill-btn');
+  helpEmailBtns.forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = 'shawnfeng@moonshotacademy.cn';
+      const mailtoUrl = 'mailto:shawnfeng@moonshotacademy.cn?subject=' + encodeURIComponent('线上指导与经验交流提问');
+      const isEn = getSiteLanguage() === 'en';
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(email);
+        } else {
+          const tempArea = document.createElement('textarea');
+          tempArea.value = email;
+          tempArea.style.position = 'fixed';
+          tempArea.style.opacity = '0';
+          document.body.appendChild(tempArea);
+          tempArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempArea);
+        }
+      } catch (_) {}
+
+      showCopyToast(
+        isEn
+          ? '✓ Copied shawnfeng@moonshotacademy.cn to clipboard! Opening mail client...'
+          : '✓ 已复制邮箱 shawnfeng@moonshotacademy.cn 到剪贴板！正在打开邮件客户端...'
+      );
+
+      setTimeout(() => {
+        window.location.href = mailtoUrl;
+      }, 350);
+    });
+  });
 }
 
 /**

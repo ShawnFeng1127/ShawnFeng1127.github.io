@@ -301,234 +301,132 @@
 
     <!-- ==================== SECTION 4: HOW CAN I HELP ==================== -->
     <section class="canvas-section help-section help-stage" id="section-help">
-      <!-- Section Header & Filter Tabs -->
-      <div class="help-header">
-        <div>
-          <h2 class="help-header-title">HOW CAN I HELP</h2>
+      <div class="help-container">
+        <!-- Left Editorial & Direct CTA -->
+        <div class="help-intro-col">
+          <div class="help-eyebrow-tag">// HOW CAN I HELP</div>
+          <h2 class="help-main-headline" data-i18n-html-zh="线上指导与经验分<br>享" data-i18n-html-en="ONLINE GUIDANCE &amp;<br>EXPERIENCE SHARING">
+            线上指导与经验分<br>享
+          </h2>
+          <p class="help-main-desc" data-i18n-zh="想学习摄影构图评析、调色修图、无人机安全起飞或 Vibe Coding 个人建站？欢迎随时通过邮件向我提问交流。" data-i18n-en="Looking to improve photography framing, master color grading, fly drones safely, or build personal sites with Vibe Coding? Feel free to reach out via email anytime.">
+            想学习摄影构图评析、调色修图、无人机安全起飞或 Vibe Coding 个人建站？欢迎随时通过邮件向我提问交流。
+          </p>
+          <div class="help-cta-wrap">
+            <button type="button" class="help-email-pill-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%E4%B8%8E%E7%BB%8F%E9%AA%8C%E4%BA%A4%E6%B5%81%E6%8F%90%E9%97%AE" data-i18n-zh="发邮件提问 &gt;" data-i18n-en="EMAIL YOUR QUESTION &gt;">
+              发邮件提问 &gt;
+            </button>
+          </div>
         </div>
 
-        <div class="help-filter-group" role="tablist" aria-label="Switch Help Topic">
-          <button type="button" class="help-filter-btn is-active" role="tab" aria-selected="true" data-help-filter="photo" data-i18n-zh="01 · 摄影与调色" data-i18n-en="01 · PHOTO &amp; GRADING">
-            01 · 摄影与调色
-          </button>
-          <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="drone" data-i18n-zh="02 · 无人机航拍" data-i18n-en="02 · DRONE AERIAL">
-            02 · 无人机航拍
-          </button>
-          <button type="button" class="help-filter-btn" role="tab" aria-selected="false" data-help-filter="digital" data-i18n-zh="03 · Vibe Coding" data-i18n-en="03 · VIBE CODING">
-            03 · Vibe Coding
-          </button>
+        <!-- Right Interactive FAQ Accordion -->
+        <div class="help-faq-col" role="region" aria-label="Frequently Asked Questions">
+          <div class="help-accordion-list">
+            <!-- FAQ 1 (Expanded by Default) -->
+            <div class="help-accordion-item is-open">
+              <button type="button" class="help-accordion-trigger" aria-expanded="true">
+                <span class="help-accordion-question" data-i18n-zh="我能帮大家什么？ (How can I help?)" data-i18n-en="How can I help? (Three Core Guidance Topics)">
+                  我能帮大家什么？ (How can I help?)
+                </span>
+                <span class="help-accordion-icon-wrap" aria-hidden="true">
+                  <svg class="help-accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="help-accordion-body">
+                <div class="help-accordion-inner">
+                  <p class="help-accordion-answer" data-i18n-zh="结合我积累的摄影、航拍与数字创作经验，我主要为大家提供 3 项线上指导：① 摄影与后期修图线上指导（构图评析 + 曝光参数答疑 + Lightroom 调色示范）；② 无人机航拍与安全飞行线上指导（适飞空域申报查询 + 起飞安全参数设置 + 航拍运镜与后期分享）；③ Vibe Coding 个人建站指导（如何用 Figma + AI 将设计稿变成可交互网页并部署）。" data-i18n-en="Drawing on my experience in photography, aerial cinematography, and digital creation, I mainly provide 3 areas of online guidance: ① Photography &amp; Color Grading (framing critique, exposure Q&amp;A, and Lightroom grading demos); ② Drone Aerial &amp; Safe Flight (airspace compliance checks, safety parameters, flight maneuvers, and post-production); ③ Vibe Coding Personal Websites (turning Figma designs into interactive live websites using AI).">
+                    结合我积累的摄影、航拍与数字创作经验，我主要为大家提供 3 项线上指导：① 摄影与后期修图线上指导（构图评析 + 曝光参数答疑 + Lightroom 调色示范）；② 无人机航拍与安全飞行线上指导（适飞空域申报查询 + 起飞安全参数设置 + 航拍运镜与后期分享）；③ Vibe Coding 个人建站指导（如何用 Figma + AI 将设计稿变成可交互网页并部署）。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="help-accordion-item">
+              <button type="button" class="help-accordion-trigger" aria-expanded="false">
+                <span class="help-accordion-question" data-i18n-zh="手机拍照的问题也可以问吗？（无需专业单反）" data-i18n-en="Can I ask questions about smartphone photography? (No DSLR required)">
+                  手机拍照的问题也可以问吗？（无需专业单反）
+                </span>
+                <span class="help-accordion-icon-wrap" aria-hidden="true">
+                  <svg class="help-accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="help-accordion-body">
+                <div class="help-accordion-inner">
+                  <p class="help-accordion-answer" data-i18n-zh="当然可以！摄影的核心在于观察视角、光线捕捉与构图逻辑，而非昂贵的器材。无论是 iPhone 还是安卓手机，只要你想提升照片通透感、学习冷暖色调搭配或掌握手机端调色，都可以随时把照片发给我交流。" data-i18n-en="Definitely! Great photography comes down to perspective, light, and composition—not expensive equipment. Whether you shoot with an iPhone or Android device, feel free to send over your shots anytime if you'd like to improve clarity or learn mobile grading.">
+                    当然可以！摄影的核心在于观察视角、光线捕捉与构图逻辑，而非昂贵的器材。无论是 iPhone 还是安卓手机，只要你想提升照片通透感、学习冷暖色调搭配或掌握手机端调色，都可以随时把照片发给我交流。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="help-accordion-item">
+              <button type="button" class="help-accordion-trigger" aria-expanded="false">
+                <span class="help-accordion-question" data-i18n-zh="无人机新手不敢起飞或怕炸机怎么办？" data-i18n-en="What if I'm a beginner afraid of flying or crashing a drone?">
+                  无人机新手不敢起飞或怕炸机怎么办？
+                </span>
+                <span class="help-accordion-icon-wrap" aria-hidden="true">
+                  <svg class="help-accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="help-accordion-body">
+                <div class="help-accordion-inner">
+                  <p class="help-accordion-answer" data-i18n-zh="新手最常见的问题是起飞慌乱和环境误判。我会在线上带你理清飞行前检查清单：① UOM 实名登记与禁飞区合规查询；② 返航高度与避障动作的关键安全阈值；③ 循序渐进的视距内悬停、刷圈与运镜练习方法，帮助你建立安全飞行信心。" data-i18n-en="Hesitation and environmental misjudgment are completely normal for beginners. I can walk you through an essential pre-flight checklist: ① UOM registration and no-fly zone compliance; ② critical Return-to-Home altitude and obstacle avoidance thresholds; ③ step-by-step line-of-sight hovering, orbiting, and cinematic movements to build confidence.">
+                    新手最常见的问题是起飞慌乱和环境误判。我会在线上带你理清飞行前检查清单：① UOM 实名登记与禁飞区合规查询；② 返航高度与避障动作的关键安全阈值；③ 循序渐进的视距内悬停、刷圈与运镜练习方法，帮助你建立安全飞行信心。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="help-accordion-item">
+              <button type="button" class="help-accordion-trigger" aria-expanded="false">
+                <span class="help-accordion-question" data-i18n-zh="怎样开始？提问需要注意什么？" data-i18n-en="How do I get started? What should I include in my question?">
+                  怎样开始？提问需要注意什么？
+                </span>
+                <span class="help-accordion-icon-wrap" aria-hidden="true">
+                  <svg class="help-accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="help-accordion-body">
+                <div class="help-accordion-inner">
+                  <p class="help-accordion-answer" data-i18n-zh="只需点击左侧的「发邮件提问」发送邮件到 shawnfeng@moonshotacademy.cn 即可。提问时建议附上：① 你的照片原片（或无人机/建站疑问截图）；② 拍摄设备或当前遇到的具体卡点；③ 你希望达到的效果。我会在周末抽出时间认真查看并提供针对性建议与示范。" data-i18n-en="Simply click &quot;EMAIL YOUR QUESTION&quot; on the left or send an email to shawnfeng@moonshotacademy.cn. Please attach: ① your original photo or question screenshot; ② your gear or current issue; ③ your intended outcome. I will reply on weekends with tailored feedback.">
+                    只需点击左侧的「发邮件提问」发送邮件到 shawnfeng@moonshotacademy.cn 即可。提问时建议附上：① 你的照片原片（或无人机/建站疑问截图）；② 拍摄设备或当前遇到的具体卡点；③ 你希望达到的效果。我会在周末抽出时间认真查看并提供针对性建议与示范。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="help-accordion-item">
+              <button type="button" class="help-accordion-trigger" aria-expanded="false">
+                <span class="help-accordion-question" data-i18n-zh="你的个人拍摄经历是怎样的？" data-i18n-en="What is your personal shooting experience?">
+                  你的个人拍摄经历是怎样的？
+                </span>
+                <span class="help-accordion-icon-wrap" aria-hidden="true">
+                  <svg class="help-accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </button>
+              <div class="help-accordion-body">
+                <div class="help-accordion-inner">
+                  <p class="help-accordion-answer" data-i18n-zh="我从初中开始系统投入摄影与无人机航拍，专注城市天际线、蓝调夜景与极简构图，独立拍摄了北京、郑州、西安、重庆等城市的多组视觉专题。同时，我结合 AI 与现代前端技术（Vibe Coding）独立设计并开发了这个个人作品集网站。" data-i18n-en="I started systematically shooting photography and flying drones in middle school, focusing on urban skylines, blue-hour lighting, and minimal framing across Beijing, Zhengzhou, Xi'an, and Chongqing. I also designed and built this personal portfolio using AI and modern frontend tools (Vibe Coding).">
+                    我从初中开始系统投入摄影与无人机航拍，专注城市天际线、蓝调夜景与极简构图，独立拍摄了北京、郑州、西安、重庆等城市的多组视觉专题。同时，我结合 AI 与现代前端技术（Vibe Coding）独立设计并开发了这个个人作品集网站。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Proposals Grid -->
-      <div class="help-proposals-grid">
-        <!-- 01: 摄影与后期调色 (Default Active) -->
-        <article class="help-card is-active-panel" data-help-category="photo" role="tabpanel">
-          <div class="help-card-header">
-            <div class="help-card-title-group">
-              <h3 class="help-card-title" data-i18n-zh="摄影与后期调色" data-i18n-en="PHOTOGRAPHY &amp; COLOR GRADING">摄影与后期调色</h3>
-            </div>
-            <span class="help-badge-pill" data-i18n-zh="📱 手机 / 相机均可提问" data-i18n-en="📱 PHONE &amp; CAMERA FRIENDLY">📱 手机 / 相机均可提问</span>
-          </div>
-
-          <div class="help-visual-row">
-            <div class="help-card-media" data-open-help-photo="Project pictures/project 9.jpg" data-photo-caption="北京 · CBD 晚霞 (BEIJING CBD · AFTERGLOW)" role="button" tabindex="0" aria-label="点击放大查看图片：北京 CBD 晚霞">
-              <img src="Project pictures/project 9.jpg" alt="北京 CBD 晚霞">
-              <span class="help-media-caption">BEIJING CBD · AFTERGLOW</span>
-            </div>
-
-            <div class="help-card-media" data-open-help-photo="Project pictures/Project 3.png" data-photo-caption="北京 · CBD 蓝调时刻 (BEIJING CBD · BLUE HOUR)" role="button" tabindex="0" aria-label="点击放大查看图片：北京 CBD 蓝调时刻">
-              <img src="Project pictures/Project 3.png" alt="北京 CBD 蓝调时刻">
-              <span class="help-media-caption">BEIJING CBD · BLUE HOUR</span>
-            </div>
-          </div>
-
-          <div class="help-summary-columns">
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。" data-i18n-en="Students and beginners looking to improve framing, exposure, or Lightroom color grading.">
-                想提升拍照构图、光线控制，或想学习 Lightroom 后期调色的同学与新手。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。" data-i18n-en="Online photo critique, exposure parameter Q&amp;A, and RAW color grading walkthroughs.">
-                提供线上看片构图评析、曝光参数答疑与原片冷暖调色示范（持续 2 年摄影项目经验）。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。" data-i18n-en="1.5–2h every weekend. Email your photos or questions to shawnfeng@moonshotacademy.cn.">
-                每周末可投入 1.5–2h。直接发邮件至 shawnfeng@moonshotacademy.cn 附上照片或问题即可。
-              </p>
-            </div>
-          </div>
-
-          <div class="help-card-footer">
-            <button type="button" class="help-learn-more-btn" data-open-help-modal="photo" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
-              了解更多 / 查看完整详情 →
-            </button>
-            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%91%84%E5%BD%B1%E4%B8%8E%E8%B0%83%E8%89%B2%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
-              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
-            </button>
-          </div>
-        </article>
-
-        <!-- 02: 无人机航拍与安全飞行 -->
-        <article class="help-card" data-help-category="drone" role="tabpanel" hidden>
-          <div class="help-card-header">
-            <div class="help-card-title-group">
-              <h3 class="help-card-title" data-i18n-zh="无人机航拍与安全飞行" data-i18n-en="DRONE AERIAL &amp; SAFE FLIGHT">无人机航拍与安全飞行</h3>
-            </div>
-            <span class="help-badge-pill" data-i18n-zh="🛸 选购 / 申报 / 航拍均可提问" data-i18n-en="🛸 GEAR, AIRSPACE &amp; AERIAL Q&amp;A">🛸 选购 / 申报 / 航拍均可提问</span>
-          </div>
-
-          <div class="help-visual-row">
-            <div class="help-card-media" data-open-help-photo="Project pictures/project 4a.jpg" data-photo-caption="西安 · 中轴线航拍 (XI'AN CENTRAL AXIS · AERIAL)" role="button" tabindex="0" aria-label="点击放大查看图片：西安中轴线航拍">
-              <img src="Project pictures/project 4a.jpg" alt="西安中轴线航拍">
-              <span class="help-media-caption">XI'AN AXIS · AERIAL VIEW</span>
-            </div>
-
-            <div class="help-card-media" data-open-help-photo="Project pictures/Project 2.jpg" data-photo-caption="甘肃 · 苦水丹霞航拍 (GANSU DANXIA · TOP-DOWN)" role="button" tabindex="0" aria-label="点击放大查看图片：甘肃苦水丹霞航拍">
-              <img src="Project pictures/Project 2.jpg" alt="甘肃苦水丹霞航拍">
-              <span class="help-media-caption">GANSU DANXIA · TOP-DOWN</span>
-            </div>
-
-            <aside class="help-visual-spec-card" data-open-help-modal="drone" role="button" tabindex="0">
-              <div class="spec-card-top">
-                <span class="spec-card-label" data-i18n-zh="飞行参数 · FLIGHT TELEMETRY" data-i18n-en="FLIGHT TELEMETRY">飞行参数 · FLIGHT TELEMETRY</span>
-              </div>
-
-              <div class="spec-metrics-grid">
-                <div class="spec-metric-item">
-                  <span class="spec-metric-num">4 YRS</span>
-                  <span class="spec-metric-tag" data-i18n-zh="安全航拍经验" data-i18n-en="FLIGHT EXP">安全航拍经验</span>
-                </div>
-                <div class="spec-metric-item">
-                  <span class="spec-metric-num">120M</span>
-                  <span class="spec-metric-tag" data-i18n-zh="UOM 适飞合规" data-i18n-en="LEGAL AIRSPACE">UOM 适飞合规</span>
-                </div>
-              </div>
-
-              <div class="spec-tags-wrap">
-                <span class="spec-mini-pill">DJI AERIAL</span>
-                <span class="spec-mini-pill">UOM CHECK</span>
-                <span class="spec-mini-pill">PANORAMA</span>
-              </div>
-            </aside>
-          </div>
-
-          <div class="help-summary-columns">
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。" data-i18n-en="Beginners curious about DJI drones, airspace rules, or top-down aerial composition.">
-                想咨询大疆无人机选购、不清楚空域政策与实名申报，或想学习高空俯拍构图的同学。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。" data-i18n-en="Online guidance on UOM airspace checks, pre-flight safety, and aerial panorama editing.">
-                提供 UOM 适飞空域查询、起飞安全设置、运镜构图与全景合成线上指导（4 年航拍经验）。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。" data-i18n-en="1–1.5h every weekend. Email your drone or aerial questions to shawnfeng@moonshotacademy.cn.">
-                每周末可投入 1–1.5h。发邮件至 shawnfeng@moonshotacademy.cn 告诉我你的问题即可。
-              </p>
-            </div>
-          </div>
-
-          <div class="help-card-footer">
-            <button type="button" class="help-learn-more-btn" data-open-help-modal="drone" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
-              了解更多 / 查看完整详情 →
-            </button>
-            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5B%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%88%AA%E6%8B%8D%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
-              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
-            </button>
-          </div>
-        </article>
-
-        <!-- 03: Vibe Coding 个人建站 -->
-        <article class="help-card" data-help-category="digital" role="tabpanel" hidden>
-          <div class="help-card-header">
-            <div class="help-card-title-group">
-              <h3 class="help-card-title" data-i18n-zh="Vibe Coding 个人建站" data-i18n-en="VIBE CODING &amp; WEB CREATION">Vibe Coding 个人建站</h3>
-            </div>
-            <span class="help-badge-pill" data-i18n-zh="💻 Figma + AI 零基础建站指导" data-i18n-en="💻 FIGMA + AI VIBE CODING">💻 Figma + AI 零基础建站指导</span>
-          </div>
-
-          <div class="help-visual-row">
-            <div class="help-card-media" data-open-help-photo="Project pictures/vibe_coding_1.png" data-photo-caption="Figma 布局设计与液态玻璃组件系统 (FIGMA UI &amp; LIQUID GLASS SYSTEM)" role="button" tabindex="0" aria-label="点击放大查看图片：Figma 布局设计与液态玻璃组件系统">
-              <img src="Project pictures/vibe_coding_1.png" alt="Figma UI &amp; Liquid Glass Design System">
-              <span class="help-media-caption">FIGMA UI · DESIGN SYSTEM</span>
-            </div>
-
-            <div class="help-card-media" data-open-help-photo="Project pictures/vibe_coding_2.png" data-photo-caption="AI Vibe Coding 提示词生成代码与 GitHub Pages 部署 (AI PROMPT TO LIVE SITE)" role="button" tabindex="0" aria-label="点击放大查看图片：AI Vibe Coding 提示词与部署">
-              <img src="Project pictures/vibe_coding_2.png" alt="AI Vibe Coding Studio &amp; GitHub Pages Deployment">
-              <span class="help-media-caption">VIBE CODING · LIVE DEPLOY</span>
-            </div>
-
-            <aside class="help-visual-spec-card" data-open-help-modal="digital" role="button" tabindex="0">
-              <div class="spec-card-top">
-                <span class="spec-card-label" data-i18n-zh="建站技术栈 · VIBE CODING STACK" data-i18n-en="VIBE CODING STACK">建站技术栈 · VIBE CODING STACK</span>
-              </div>
-
-              <div class="spec-metrics-grid">
-                <div class="spec-metric-item">
-                  <span class="spec-metric-num">AI+UI</span>
-                  <span class="spec-metric-tag" data-i18n-zh="Figma 转交互网页" data-i18n-en="FIGMA TO WEB">Figma 转交互网页</span>
-                </div>
-                <div class="spec-metric-item">
-                  <span class="spec-metric-num">100%</span>
-                  <span class="spec-metric-tag" data-i18n-zh="GitHub Pages 上线" data-i18n-en="LIVE DEPLOY">GitHub Pages 上线</span>
-                </div>
-              </div>
-
-              <div class="spec-tags-wrap">
-                <span class="spec-mini-pill">FIGMA UI</span>
-                <span class="spec-mini-pill">VIBE CODING</span>
-                <span class="spec-mini-pill">GITHUB PAGES</span>
-              </div>
-            </aside>
-          </div>
-
-          <div class="help-summary-columns">
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="帮谁 · WHO" data-i18n-en="WHO I HELP">帮谁 · WHO</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="没有深厚编程基础，但想通过 Figma + AI (Vibe Coding) 搭建个人网站并发布上线的同学。" data-i18n-en="Students who want to build and publish a personal website using Figma + AI (Vibe Coding).">
-                没有深厚编程基础，但想通过 Figma + AI (Vibe Coding) 搭建个人网站并发布上线的同学。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="做什么 · ONLINE GUIDANCE" data-i18n-en="WHAT WE DO">做什么 · ONLINE GUIDANCE</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="线上指导如何编写结构化 AI 提示词（Prompt）、调试 HTML/CSS 排版动画与部署到 GitHub Pages。" data-i18n-en="Online guidance on writing structured AI prompts, refining HTML/CSS layouts, and deploying to GitHub Pages.">
-                线上指导如何编写结构化 AI 提示词（Prompt）、调试 HTML/CSS 排版动画与部署到 GitHub Pages。
-              </p>
-            </div>
-
-            <div class="help-summary-col">
-              <h4 class="help-summary-col-title" data-i18n-zh="怎样开始 · HOW TO START" data-i18n-en="HOW TO START">怎样开始 · HOW TO START</h4>
-              <p class="help-summary-col-desc" data-i18n-zh="每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或网页问题即可。" data-i18n-en="45–60 min weekly. Email your Figma design or webpage question to shawnfeng@moonshotacademy.cn.">
-                每周可投入 45–60min。发邮件至 shawnfeng@moonshotacademy.cn 附上设计稿或网页问题即可。
-              </p>
-            </div>
-          </div>
-
-          <div class="help-card-footer">
-            <button type="button" class="help-learn-more-btn" data-open-help-modal="digital" data-i18n-zh="了解更多 / 查看完整详情 →" data-i18n-en="LEARN MORE / FULL DETAILS →">
-              了解更多 / 查看完整详情 →
-            </button>
-            <button type="button" class="help-copy-btn" data-copy-text="shawnfeng@moonshotacademy.cn" data-mailto="mailto:shawnfeng@moonshotacademy.cn?subject=%5BVibe%20Coding%20%E5%BB%BA%E7%AB%99%E7%BA%BF%E4%B8%8A%E6%8C%87%E5%AF%BC%5D%20Hi%20Shawn%EF%BC%81" data-i18n-zh="✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)" data-i18n-en="✉ EMAIL ME (shawnfeng@moonshotacademy.cn)">
-              ✉ 发邮件提问 (shawnfeng@moonshotacademy.cn)
-            </button>
-          </div>
-        </article>
       </div>
     </section>
 
