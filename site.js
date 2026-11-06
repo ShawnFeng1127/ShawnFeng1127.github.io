@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initGlobalLanguageSwitcher();
   initSiteEntranceAnimation();
+  initSiteSearch();
   initAmbientGlow();
   initDepthParallax();
   initInteractiveDrone();
@@ -102,141 +103,284 @@ function initSiteEntranceAnimation() {
 }
 
 function playFullEntranceSequence(isManualReplay) {
-  const existing = document.getElementById('site-intro-overlay');
+  const existing = document.getElementById('site-pixel-preloader') || document.getElementById('site-intro-overlay');
   if (existing) existing.remove();
 
   document.body.classList.add('is-intro-stage-hold');
 
-  // Generate 9 curved mechanical camera aperture blades
-  const bladesMarkup = Array.from({ length: 9 })
-    .map((_, i) => {
-      const angle = i * 40;
-      return `<g transform="rotate(${angle} 250 250)">
-        <path d="M 250 76 C 308 82, 360 124, 376 184 L 296 206 C 280 166, 264 126, 250 76 Z"
-              fill="rgba(16, 20, 26, 0.86)"
-              stroke="rgba(255, 255, 255, 0.18)"
-              stroke-width="1" />
-      </g>`;
-    })
-    .join('');
-
   const overlay = document.createElement('div');
-  overlay.id = 'site-intro-overlay';
-  overlay.className = 'site-intro-overlay';
+  overlay.id = 'site-pixel-preloader';
+  overlay.className = 'site-pixel-preloader';
   overlay.setAttribute('aria-hidden', 'true');
   overlay.innerHTML = `
-    <div class="intro-shutter intro-shutter--top"></div>
-    <div class="intro-shutter intro-shutter--bottom"></div>
-    <div class="intro-shutter-flash"></div>
+    <div class="pixel-grid-backdrop" aria-hidden="true"></div>
+    <div class="pixel-shutter-curtain pixel-shutter-curtain--top" aria-hidden="true"></div>
+    <div class="pixel-shutter-curtain pixel-shutter-curtain--bottom" aria-hidden="true"></div>
+    <div class="pixel-flash-overlay" aria-hidden="true"></div>
 
-    <div class="intro-lens-stage">
-      <svg class="intro-aperture-svg" viewBox="0 0 500 500" aria-hidden="true">
-        <defs>
-          <linearGradient id="lens-coating-amber" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(255, 255, 255, 0.48)" />
-            <stop offset="50%" stop-color="rgba(255, 255, 255, 0.08)" />
-            <stop offset="100%" stop-color="rgba(215, 220, 230, 0.28)" />
-          </linearGradient>
-        </defs>
+    <header class="pixel-header-row">
+      <span>// SYS.BOOT : <strong class="pixel-studio-badge">SHAWN FENG</strong></span>
+      <span>[ PIXEL MATRIX 2026 ]</span>
+    </header>
 
-        <!-- Outer Camera Lens Barrel Ring -->
-        <circle cx="250" cy="250" r="204" fill="none" stroke="rgba(255, 255, 255, 0.14)" stroke-width="1" />
-        <circle cx="250" cy="250" r="184" fill="none" stroke="url(#lens-coating-amber)" stroke-width="1.5" />
-
-        <!-- 9-Blade Mechanical Camera Aperture Diaphragm -->
-        <g class="intro-aperture-blades">
-          ${bladesMarkup}
-          <circle cx="250" cy="250" r="144" fill="none" stroke="rgba(255, 255, 255, 0.42)" stroke-width="1.2" />
-        </g>
-      </svg>
-
-      <!-- Center Camera Autofocus Frame ([ + ]) & Optical Focus Pull -->
-      <div class="intro-af-box">
-        <div class="intro-af-corner intro-af-corner--tl"></div>
-        <div class="intro-af-corner intro-af-corner--tr"></div>
-        <div class="intro-af-corner intro-af-corner--bl"></div>
-        <div class="intro-af-corner intro-af-corner--br"></div>
-        <div class="intro-title-cn">冯靖翔</div>
-        <div class="intro-title-en">SHAWN FENG</div>
+    <main class="pixel-center-stage">
+      <div class="pixel-canvas-frame">
+        <canvas id="pixel-matrix-canvas" class="pixel-matrix-canvas" width="160" height="160"></canvas>
       </div>
-    </div>
+      <div class="pixel-phase-badge" id="pixel-phase-badge">INITIALIZING IDENTITY</div>
+      <div class="pixel-counter-text" id="pixel-counter-text">00%</div>
+      <div class="pixel-progress-wrap">
+        <div class="pixel-progress-bar" id="pixel-progress-bar"></div>
+      </div>
+      <div class="pixel-status-ticker" id="pixel-status-ticker">MOUNTING PIXEL GRAPHICS ENGINE...</div>
+    </main>
 
-    <!-- Minimalist Photography Exposure Bar -->
-    <div class="intro-exposure-bar">
-      <span>35MM</span>
-      <span><strong class="intro-exposure-val" id="intro-exp-aperture">f/2.8</strong></span>
-      <span><strong class="intro-exposure-val" id="intro-exp-shutter">1/250s</strong></span>
-      <span>ISO <strong class="intro-exposure-val">100</strong></span>
-      <span class="intro-af-indicator"><span class="intro-af-dot"></span>AF-S</span>
-    </div>
-
-    <button type="button" class="intro-skip-btn" id="intro-skip-btn">SKIP</button>
+    <footer class="pixel-footer-row">
+      <span>[ 像素风加载 // S · 镜头 · 无人机 ]</span>
+      <button type="button" class="pixel-skip-btn" id="pixel-skip-btn">SKIP // ESC</button>
+    </footer>
   `;
 
   document.body.appendChild(overlay);
 
-  const apertureEl = document.getElementById('intro-exp-aperture');
-  const shutterEl = document.getElementById('intro-exp-shutter');
-  const skipBtn = document.getElementById('intro-skip-btn');
+  const canvas = document.getElementById('pixel-matrix-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const phaseBadge = document.getElementById('pixel-phase-badge');
+  const counterText = document.getElementById('pixel-counter-text');
+  const progressBar = document.getElementById('pixel-progress-bar');
+  const tickerText = document.getElementById('pixel-status-ticker');
+  const skipBtn = document.getElementById('pixel-skip-btn');
 
-  const apertureSteps = ['f/5.6', 'f/4.0', 'f/2.8', 'f/2.0', 'f/1.4'];
-  const shutterSteps = ['1/1000s', '1/500s', '1/250s'];
-  const duration = isManualReplay ? 1750 : 1650;
+  // 16x16 Pixel Art Matrices
+  const MATRIX_S = [
+    "................",
+    "....########....",
+    "...##########...",
+    "..############..",
+    "..###......###..",
+    "..###...........",
+    "..###...........",
+    "...##########...",
+    "....##########..",
+    "...........###..",
+    "...........###..",
+    "..###......###..",
+    "..############..",
+    "...##########...",
+    "....########....",
+    "................"
+  ];
+
+  const MATRIX_LENS = [
+    ".....######.....",
+    "...##########...",
+    "..############..",
+    ".###...##...###.",
+    ".##...####...##.",
+    "###..######..###",
+    "###..##..##..###",
+    "###..##..##..###",
+    "###..##..##..###",
+    "###..######..###",
+    ".##...####...##.",
+    ".###...##...###.",
+    "..############..",
+    "...##########...",
+    ".....######.....",
+    "................"
+  ];
+
+  const MATRIX_DRONE_1 = [
+    "###..........###",
+    ".#............#.",
+    "..#..........#..",
+    "...#........#...",
+    "....#..##..#....",
+    ".....######.....",
+    "....########....",
+    "....###..###....",
+    "....###..###....",
+    "....########....",
+    ".....######.....",
+    "....#..##..#....",
+    "...#........#...",
+    "..#..........#..",
+    ".#............#.",
+    "###..........###"
+  ];
+
+  const MATRIX_DRONE_2 = [
+    ".#............#.",
+    "###..........###",
+    "..#..........#..",
+    "...#........#...",
+    "....#..##..#....",
+    ".....######.....",
+    "....########....",
+    "....###..###....",
+    "....###..###....",
+    "....########....",
+    ".....######.....",
+    "....#..##..#....",
+    "...#........#...",
+    "..#..........#..",
+    "###..........###",
+    ".#............#."
+  ];
+
+  function getPixelMatrix(rows) {
+    const grid = [];
+    for (let r = 0; r < 16; r++) {
+      const row = [];
+      const line = rows[r] || '................';
+      for (let c = 0; c < 16; c++) {
+        row.push(line[c] === '#' ? 1 : 0);
+      }
+      grid.push(row);
+    }
+    return grid;
+  }
+
+  const gridS = getPixelMatrix(MATRIX_S);
+  const gridLens = getPixelMatrix(MATRIX_LENS);
+  const gridDrone1 = getPixelMatrix(MATRIX_DRONE_1);
+  const gridDrone2 = getPixelMatrix(MATRIX_DRONE_2);
+
+  const duration = isManualReplay ? 1950 : 2150;
   const startTime = performance.now();
   let finished = false;
-  let focusLocked = false;
 
   function completeIntro() {
     if (finished) return;
     finished = true;
-    overlay.classList.add('is-shutter-flash');
+    overlay.classList.add('is-flash');
     overlay.classList.add('is-opening');
     document.body.classList.remove('is-intro-stage-hold');
 
     setTimeout(() => {
-      overlay.classList.remove('is-shutter-flash');
-    }, 220);
+      overlay.classList.remove('is-flash');
+    }, 240);
 
     setTimeout(() => {
       overlay.classList.add('is-hidden');
       setTimeout(() => {
         if (overlay.parentNode) overlay.remove();
-      }, 450);
-    }, 880);
+      }, 550);
+    }, 850);
   }
 
   if (skipBtn) {
     skipBtn.addEventListener('click', completeIntro);
   }
 
-  function stepExposure(now) {
+  const onEscKey = (e) => {
+    if (e.key === 'Escape') {
+      completeIntro();
+      document.removeEventListener('keydown', onEscKey);
+    }
+  };
+  document.addEventListener('keydown', onEscKey);
+
+  function drawPixelMatrix(grid, alpha = 1, accentColor = '#FFFFFF', glowColor = 'rgba(255, 255, 255, 0.85)') {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, 160, 160);
+    const cellSize = 8;
+    const gap = 2;
+
+    for (let r = 0; r < 16; r++) {
+      for (let c = 0; c < 16; c++) {
+        const val = grid[r][c];
+        const x = c * (cellSize + gap);
+        const y = r * (cellSize + gap);
+
+        if (val > 0.05) {
+          ctx.fillStyle = accentColor;
+          ctx.globalAlpha = Math.min(1, val * alpha);
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 10;
+          ctx.fillRect(x, y, cellSize, cellSize);
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.globalAlpha = 0.5;
+          ctx.shadowBlur = 0;
+          ctx.fillRect(x + 3, y + 3, 2, 2);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  function interpolateMatrices(m1, m2, t) {
+    const res = [];
+    for (let r = 0; r < 16; r++) {
+      const row = [];
+      for (let c = 0; c < 16; c++) {
+        const v1 = m1[r][c];
+        const v2 = m2[r][c];
+        row.push(v1 + (v2 - v1) * t);
+      }
+      res.push(row);
+    }
+    return res;
+  }
+
+  function step(now) {
     if (finished) return;
     const elapsed = now - startTime;
-    const rawProgress = Math.min(1, elapsed / duration);
-    const eased = 1 - Math.pow(1 - rawProgress, 3);
+    const progress = Math.min(1, elapsed / duration);
+    const pct = Math.floor(progress * 100);
 
-    if (apertureEl) {
-      apertureEl.textContent =
-        apertureSteps[Math.min(apertureSteps.length - 1, Math.floor(eased * apertureSteps.length))];
+    if (counterText) {
+      counterText.textContent = String(pct).padStart(2, '0') + '%';
     }
-    if (shutterEl) {
-      shutterEl.textContent =
-        shutterSteps[Math.min(shutterSteps.length - 1, Math.floor(eased * shutterSteps.length))];
+    if (progressBar) {
+      progressBar.style.width = pct + '%';
     }
 
-    if (rawProgress > 0.56 && !focusLocked) {
-      focusLocked = true;
-      overlay.classList.add('is-focus-locked');
-    }
-
-    if (rawProgress < 1) {
-      requestAnimationFrame(stepExposure);
+    if (progress < 0.35) {
+      // Phase 1: Letter S
+      if (phaseBadge) phaseBadge.textContent = 'PHASE 01: MOUNTING IDENTITY [S]';
+      if (tickerText) tickerText.textContent = 'SHAWN FENG // INITIALIZING VISUAL PORTFOLIO';
+      drawPixelMatrix(gridS, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.85)');
+    } else if (progress >= 0.35 && progress < 0.42) {
+      // Transition: S -> Lens
+      const t = (progress - 0.35) / 0.07;
+      if (phaseBadge) phaseBadge.textContent = 'TRANSITION: [S] -> [LENS]';
+      const blended = interpolateMatrices(gridS, gridLens, t);
+      drawPixelMatrix(blended, 1, '#E6F0FA', 'rgba(180, 215, 255, 0.8)');
+    } else if (progress >= 0.42 && progress < 0.70) {
+      // Phase 2: Camera Lens
+      if (phaseBadge) phaseBadge.textContent = 'PHASE 02: CALIBRATING OPTICAL LENS [CAM]';
+      if (tickerText) tickerText.textContent = 'APERTURE F/1.4 // RAW TWILIGHT EXPOSURE LOCK';
+      drawPixelMatrix(gridLens, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.85)');
+    } else if (progress >= 0.70 && progress < 0.76) {
+      // Transition: Lens -> Drone
+      const t = (progress - 0.70) / 0.06;
+      if (phaseBadge) phaseBadge.textContent = 'TRANSITION: [LENS] -> [DRONE]';
+      const blended = interpolateMatrices(gridLens, gridDrone1, t);
+      drawPixelMatrix(blended, 1, '#EBF5EB', 'rgba(190, 255, 200, 0.8)');
+    } else if (progress >= 0.76 && progress < 0.99) {
+      // Phase 3: Drone with live rotating blades
+      if (phaseBadge) phaseBadge.textContent = 'PHASE 03: ARMING DRONE FLIGHT MATRIX [UAV]';
+      if (tickerText) tickerText.textContent = 'DJI TELEMETRY ARMED // UOM AIRSPACE LEGAL 120M';
+      const isAltFrame = Math.floor(elapsed / 80) % 2 === 0;
+      drawPixelMatrix(isAltFrame ? gridDrone1 : gridDrone2, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.9)');
     } else {
-      setTimeout(completeIntro, 160);
+      // 100%: Finished
+      if (phaseBadge) phaseBadge.textContent = 'SYSTEM ARMED // LAUNCHING EXPERIENCE';
+      if (tickerText) tickerText.textContent = 'WELCOME TO SHAWN FENG 2026';
+      drawPixelMatrix(gridDrone1, 1, '#FFFFFF', 'rgba(255, 255, 255, 1)');
+      completeIntro();
+      return;
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
     }
   }
 
-  requestAnimationFrame(stepExposure);
+  requestAnimationFrame(step);
 }
 
 /**
@@ -4563,4 +4707,399 @@ function initDroneFpvCard() {
   }
 
   requestAnimationFrame(stepFpvSimulation);
+}
+
+/**
+ * 9. Global Spotlight Command Palette Search (#site-search-modal)
+ *    - Opens via #nav-search-btn or Cmd+K / Ctrl+K / '/'
+ *    - Live search across Sections, Photography Works, 3D Flight Simulator, FAQ items
+ *    - Keyboard accessible with live match highlighting
+ */
+function initSiteSearch() {
+  const modal = document.getElementById('site-search-modal');
+  const backdrop = document.getElementById('site-search-backdrop');
+  const searchInput = document.getElementById('site-search-input');
+  const clearBtn = document.getElementById('search-clear-btn');
+  const resultsContainer = document.getElementById('search-results-list');
+  const triggerBtn = document.getElementById('nav-search-btn');
+  const quickTags = document.querySelectorAll('.search-tag-chip');
+
+  if (!modal || !searchInput || !resultsContainer) return;
+
+  const SEARCH_DATABASE = [
+    // Sections
+    {
+      id: 'sec-home',
+      categoryZh: '页面板块',
+      categoryEn: 'SECTION',
+      icon: '🏠',
+      titleZh: '首页 · 冯靖翔 个人主页',
+      titleEn: 'Home · Shawn Feng Personal Portfolio',
+      descZh: '透过视觉镜头观察并记录这个世界，14岁独立摄影创作者',
+      descEn: 'Seeing the world through a visual lens · 14-year-old creator',
+      action: () => scrollToSection('section-home')
+    },
+    {
+      id: 'sec-about',
+      categoryZh: '页面板块',
+      categoryEn: 'SECTION',
+      icon: '👤',
+      titleZh: '关于我 · 个人背景与探月学校',
+      titleEn: 'About Me · Moonshot Academy & Background',
+      descZh: '来自北京，探月学校九年级，热爱摄影、无人机与数字交互',
+      descEn: 'Moonshot Academy 9th grader from Beijing, passion for visual arts',
+      action: () => scrollToSection('section-about')
+    },
+    {
+      id: 'sec-work',
+      categoryZh: '页面板块',
+      categoryEn: 'SECTION',
+      icon: '📷',
+      titleZh: '作品集 · 精选摄影与无人机航拍',
+      titleEn: 'Work · Photography & Drone Aerial Portfolio',
+      descZh: '北京CBD、甘肃苦水丹霞、西安中轴线、重庆山城风光',
+      descEn: 'Beijing CBD, Gansu Danxia, Xi’an central axis, Chongqing',
+      action: () => scrollToSection('section-work')
+    },
+    {
+      id: 'sec-help',
+      categoryZh: '页面板块',
+      categoryEn: 'SECTION',
+      icon: '💬',
+      titleZh: '帮助与交流 · 线上指导与常见问答',
+      titleEn: 'How Can I Help · Online Guidance & FAQ',
+      descZh: '摄影构图修图、无人机安全起飞、Vibe Coding建站线上交流',
+      descEn: 'Photo critique, drone safety checks, Vibe Coding personal site',
+      action: () => scrollToSection('section-help')
+    },
+
+    // Photography Works
+    {
+      id: 'work-cbd-sunset',
+      categoryZh: '摄影作品',
+      categoryEn: 'WORK',
+      icon: '🌇',
+      titleZh: '北京 · CBD 晚霞 (Afterglow)',
+      titleEn: 'Beijing CBD · Sunset Afterglow',
+      descZh: '国贸天际线与日落晚霞，冷暖色调对冲与长焦空间压缩',
+      descEn: 'Sunset afterglow over Beijing CBD skyline, warm/cool palette',
+      action: () => {
+        scrollToSection('section-work');
+      }
+    },
+    {
+      id: 'work-cbd-blue',
+      categoryZh: '摄影作品',
+      categoryEn: 'WORK',
+      icon: '🌃',
+      titleZh: '北京 · CBD 蓝调时刻 (Blue Hour)',
+      titleEn: 'Beijing CBD · Twilight Blue Hour',
+      descZh: '夜幕降临时的纯净蓝调与城市车流光轨交织',
+      descEn: 'Clean deep blue twilight hour and urban light trails',
+      action: () => {
+        scrollToSection('section-work');
+      }
+    },
+    {
+      id: 'work-xian-axis',
+      categoryZh: '航拍作品',
+      categoryEn: 'AERIAL',
+      icon: '🛸',
+      titleZh: '西安 · 城市中轴线航拍',
+      titleEn: 'Xi’an · Central Axis Aerial View',
+      descZh: '大疆无人机高空俯拍，古今交融的历史城市对称中轴构图',
+      descEn: 'Top-down aerial view of Xi’an historic central axis',
+      action: () => {
+        scrollToSection('section-work');
+      }
+    },
+    {
+      id: 'work-danxia',
+      categoryZh: '航拍作品',
+      categoryEn: 'AERIAL',
+      icon: '🏜️',
+      titleZh: '甘肃 · 苦水丹霞高空俯拍',
+      titleEn: 'Gansu · Kushui Danxia Aerial Top-Down',
+      descZh: '自然地貌纹理与色彩层次，极简大地的几何视觉表现',
+      descEn: 'Geometric earth textures and geological strata in Gansu',
+      action: () => {
+        scrollToSection('section-work');
+      }
+    },
+    {
+      id: 'feature-fpv',
+      categoryZh: '互动体验',
+      categoryEn: 'FEATURE',
+      icon: '🎮',
+      titleZh: 'DJI Fly 3D 飞行模拟器',
+      titleEn: 'DJI Fly 3D Minimalist Flight Simulator',
+      descZh: '第一/第三人称几何视角，支持键盘 W/A/S/D、Q/E 与云台俯仰控制',
+      descEn: '3D geometric flight simulator with city, mountain & grassland scenes',
+      action: () => {
+        const fpvModal = document.getElementById('drone-fpv-modal');
+        if (fpvModal) {
+          fpvModal.classList.add('is-active');
+          fpvModal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+          window.dispatchEvent(new CustomEvent('shawn:open-fpv'));
+        }
+      }
+    },
+
+    // FAQ items
+    {
+      id: 'faq-1',
+      categoryZh: '常见问答',
+      categoryEn: 'FAQ',
+      icon: '❓',
+      titleZh: '我能帮大家什么？ (How can I help?)',
+      titleEn: 'How can I help? (Three Core Guidance Topics)',
+      descZh: '提供摄影与后期修图、无人机航拍安全、Vibe Coding建站 3 项线上指导',
+      descEn: '3 core guidance topics: photo grading, drone safety, Vibe Coding',
+      action: () => openHelpFaq(0)
+    },
+    {
+      id: 'faq-2',
+      categoryZh: '常见问答',
+      categoryEn: 'FAQ',
+      icon: '📱',
+      titleZh: '手机拍照的问题也可以问吗？（无需专业单反）',
+      titleEn: 'Can I ask questions about smartphone photography?',
+      descZh: '当然可以！摄影核心在于观察视角与光线，iPhone 与安卓手机均可提问',
+      descEn: 'Yes! Photography is about perspective and light, mobile photos welcome',
+      action: () => openHelpFaq(1)
+    },
+    {
+      id: 'faq-3',
+      categoryZh: '常见问答',
+      categoryEn: 'FAQ',
+      icon: '🛡️',
+      titleZh: '无人机新手不敢起飞或怕炸机怎么办？',
+      titleEn: 'What if I am a beginner afraid of flying or crashing a drone?',
+      descZh: '理清飞行前检查清单：UOM实名登记、适飞合规、返航高度与避障安全',
+      descEn: 'Essential checklist: UOM compliance, RTH altitude & obstacle safety',
+      action: () => openHelpFaq(2)
+    },
+    {
+      id: 'faq-4',
+      categoryZh: '常见问答',
+      categoryEn: 'FAQ',
+      icon: '✉️',
+      titleZh: '怎样开始？提问需要注意什么？',
+      titleEn: 'How do I get started? What should I include in my question?',
+      descZh: '发邮件至 shawnfeng@moonshotacademy.cn 附上照片原片、设备或卡点',
+      descEn: 'Email shawnfeng@moonshotacademy.cn with your photos or questions',
+      action: () => openHelpFaq(3)
+    },
+    {
+      id: 'faq-5',
+      categoryZh: '常见问答',
+      categoryEn: 'FAQ',
+      icon: '🎬',
+      titleZh: '你的个人拍摄经历是怎样的？',
+      titleEn: 'What is your personal shooting experience?',
+      descZh: '初中开始系统投入摄影与航拍，结合AI与现代前端独立打造本作品集',
+      descEn: 'Years of cityscape and aerial shooting, built this portfolio with Vibe Coding',
+      action: () => openHelpFaq(4)
+    }
+  ];
+
+  let selectedIdx = 0;
+  let currentMatches = [];
+
+  function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function openHelpFaq(faqIndex) {
+    scrollToSection('section-help');
+    setTimeout(() => {
+      const items = document.querySelectorAll('.help-accordion-item');
+      if (items[faqIndex]) {
+        items.forEach((it, idx) => {
+          const isOpen = idx === faqIndex;
+          it.classList.toggle('is-open', isOpen);
+          const trig = it.querySelector('.help-accordion-trigger');
+          if (trig) trig.setAttribute('aria-expanded', String(isOpen));
+        });
+        items[faqIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 450);
+  }
+
+  function openSearchModal() {
+    modal.classList.add('is-active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    renderResults('');
+    setTimeout(() => searchInput.focus(), 80);
+  }
+
+  function closeSearchModal() {
+    modal.classList.remove('is-active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function renderResults(query) {
+    const isEn = getSiteLanguage() === 'en';
+    const cleanQuery = (query || '').trim().toLowerCase();
+
+    if (!cleanQuery) {
+      currentMatches = SEARCH_DATABASE;
+    } else {
+      currentMatches = SEARCH_DATABASE.filter((item) => {
+        const text = `${item.titleZh} ${item.titleEn} ${item.descZh} ${item.descEn} ${item.categoryZh} ${item.categoryEn}`.toLowerCase();
+        return text.includes(cleanQuery);
+      });
+    }
+
+    selectedIdx = 0;
+    resultsContainer.innerHTML = '';
+
+    if (currentMatches.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="search-empty-state">
+          ${isEn ? 'No matching results found for "' + escapeHtml(query) + '"' : '未找到与 “' + escapeHtml(query) + '” 相关的结果'}
+        </div>
+      `;
+      return;
+    }
+
+    currentMatches.forEach((item, idx) => {
+      const el = document.createElement('div');
+      el.className = 'search-result-item' + (idx === 0 ? ' is-selected' : '');
+      el.setAttribute('role', 'option');
+      el.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+
+      const title = isEn ? item.titleEn : item.titleZh;
+      const desc = isEn ? item.descEn : item.descZh;
+      const cat = isEn ? item.categoryEn : item.categoryZh;
+
+      const highlightedTitle = highlightMatch(title, cleanQuery);
+
+      el.innerHTML = `
+        <div class="search-result-left">
+          <span class="search-result-icon">${item.icon}</span>
+          <div class="search-result-texts">
+            <span class="search-result-title">${highlightedTitle}</span>
+            <span class="search-result-desc">${escapeHtml(desc)}</span>
+          </div>
+        </div>
+        <span class="search-result-cat">${escapeHtml(cat)}</span>
+      `;
+
+      el.addEventListener('click', () => {
+        closeSearchModal();
+        item.action();
+      });
+
+      resultsContainer.appendChild(el);
+    });
+  }
+
+  function highlightMatch(text, query) {
+    if (!query) return escapeHtml(text);
+    const escapedText = escapeHtml(text);
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return escapedText.replace(regex, '<mark>$1</mark>');
+  }
+
+  function escapeHtml(str) {
+    return (str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function updateSelected() {
+    const items = resultsContainer.querySelectorAll('.search-result-item');
+    items.forEach((item, idx) => {
+      const isSel = idx === selectedIdx;
+      item.classList.toggle('is-selected', isSel);
+      item.setAttribute('aria-selected', String(isSel));
+      if (isSel) {
+        item.scrollIntoView({ block: 'nearest' });
+      }
+    });
+  }
+
+  // Event Listeners
+  if (triggerBtn) {
+    triggerBtn.addEventListener('click', openSearchModal);
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', closeSearchModal);
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      renderResults('');
+      searchInput.focus();
+    });
+  }
+
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (clearBtn) clearBtn.style.display = val ? 'block' : 'none';
+    renderResults(val);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentMatches.length > 0) {
+        selectedIdx = (selectedIdx + 1) % currentMatches.length;
+        updateSelected();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentMatches.length > 0) {
+        selectedIdx = (selectedIdx - 1 + currentMatches.length) % currentMatches.length;
+        updateSelected();
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentMatches[selectedIdx]) {
+        closeSearchModal();
+        currentMatches[selectedIdx].action();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSearchModal();
+    }
+  });
+
+  quickTags.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const term = chip.getAttribute('data-search-term') || chip.textContent;
+      searchInput.value = term;
+      if (clearBtn) clearBtn.style.display = 'block';
+      renderResults(term);
+      searchInput.focus();
+    });
+  });
+
+  // Global Shortcut: Cmd+K / Ctrl+K / '/'
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (modal.classList.contains('is-active')) {
+        closeSearchModal();
+      } else {
+        openSearchModal();
+      }
+    } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      openSearchModal();
+    } else if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+      closeSearchModal();
+    }
+  });
 }
