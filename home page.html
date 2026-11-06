@@ -60,6 +60,10 @@
       <button type="button" class="nav-lang-btn" aria-label="Switch Language / 切换语言">
         <span class="lang-opt" data-lang="zh">中</span><span class="lang-sep">/</span><span class="lang-opt" data-lang="en">EN</span>
       </button>
+      <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-label="打开全屏导航菜单 / Open Fullscreen Menu" title="打开全屏导航菜单" aria-expanded="false" aria-controls="fullscreen-nav-drawer">
+        <span class="menu-bar menu-bar--top"></span>
+        <span class="menu-bar menu-bar--bottom"></span>
+      </button>
     </div>
   </header>
 
@@ -773,6 +777,71 @@
   <!-- Copy Success Toast -->
   <div id="help-copy-toast" class="help-toast" role="status" aria-live="polite">
     ✓ 已复制邮箱地址 shawnfeng@moonshotacademy.cn！欢迎随时发邮件获取线上指导
+  </div>
+
+  <!-- ==========================================================================
+       Fullscreen Brutalist Navigation Drawer (Image 1 & Image 2 Style)
+       ========================================================================== -->
+  <div id="fullscreen-nav-drawer" class="fullscreen-nav-drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="drawer-header-bar">
+      <div class="drawer-brand-col">
+        <span class="drawer-brand-letter">S</span>
+      </div>
+      <div class="drawer-ticker-col">
+        <span class="drawer-ticker-muted">SEE </span><span class="drawer-ticker-bold">THE WORLD</span><span class="drawer-cursor-block" aria-hidden="true"></span>
+      </div>
+      <div class="drawer-actions-col">
+        <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="关闭全屏菜单 / Close Menu">
+          <span class="drawer-close-text">CLOSE</span>
+          <span class="drawer-close-icon">&times;</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer-content-body">
+      <!-- Left Column: Giant Numbered Navigation List -->
+      <nav class="drawer-menu-list" role="navigation" aria-label="全屏大字号导航">
+        <a href="#section-work" class="drawer-menu-item" data-drawer-index="0" data-nav-target="section-work">
+          <span class="drawer-item-num">01</span>
+          <span class="drawer-item-title">PHOTOGRAPHY</span>
+        </a>
+        <a href="#section-about" class="drawer-menu-item active" data-drawer-index="1" data-nav-target="section-about">
+          <span class="drawer-item-num">02</span>
+          <span class="drawer-item-title">ABOUT &amp; BIO</span>
+        </a>
+        <a href="#section-help" class="drawer-menu-item" data-drawer-index="2" data-nav-target="section-help">
+          <span class="drawer-item-num">03</span>
+          <span class="drawer-item-title">HOW I CAN HELP</span>
+        </a>
+        <a href="#section-help" class="drawer-menu-item" data-drawer-index="3" data-nav-target="section-help" data-open-faq="true">
+          <span class="drawer-item-num">04</span>
+          <span class="drawer-item-title">FAQ</span>
+        </a>
+        <a href="mailto:18311181503@163.com" class="drawer-menu-item" data-drawer-index="4">
+          <span class="drawer-item-num">05</span>
+          <span class="drawer-item-title">GET IN TOUCH</span>
+        </a>
+      </nav>
+
+      <!-- Right Column: Interactive Context Preview Card & Sublinks (Matching Image 1) -->
+      <div class="drawer-preview-col">
+        <div class="drawer-preview-card" id="drawer-preview-card">
+          <p class="drawer-card-text" id="drawer-card-text">
+            冯靖翔 (Shawn Feng) · 探月学校 Moonshot Academy 九年级（G9）。热爱数字与视觉创作，专注于城市建筑风光、无人机航拍及 Vibe Coding 建站实践。
+          </p>
+          <div class="drawer-card-action">
+            <a href="mailto:18311181503@163.com" class="drawer-card-btn" id="drawer-card-btn">Email Shawn &rarr;</a>
+          </div>
+        </div>
+
+        <div class="drawer-sublinks-row">
+          <a href="mailto:18311181503@163.com" class="drawer-sublink">EMAIL</a>
+          <a href="#section-about" class="drawer-sublink" data-nav-target="section-about">ABOUT PAGE</a>
+          <a href="project-detail.html" class="drawer-sublink">WORK DETAILS</a>
+          <a href="#section-help" class="drawer-sublink" data-nav-target="section-help">HELP DOCUMENT</a>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==========================================================================

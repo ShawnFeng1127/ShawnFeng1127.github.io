@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlobalLanguageSwitcher();
   initSiteEntranceAnimation();
   initSiteSearch();
+  initFullscreenNavDrawer();
   initAmbientGlow();
   initDepthParallax();
   initInteractiveDrone();
@@ -5100,6 +5101,181 @@ function initSiteSearch() {
       openSearchModal();
     } else if (e.key === 'Escape' && modal.classList.contains('is-active')) {
       closeSearchModal();
+    }
+  });
+}
+
+/**
+ * 10. Fullscreen Brutalist Navigation Drawer (Image 1 & Image 2 Style)
+ *     - Opens via 2-bar menu button on top glass navbar or keyboard shortcut
+ *     - 01-05 Giant Numbered Typography with interactive right preview card & sublinks
+ */
+function initFullscreenNavDrawer() {
+  const drawer = document.getElementById('fullscreen-nav-drawer');
+  const triggerBtn = document.getElementById('nav-menu-btn');
+  const closeBtn = document.getElementById('drawer-close-btn');
+  const cardText = document.getElementById('drawer-card-text');
+  const cardBtn = document.getElementById('drawer-card-btn');
+  const menuItems = document.querySelectorAll('.drawer-menu-item');
+  const sublinks = document.querySelectorAll('.drawer-sublink');
+
+  if (!drawer || !triggerBtn) return;
+
+  function scrollToTarget(targetId) {
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function triggerFaq(idx) {
+    scrollToTarget('section-help');
+    setTimeout(() => {
+      const items = document.querySelectorAll('.help-accordion-item');
+      if (items[idx]) {
+        items.forEach((it, i) => {
+          const isOpen = i === idx;
+          it.classList.toggle('is-open', isOpen);
+          const trig = it.querySelector('.help-accordion-trigger');
+          if (trig) trig.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          const panel = it.querySelector('.help-accordion-panel');
+          if (panel) panel.style.maxHeight = isOpen ? (panel.scrollHeight + 'px') : null;
+        });
+      }
+    }, 450);
+  }
+
+  const DRAWER_PREVIEWS = [
+    {
+      index: 0,
+      title: 'PHOTOGRAPHY',
+      descZh: '收录 2024–2026 年独立视觉摄影创作：北京 CBD 极简蓝调、西安城市中轴线、光影几何与暮光航拍视角。',
+      descEn: 'Selected independent visual photography works 2024–2026: Beijing CBD Minimalist Blue, Xi\'an Axis, Light & Shadow Geometry, and Twilight Drone Aerials.',
+      btnTextZh: '浏览作品集 →',
+      btnTextEn: 'View Works →',
+      action: () => scrollToTarget('section-work')
+    },
+    {
+      index: 1,
+      title: 'ABOUT & BIO',
+      descZh: '冯靖翔 (Shawn Feng) · 探月学校 Moonshot Academy 九年级（G9）。热爱数字与视觉创作，专注于城市建筑风光、无人机航拍及 Vibe Coding 建站实践。',
+      descEn: 'Shawn Feng · Moonshot Academy 9th grader (G9). Passionate about digital & visual creation, urban architecture, drone aerials, and Vibe Coding.',
+      btnTextZh: 'Email Shawn →',
+      btnTextEn: 'Email Shawn →',
+      action: () => { window.location.href = 'mailto:18311181503@163.com'; }
+    },
+    {
+      index: 2,
+      title: 'HOW I CAN HELP',
+      descZh: '线上指导与经验分享：构图评析、曝光与调色答疑、无人机适飞空域申报与起飞安全指导、Vibe Coding 个人建站辅导。',
+      descEn: 'Online Guidance & Experience: Composition reviews, exposure & color grading Q&A, drone airspace regulations & flight guidance, Vibe Coding personal site mentoring.',
+      btnTextZh: '获取指导交流 →',
+      btnTextEn: 'Get Mentoring →',
+      action: () => scrollToTarget('section-help')
+    },
+    {
+      index: 3,
+      title: 'FAQ',
+      descZh: '常见问题答疑：新手起飞防炸机手册、手机与单反摄影选型答疑、提问沟通方式与个人创作经历解析。',
+      descEn: 'Frequently Asked Questions: Beginner drone safety handbook, camera selection advice, inquiry guidelines, and creative journey insights.',
+      btnTextZh: '查看全部解答 →',
+      btnTextEn: 'Browse FAQ →',
+      action: () => triggerFaq(0)
+    },
+    {
+      index: 4,
+      title: 'GET IN TOUCH',
+      descZh: '随时交流讨论：欢迎摄影同好、探月校友或设计开发者交流提问，共同探索视觉艺术。',
+      descEn: 'Always open to discussion: Welcome photographers, Moonshot peers, and digital creators to connect and collaborate.',
+      btnTextZh: '发送邮件交流 →',
+      btnTextEn: 'Send Message →',
+      action: () => { window.location.href = 'mailto:18311181503@163.com'; }
+    }
+  ];
+
+  let activeIndex = 1; // Default to 02 ABOUT & BIO (as in user screenshot Image 1)
+
+  function updatePreview(idx) {
+    const item = DRAWER_PREVIEWS[idx];
+    if (!item || !cardText || !cardBtn) return;
+    activeIndex = idx;
+
+    menuItems.forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+    });
+
+    const isZh = document.documentElement.lang !== 'en';
+    cardText.style.opacity = '0';
+    setTimeout(() => {
+      cardText.textContent = isZh ? item.descZh : item.descEn;
+      cardBtn.textContent = isZh ? item.btnTextZh : item.btnTextEn;
+      cardText.style.opacity = '1';
+    }, 100);
+
+    cardBtn.onclick = (e) => {
+      e.preventDefault();
+      closeDrawer();
+      if (item.action) item.action();
+    };
+  }
+
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    triggerBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    updatePreview(activeIndex);
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    triggerBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  triggerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (drawer.classList.contains('is-open')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeDrawer);
+  }
+
+  menuItems.forEach((el, idx) => {
+    el.addEventListener('mouseenter', () => updatePreview(idx));
+    el.addEventListener('focus', () => updatePreview(idx));
+    el.addEventListener('click', (e) => {
+      const target = el.getAttribute('data-nav-target');
+      const isFaq = el.getAttribute('data-open-faq');
+      if (target) {
+        e.preventDefault();
+        closeDrawer();
+        scrollToTarget(target);
+        if (isFaq) {
+          triggerFaq(0);
+        }
+      }
+    });
+  });
+
+  sublinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const target = link.getAttribute('data-nav-target');
+      if (target) {
+        e.preventDefault();
+        closeDrawer();
+        scrollToTarget(target);
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+      closeDrawer();
     }
   });
 }
