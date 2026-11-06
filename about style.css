@@ -160,12 +160,20 @@ body.about-page .interactive-drone-layer:not(.is-airborne).is-drone-hovered .int
 }
 
 .about-bio {
-  font-size: 17px;
+  font-size: clamp(20px, 1.5vw, 23px);
   font-weight: 400;
-  line-height: 1.72;
-  color: var(--ink-muted);
-  max-width: 520px;
-  margin-top: 14px;
+  line-height: 1.88;
+  color: rgba(246, 245, 240, 0.96);
+  max-width: 620px;
+  margin-top: 24px;
+  letter-spacing: 0.35px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
+}
+
+.about-bio .bio-lead {
+  color: #FFFFFF;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 /* ==========================================================================

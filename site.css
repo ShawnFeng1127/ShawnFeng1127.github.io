@@ -1804,10 +1804,11 @@ body.unified-canvas-page {
   }
 
   .about-bio {
-    font-size: 15px;
-    line-height: 1.68;
+    font-size: 17px;
+    line-height: 1.82;
     max-width: 100%;
-    margin-top: 14px;
+    margin-top: 18px;
+    color: rgba(246, 245, 240, 0.96);
   }
 
   .profile-card-wrapper {
