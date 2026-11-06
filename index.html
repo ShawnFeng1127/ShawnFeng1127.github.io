@@ -315,6 +315,56 @@
       </div>
     </section>
 
+    <!-- ==================== SECTION 3B: SPHERICAL ORBIT GALLERY ==================== -->
+    <section class="canvas-section sphere-gallery-section" id="section-sphere-gallery" aria-label="三维球面环绕画廊 / 3D Spherical Photography Gallery">
+      <!-- Section Header & Floating Telemetry HUD -->
+      <div class="sphere-section-header">
+        <div class="sphere-header-text">
+          <span class="sphere-eyebrow-tag">// SPHERICAL SPACE · 3D ORBIT ARCHIVE</span>
+          <h2 class="sphere-header-title" data-i18n-zh="环绕球体作品画廊" data-i18n-en="SPHERICAL ORBIT GALLERY">环绕球体作品画廊</h2>
+          <p class="sphere-header-subtitle" data-i18n-zh="以创作者为空间引力核心 · 12 组摄影视界在三维球体曲面轨道上环绕运行" data-i18n-en="Centered around the creator · 12 photographic perspectives orbiting in full 3D spherical space">以创作者为空间引力核心 · 12 组摄影视界在三维球体曲面轨道上环绕运行</p>
+        </div>
+
+        <div class="sphere-hud-controls" role="toolbar" aria-label="3D 球体控制工具栏">
+          <div class="sphere-hint-badge">
+            <span class="sphere-hint-icon">✥</span>
+            <span class="sphere-hint-label" data-i18n-zh="按住拖拽 360° 旋转 · 滚轮缩放球面 · 点击进入详情" data-i18n-en="Drag to Orbit 360° · Scroll to Zoom · Click to Inspect">按住拖拽 360° 旋转 · 滚轮缩放球面 · 点击进入详情</span>
+          </div>
+          <button type="button" class="sphere-ctrl-btn" id="sphere-toggle-rotate" aria-label="切换自动旋转" title="暂停/开启自动旋转">
+            <span class="ctrl-icon" id="sphere-rotate-icon">⏸</span>
+            <span class="ctrl-text" id="sphere-rotate-text" data-i18n-zh="暂停旋转" data-i18n-en="PAUSE">暂停旋转</span>
+          </button>
+          <button type="button" class="sphere-ctrl-btn" id="sphere-reset-view" aria-label="复位球体视角" title="重置视角">
+            <span class="ctrl-icon">↺</span>
+            <span class="ctrl-text" data-i18n-zh="复位" data-i18n-en="RESET">复位</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive 3D Orbit Stage -->
+      <div class="sphere-stage" id="sphere-stage" tabindex="0" role="region" aria-label="可拖拽交互的三维摄影球体画廊">
+        <!-- Floating Drag Interaction Badge -->
+        <div class="sphere-drag-badge" id="sphere-drag-badge" aria-hidden="true">
+          <span class="sphere-drag-icon">✥</span>
+          <span class="sphere-drag-text">Drag 3D</span>
+        </div>
+
+        <!-- Ambient Depth Vignette & Radial Glow Behind Person -->
+        <div class="sphere-ambient-glow" aria-hidden="true"></div>
+
+        <!-- Center Fixed Figure (Responsive Transparent PNG Cutout at Z=0) -->
+        <div class="sphere-center-person-wrapper" aria-hidden="true">
+          <img class="sphere-center-person-img" src="Project pictures/home page人物.png" alt="Shawn Feng - Creator Center">
+          <div class="sphere-person-pedestal"></div>
+        </div>
+
+        <!-- 3D Projected Cards Container -->
+        <div class="sphere-nodes-container" id="sphere-nodes-container">
+          <!-- 12 Cards dynamically mounted and updated by Fibonacci projection engine -->
+        </div>
+      </div>
+    </section>
+
     <!-- ==================== SECTION 4: HOW CAN I HELP ==================== -->
     <section class="canvas-section help-section help-stage" id="section-help">
       <div class="help-container">

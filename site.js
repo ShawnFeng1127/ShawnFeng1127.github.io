@@ -14,8 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initInteractiveDrone();
   initDroneFpvCard();
   initInfiniteRingGallery();
+  initSphericalOrbitGallery();
   initHelpPageInteractions();
   initScrollAndKeyGuidance();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('preview') === 'sphere') {
+    setTimeout(() => {
+      const sec = document.getElementById('section-sphere-gallery');
+      if (sec) sec.scrollIntoView({ behavior: 'instant' });
+    }, 150);
+  }
 });
 
 let galleryWasDragged = false;
@@ -1396,6 +1405,9 @@ function initInfiniteRingGallery() {
       modalBioScroll.focus({ preventScroll: true });
     }
   }
+
+  // Globally accessible so any gallery (infinite ring or 3D spherical orbit) can open the exact lightbox
+  window.openPhotoLightbox = openLightboxByPhotoId;
 
   function closeLightbox() {
     if (!modal) return;
@@ -5470,4 +5482,420 @@ function initCursorTrail() {
       ctx.clearRect(0, 0, width, height);
     }
   }
+}
+
+/**
+ * ==========================================================================
+ * Section 3B: 3D Spherical Orbit Photography Gallery (Creator Gravitational Core)
+ * - Fibonacci Sphere mathematical distribution (12 photo nodes)
+ * - True 3D Mathematical Projection + Billboard Orientation (always faces camera)
+ * - Spatial Depth Occlusion:
+ *     - Z > 0 (Foreground cards): pass IN FRONT of Creator (z-index > 100, full brightness)
+ *     - Z < 0 (Background cards): pass BEHIND Creator (z-index < 100, subtle depth blur)
+ * - 360° Drag Orbit + Inertial Glide + Wheel / Touch Pinch Radius Zoom
+ * - Click Card opens #project-lightbox with 100% untouched layout & EXIF data
+ * ==========================================================================
+ */
+function initSphericalOrbitGallery() {
+  const stage = document.getElementById('sphere-stage');
+  const container = document.getElementById('sphere-nodes-container');
+  const dragBadge = document.getElementById('sphere-drag-badge');
+  const toggleBtn = document.getElementById('sphere-toggle-rotate');
+  const toggleIcon = document.getElementById('sphere-rotate-icon');
+  const toggleText = document.getElementById('sphere-rotate-text');
+  const resetBtn = document.getElementById('sphere-reset-view');
+
+  if (!stage || !container) return;
+
+  const SPHERE_ITEMS = [
+    {
+      id: '1',
+      series: 'SERIES 01',
+      title: '郑州 · 黑川纪章纪念馆',
+      meta: 'HENAN / ARCHITECTURE · 2026',
+      src: 'Project pictures/Project 1.png'
+    },
+    {
+      id: '2',
+      series: 'SERIES 02',
+      title: '甘肃 · 苦水丹霞',
+      meta: 'GANSU / GEOLOGY · 2026',
+      src: 'Project pictures/Project 2.jpg'
+    },
+    {
+      id: '3',
+      series: 'SERIES 03',
+      title: '北京 · CBD 核心区夜色',
+      meta: 'BEIJING / URBAN NIGHT · 2026',
+      src: 'Project pictures/Project 3.png'
+    },
+    {
+      id: '4a',
+      series: 'SERIES 04A',
+      title: '西安 · 中轴线航拍',
+      meta: 'SHAANXI / BLUE HOUR · 2026',
+      src: 'Project pictures/project 4a.jpg'
+    },
+    {
+      id: '4b',
+      series: 'SERIES 04B',
+      title: '西安 · 永宁门航拍',
+      meta: 'SHAANXI / ANCIENT WALL · 2026',
+      src: 'Project pictures/project 4b.jpg'
+    },
+    {
+      id: '5',
+      series: 'SERIES 05',
+      title: '川西 · 九寨沟航拍',
+      meta: 'SICHUAN / NATURE AERIAL · 2026',
+      src: 'Project pictures/project 5.jpg'
+    },
+    {
+      id: '6',
+      series: 'SERIES 06',
+      title: '上海 · 陆家嘴 CBD',
+      meta: 'SHANGHAI / SKYLINE · 2026',
+      src: 'Project pictures/project 6.jpg'
+    },
+    {
+      id: '7',
+      series: 'SERIES 07',
+      title: '郑州 · 龙湖湿地公园',
+      meta: 'HENAN / PANORAMA · 2026',
+      src: 'Project pictures/project 7.jpg'
+    },
+    {
+      id: '8',
+      series: 'SERIES 08',
+      title: '重庆 · 朝天门与千佛寺',
+      meta: 'CHONGQING / HERITAGE · 2026',
+      src: 'Project pictures/project 8.jpg'
+    },
+    {
+      id: '9',
+      series: 'SERIES 09',
+      title: '北京 · CBD 漫天晚霞',
+      meta: 'BEIJING / SUNSET · 2026',
+      src: 'Project pictures/project 9.jpg'
+    },
+    {
+      id: '10a',
+      series: 'SERIES 10A',
+      title: '郑州 · 二七塔与大玉米',
+      meta: 'HENAN / BLUE HOUR · 2026',
+      src: 'Project pictures/project 10a.jpg'
+    },
+    {
+      id: '10b',
+      series: 'SERIES 10B',
+      title: '郑州 · 二七塔黄昏',
+      meta: 'HENAN / GOLDEN DUSK · 2026',
+      src: 'Project pictures/project 10b.jpg'
+    }
+  ];
+
+  // Fibonacci Sphere Mathematical Point Generator
+  function generateFibonacciPoints(count) {
+    const pts = [];
+    const phi = Math.PI * (Math.sqrt(5) - 1); // Golden ratio angle (~2.399963 rad)
+    for (let i = 0; i < count; i++) {
+      const y = 1 - (i / (count - 1)) * 2; // y from 1 down to -1
+      const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
+      const theta = phi * i;
+      const x = Math.cos(theta) * radiusAtY;
+      const z = Math.sin(theta) * radiusAtY;
+      pts.push({ nx: x, ny: y, nz: z });
+    }
+    return pts;
+  }
+
+  const basePoints = generateFibonacciPoints(SPHERE_ITEMS.length);
+
+  // Responsive Radius Configuration
+  function getDefaultRadius() {
+    const w = window.innerWidth;
+    if (w < 600) return 210;
+    if (w < 900) return 270;
+    return 340;
+  }
+
+  let currentRadius = getDefaultRadius();
+  const minRadius = 190;
+  const maxRadius = 490;
+
+  // Rotation State
+  let rotX = -0.15; // Initial slight downward tilt
+  let rotY = 0.35;  // Initial yaw angle
+  let velX = 0;
+  let velY = 0;
+  const friction = 0.92;
+
+  // Auto-Rotation Settings
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let isAutoRotating = !prefersReduced;
+  const autoRotateSpeed = 0.0024; // Smooth continuous spin
+
+  // Drag Interaction State
+  let isDragging = false;
+  let startPointerX = 0;
+  let startPointerY = 0;
+  let prevPointerX = 0;
+  let prevPointerY = 0;
+  let totalDragDistance = 0;
+
+  // Create Card DOM Nodes
+  container.innerHTML = '';
+  const nodes = SPHERE_ITEMS.map((item, idx) => {
+    const card = document.createElement('article');
+    card.className = 'sphere-card';
+    card.setAttribute('data-photo-id', item.id);
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `${item.series}: ${item.title} — 点击打开全幅摄影详情`);
+
+    card.innerHTML = `
+      <img class="sphere-card-img" src="${item.src}" alt="${item.title}" loading="lazy">
+      <div class="sphere-card-overlay"></div>
+      <div class="sphere-card-top">
+        <span class="sphere-card-series">${item.series}</span>
+        <span class="sphere-card-inspect">INSPECT ↗</span>
+      </div>
+      <div class="sphere-card-bottom">
+        <h3 class="sphere-card-title">${item.title}</h3>
+        <p class="sphere-card-meta">${item.meta}</p>
+      </div>
+    `;
+
+    // Click to Open Detail Lightbox (Format and EXIF 100% Preserved)
+    card.addEventListener('click', (e) => {
+      if (totalDragDistance > 6) {
+        e.preventDefault();
+        return; // Prevent opening if user was rotating/dragging
+      }
+      if (typeof window.openPhotoLightbox === 'function') {
+        window.openPhotoLightbox(item.id);
+      }
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (typeof window.openPhotoLightbox === 'function') {
+          window.openPhotoLightbox(item.id);
+        }
+      }
+    });
+
+    container.appendChild(card);
+
+    return {
+      el: card,
+      item: item,
+      basePoint: basePoints[idx]
+    };
+  });
+
+  // Cursor Badge Tracking
+  stage.addEventListener('pointermove', (e) => {
+    if (!dragBadge) return;
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    dragBadge.style.left = `${x}px`;
+    dragBadge.style.top = `${y}px`;
+  });
+
+  // Pointer Drag Rotation
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return; // Left click only
+    isDragging = true;
+    totalDragDistance = 0;
+    startPointerX = e.clientX;
+    startPointerY = e.clientY;
+    prevPointerX = e.clientX;
+    prevPointerY = e.clientY;
+    velX = 0;
+    velY = 0;
+    stage.classList.add('is-dragging');
+    try {
+      stage.setPointerCapture(e.pointerId);
+    } catch (_) {}
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevPointerX;
+    const dy = e.clientY - prevPointerY;
+    prevPointerX = e.clientX;
+    prevPointerY = e.clientY;
+
+    totalDragDistance += Math.hypot(dx, dy);
+
+    // Yaw (Y-axis rotation) and Pitch (X-axis rotation)
+    rotY += dx * 0.0042;
+    rotX = Math.max(-1.15, Math.min(1.15, rotX - dy * 0.0042)); // Clamp pitch to avoid gimbal flip
+
+    // Store instantaneous velocity for inertia glide
+    velY = dx * 0.0035;
+    velX = -dy * 0.0035;
+  });
+
+  function endDrag(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    stage.classList.remove('is-dragging');
+    try {
+      if (e && e.pointerId) stage.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+  }
+
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  // Wheel Zoom (Adjust Sphere Radius)
+  stage.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY * 0.35;
+      currentRadius = Math.max(minRadius, Math.min(maxRadius, currentRadius - zoomDelta));
+    },
+    { passive: false }
+  );
+
+  // Mobile Touch Pinch Zoom
+  let initialPinchDist = 0;
+  let initialPinchRadius = currentRadius;
+
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      initialPinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      initialPinchRadius = currentRadius;
+    }
+  }, { passive: true });
+
+  stage.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && initialPinchDist > 0) {
+      const currentDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = currentDist / initialPinchDist;
+      currentRadius = Math.max(minRadius, Math.min(maxRadius, initialPinchRadius * factor));
+    }
+  }, { passive: true });
+
+  // Control Buttons
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      isAutoRotating = !isAutoRotating;
+      if (toggleIcon) toggleIcon.textContent = isAutoRotating ? '⏸' : '▶';
+      if (toggleText) {
+        toggleText.textContent = isAutoRotating ? '暂停旋转' : '开启旋转';
+        toggleText.setAttribute('data-i18n-zh', isAutoRotating ? '暂停旋转' : '开启旋转');
+        toggleText.setAttribute('data-i18n-en', isAutoRotating ? 'PAUSE' : 'PLAY');
+      }
+      toggleBtn.classList.toggle('is-paused', !isAutoRotating);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      // Smooth reset to default orientation & radius
+      rotX = -0.15;
+      rotY = 0.35;
+      velX = 0;
+      velY = 0;
+      currentRadius = getDefaultRadius();
+      isAutoRotating = !prefersReduced;
+      if (toggleIcon) toggleIcon.textContent = isAutoRotating ? '⏸' : '▶';
+      if (toggleText) toggleText.textContent = isAutoRotating ? '暂停旋转' : '开启旋转';
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    // Keep radius in reasonable range upon resize
+    const def = getDefaultRadius();
+    if (currentRadius > def * 1.5 || currentRadius < def * 0.7) {
+      currentRadius = def;
+    }
+  });
+
+  // Main 3D Projection Render Loop (60/120 FPS)
+  const D = 920; // Perspective Camera Focal Distance
+
+  function renderLoop() {
+    // 1. Inertial Glide or Auto-Rotation
+    if (!isDragging) {
+      if (Math.abs(velX) > 0.0001 || Math.abs(velY) > 0.0001) {
+        rotX = Math.max(-1.15, Math.min(1.15, rotX + velX));
+        rotY += velY;
+        velX *= friction;
+        velY *= friction;
+      } else if (isAutoRotating) {
+        rotY += autoRotateSpeed;
+      }
+    }
+
+    const cosY = Math.cos(rotY);
+    const sinY = Math.sin(rotY);
+    const cosX = Math.cos(rotX);
+    const sinX = Math.sin(rotX);
+
+    // 2. Project Each Fibonacci Node to 3D Space & Calculate Depth Layering
+    nodes.forEach((node) => {
+      const p = node.basePoint;
+
+      // Euler Yaw (Y-axis)
+      const x1 = p.nx * cosY + p.nz * sinY;
+      const z1 = -p.nx * sinY + p.nz * cosY;
+
+      // Euler Pitch (X-axis)
+      const y2 = p.ny * cosX - z1 * sinX;
+      const z2 = p.ny * sinX + z1 * cosX;
+      const x2 = x1;
+
+      // Scaled 3D World Coordinates
+      const wx = x2 * currentRadius;
+      const wy = y2 * currentRadius;
+      const wz = z2 * currentRadius;
+
+      // 3. Perspective Projection
+      const scale = D / (D - wz);
+      const screenX = wx * scale;
+      const screenY = wy * scale;
+
+      // 4. True Spatial Depth Occlusion (Shawn Center Figure sits at Z=0, zIndex: 100)
+      const zIndex = Math.round(100 + wz);
+      let opacity = 1;
+      let blurPx = 0;
+
+      if (wz >= 0) {
+        // Foreground Cards: passing IN FRONT of Shawn
+        const normZ = wz / currentRadius;
+        opacity = 0.85 + 0.15 * normZ;
+      } else {
+        // Background Cards: passing BEHIND Shawn
+        const normZ = Math.abs(wz) / currentRadius;
+        opacity = Math.max(0.38, 0.85 - normZ * 0.48);
+        if (normZ > 0.35) {
+          blurPx = (normZ - 0.35) * 2.6;
+        }
+      }
+
+      // 5. Apply Billboard Transform & Depth Styles
+      const cardEl = node.el;
+      cardEl.style.transform = `translate3d(calc(-50% + ${screenX.toFixed(1)}px), calc(-50% + ${screenY.toFixed(1)}px), 0) scale(${(scale * 0.94).toFixed(3)})`;
+      cardEl.style.zIndex = zIndex;
+      cardEl.style.opacity = opacity.toFixed(3);
+      cardEl.style.filter = blurPx > 0.2 ? `blur(${blurPx.toFixed(1)}px)` : 'none';
+    });
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  requestAnimationFrame(renderLoop);
 }
