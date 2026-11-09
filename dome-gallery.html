@@ -106,8 +106,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 400px;
-      height: 262px;
+      width: 360px;
+      height: 236px;
       border-radius: 14px;
       overflow: hidden;
       background: #05070C;
@@ -116,8 +116,6 @@
       pointer-events: auto;
       cursor: pointer;
       transform-origin: center center;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
       will-change: transform;
       contain: layout style paint;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -125,13 +123,13 @@
     }
 
     .dome-photo-card.is-horizontal {
-      width: 400px;
-      height: 262px;
+      width: 360px;
+      height: 236px;
     }
 
     .dome-photo-card.is-vertical {
-      width: 272px;
-      height: 396px;
+      width: 248px;
+      height: 360px;
     }
 
     .dome-photo-card:hover,
@@ -861,83 +859,98 @@
 
     function getSphereRadius() {
       const w = window.innerWidth;
-      if (w < 600) return 480;
-      if (w < 960) return 600;
-      return 680;
+      if (w < 600) return 460;
+      if (w < 960) return 560;
+      return 640;
     }
 
-    // --- 1. Build 18 Enlarged Spherical Inner-Wall Panels (Richly Filled Dome Space) ---
-    // Interleave vertical (6, 8, 10a, 10b) and horizontal photos; indices 12..17 are offset by 9 steps (~158° opposite azimuth) so duplicates never appear in the same view
-    const SPHERE_ORDER = [0, 6, 2, 8, 4, 10, 1, 5, 7, 11, 3, 9, 8, 4, 10, 1, 5, 7];
-    const TOTAL_PANELS = SPHERE_ORDER.length; // 18 panels for fuller spatial coverage
+    // --- 1. Build 5-Tier Geodesic Spherical Dome Panels (Top Crown, Upper Vault, Equator, Lower Bowl, Bottom Floor) ---
+    // Staggered longitude rings ensure top, middle, and bottom of the sphere are richly populated in every direction without adjacent duplicates
+    const DOME_RINGS = [
+      // Ring 1: Zenith Crown (球幕顶部天顶圈, lat = +62°)
+      { latDeg: 62, offsetDeg: 0, ringScale: 0.80, indices: [9, 3, 4, 1] },
+      // Ring 2: Upper Dome Vault (球幕上方纬线圈, lat = +33°)
+      { latDeg: 33, offsetDeg: 22.5, ringScale: 0.90, indices: [4, 10, 5, 11, 7, 6, 9, 8] },
+      // Ring 3: Equatorial Horizon (球幕赤道主视野圈, lat = 0°)
+      { latDeg: 0, offsetDeg: 0, ringScale: 1.00, indices: [0, 6, 1, 8, 2, 10, 3, 11] },
+      // Ring 4: Lower Dome Bowl (球幕下方纬线圈, lat = -33°)
+      { latDeg: -33, offsetDeg: 22.5, ringScale: 0.90, indices: [7, 2, 9, 3, 4, 0, 5, 1] },
+      // Ring 5: Nadir Floor (球幕底部地底圈, lat = -62°)
+      { latDeg: -62, offsetDeg: 45, ringScale: 0.80, indices: [10, 5, 6, 7] }
+    ];
     const panelNodes = [];
 
     function buildDomePanels() {
-      const phi = Math.PI * (Math.sqrt(5) - 1); // golden angle ~2.39996 rad
+      let panelIdx = 0;
 
-      for (let i = 0; i < TOTAL_PANELS; i++) {
-        const catalogIdx = SPHERE_ORDER[i];
-        const item = PHOTO_CATALOG[catalogIdx];
+      for (let rIdx = 0; rIdx < DOME_RINGS.length; rIdx++) {
+        const ring = DOME_RINGS[rIdx];
+        const latRad = (ring.latDeg * Math.PI) / 180;
+        const uy = Math.sin(latRad);
+        const radiusAtY = Math.cos(latRad);
+        const count = ring.indices.length;
 
-        // Distribute y in [-0.66, +0.66] so panels richly fill the horizon & upper/lower vaults
-        const t = i / (TOTAL_PANELS - 1);
-        const y = (1 - 2 * t) * 0.66;
-        const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
-        const theta = phi * i;
+        for (let k = 0; k < count; k++) {
+          const catalogIdx = ring.indices[k];
+          const item = PHOTO_CATALOG[catalogIdx];
+          const lonDeg = ring.offsetDeg + (k * 360) / count;
+          const theta = (lonDeg * Math.PI) / 180;
 
-        const ux = Math.cos(theta) * radiusAtY;
-        const uy = y;
-        const uz = -Math.sin(theta) * radiusAtY;
+          const ux = Math.cos(theta) * radiusAtY;
+          const uz = -Math.sin(theta) * radiusAtY;
+          const myPanelIndex = panelIdx++;
 
-        const isVertical = item.orientation === 'vertical';
-        const card = document.createElement('article');
-        card.className = `dome-photo-card ${isVertical ? 'is-vertical' : 'is-horizontal'}`;
-        card.setAttribute('data-photo-id', item.id);
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', `${item.shortTag}: ${item.title}`);
+          const isVertical = item.orientation === 'vertical';
+          const card = document.createElement('article');
+          card.className = `dome-photo-card ${isVertical ? 'is-vertical' : 'is-horizontal'}`;
+          card.setAttribute('data-photo-id', item.id);
+          card.setAttribute('tabindex', '0');
+          card.setAttribute('role', 'button');
+          card.setAttribute('aria-label', `${item.shortTag}: ${item.title}`);
 
-        card.innerHTML = `
-          <img class="dome-photo-img" src="${item.thumb || item.src}" decoding="async" alt="${item.title}">
-          <div class="dome-photo-overlay"></div>
-          <div class="dome-photo-bottom">
-            <div class="dome-photo-info">
-              <h3 class="dome-photo-title">${item.title}</h3>
-              <p class="dome-photo-loc">${item.location}</p>
+          card.innerHTML = `
+            <img class="dome-photo-img" src="${item.thumb || item.src}" decoding="async" alt="${item.title}">
+            <div class="dome-photo-overlay"></div>
+            <div class="dome-photo-bottom">
+              <div class="dome-photo-info">
+                <h3 class="dome-photo-title">${item.title}</h3>
+                <p class="dome-photo-loc">${item.location}</p>
+              </div>
+              <span class="dome-photo-inspect">查看详情 ↗</span>
             </div>
-            <span class="dome-photo-inspect">查看详情 ↗</span>
-          </div>
-        `;
+          `;
 
-        card.addEventListener('pointerenter', () => {
-          crosshair.classList.add('is-hovering');
-        });
-        card.addEventListener('pointerleave', () => {
-          crosshair.classList.remove('is-hovering');
-        });
+          card.addEventListener('pointerenter', () => {
+            crosshair.classList.add('is-hovering');
+          });
+          card.addEventListener('pointerleave', () => {
+            crosshair.classList.remove('is-hovering');
+          });
 
-        card.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (totalDragDist > 7) return;
-          steerAndOpenPhoto(i, ux, uy, uz, item.id);
-        });
+          card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (totalDragDist > 7) return;
+            steerAndOpenPhoto(myPanelIndex, ux, uy, uz, item.id);
+          });
 
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            steerAndOpenPhoto(i, ux, uy, uz, item.id);
-          }
-        });
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              steerAndOpenPhoto(myPanelIndex, ux, uy, uz, item.id);
+            }
+          });
 
-        scene3d.appendChild(card);
-        panelNodes.push({
-          el: card,
-          item,
-          ux,
-          uy,
-          uz,
-          visible: true
-        });
+          scene3d.appendChild(card);
+          panelNodes.push({
+            el: card,
+            item,
+            ux,
+            uy,
+            uz,
+            ringScale: ring.ringScale,
+            visible: true
+          });
+        }
       }
     }
 
@@ -1050,8 +1063,8 @@
       const zc = -uy * sinPitch + z1 * cosPitch;
       const xc = x1;
 
-      if (zc >= -0.05) return null;
-      const scale = focalLength / -zc;
+      if (zc >= -0.10) return null;
+      const scale = focalLength / (0.55 * (1 - zc));
       return {
         x: cx + xc * scale,
         y: cy - yc * scale,
@@ -1080,8 +1093,8 @@
         bgCtx.drawImage(neb.sprite, pt.x - r, pt.y - r, r * 2, r * 2);
       }
 
-      // 3. Whisper-faint Astronomical Geodesic Dome Latitude Rings
-      const latAngles = [-0.46, 0, 0.46];
+      // 3. Whisper-faint Astronomical Geodesic Dome Latitude Rings & Longitude Meridians
+      const latAngles = [-1.08, -0.576, 0, 0.576, 1.08];
       for (let idx = 0; idx < latAngles.length; idx++) {
         const lat = latAngles[idx];
         const uy = Math.sin(lat);
@@ -1104,8 +1117,37 @@
             started = false;
           }
         }
-        bgCtx.strokeStyle = idx === 1 ? 'rgba(145, 180, 235, 0.032)' : 'rgba(135, 170, 225, 0.015)';
-        bgCtx.lineWidth = 0.8;
+        bgCtx.strokeStyle = idx === 2 ? 'rgba(145, 180, 235, 0.036)' : 'rgba(135, 170, 225, 0.022)';
+        bgCtx.lineWidth = 0.85;
+        bgCtx.stroke();
+      }
+
+      for (let mIdx = 0; mIdx < 8; mIdx++) {
+        const lon = (mIdx / 8) * Math.PI * 2;
+        const cosLon = Math.cos(lon);
+        const sinLon = Math.sin(lon);
+        bgCtx.beginPath();
+        let started = false;
+        for (let step = -18; step <= 18; step++) {
+          const lat = (step / 18) * (Math.PI * 0.46);
+          const uy = Math.sin(lat);
+          const rLat = Math.cos(lat);
+          const ux = cosLon * rLat;
+          const uz = -sinLon * rLat;
+          const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+          if (pt && pt.x >= -150 && pt.x <= w + 150 && pt.y >= -150 && pt.y <= h + 150) {
+            if (!started) {
+              bgCtx.moveTo(pt.x, pt.y);
+              started = true;
+            } else {
+              bgCtx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            started = false;
+          }
+        }
+        bgCtx.strokeStyle = 'rgba(135, 170, 225, 0.018)';
+        bgCtx.lineWidth = 0.75;
         bgCtx.stroke();
       }
 
@@ -1257,8 +1299,8 @@
           const zc = -y1 * sinPitch + z1 * cosPitch;
           const xc = x1;
 
-          // Cull panels behind the viewer's head (zc >= -0.14) without layout-thrashing display toggles
-          if (zc >= -0.14) {
+          // Cull panels beyond the front hemisphere horizon (zc >= -0.18) without layout-thrashing display toggles
+          if (zc >= -0.18) {
             if (node.visible) {
               node.el.style.visibility = 'hidden';
               node.el.style.pointerEvents = 'none';
@@ -1274,31 +1316,38 @@
           }
 
           const isTarget = i === steerPanelIndex && suctionStrength > 0.001;
-          const effectiveR = isTarget
-            ? R * (1 - suctionStrength * 0.84)
-            : R * (1 + suctionStrength * 0.42);
+          // Monotonic Stereographic Spherical Dome Projection:
+          // 1) Depth dCam increases smoothly from center (0.90*R) toward dome periphery (1.32*R) for natural spherical scale & z-order
+          // 2) Screen coordinates follow conformal stereographic mapping 1 / (0.55 * (1 - zc)) so peripheral panels never fold back
+          const sphereDepthNorm = 1.32 + 0.42 * zc;
+          const dCam = isTarget
+            ? R * sphereDepthNorm * (1 - suctionStrength * 0.84)
+            : R * sphereDepthNorm * (1 + suctionStrength * 0.42);
+          const stereoFactor = 1 / (0.55 * (1 - zc));
 
-          const Xcss = effectiveR * xc;
-          const Ycss = -effectiveR * yc;
-          const Zcss = focalLength + effectiveR * zc;
+          const Xcss = dCam * xc * stereoFactor;
+          const Ycss = -dCam * yc * stereoFactor;
+          const Zcss = focalLength - dCam;
 
-          // Inner-wall orientation facing the sphere center (lookAt origin)
-          const panelYaw = Math.atan2(-xc, -zc);
-          const panelPitch = -Math.asin(Math.max(-1, Math.min(1, yc)));
+          // Inner-wall orientation facing the sphere center + spherical arch roll along latitude rings
+          const panelYaw = Math.atan2(-xc, -zc) * 0.86;
+          const panelPitch = -Math.asin(Math.max(-1, Math.min(1, yc))) * 0.86;
+          const panelRoll = xc * yc * 0.32;
+          const baseScale = node.ringScale || 1;
 
           if (suctionStrength > 0.001) {
             const portalScale = isTarget
-              ? 1 + suctionStrength * 3.35
-              : Math.max(0.72, 1 - suctionStrength * 0.22);
-            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) scale(${portalScale.toFixed(3)})`;
+              ? baseScale * (1 + suctionStrength * 3.35)
+              : Math.max(0.65, baseScale * (1 - suctionStrength * 0.22));
+            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) rotateZ(${panelRoll.toFixed(4)}rad) scale(${portalScale.toFixed(3)})`;
           } else {
-            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad)`;
+            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) rotateZ(${panelRoll.toFixed(4)}rad) scale(${baseScale.toFixed(3)})`;
           }
         }
       } else {
-        // Third-Person Mode
-        const orbitDist = 1150;
-        const Rtp = R * 0.62;
+        // Third-Person Mode: True 3D Globe / Sphere of Photos around the Central Observer
+        const orbitDist = 1180;
+        const Rtp = R * 0.72;
         const centerZ = focalLength - orbitDist;
 
         centerPersonEl.style.transform = `translate3d(-50%, -50%, ${centerZ.toFixed(1)}px)`;
@@ -1323,9 +1372,12 @@
           const Zcss = isTarget
             ? (centerZ + Rtp * zc) + suctionStrength * 920
             : centerZ + Rtp * zc;
-          const tpScale = isTarget ? (0.78 + suctionStrength * 2.8) : 0.78;
+          const baseScale = (node.ringScale || 1) * 0.62;
+          const tpScale = isTarget ? (baseScale + suctionStrength * 2.8) : baseScale;
+          const tpYaw = Math.atan2(xc, Math.abs(zc) + 0.15) * 0.65;
+          const tpPitch = -Math.asin(Math.max(-1, Math.min(1, yc))) * 0.65;
 
-          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) scale(${tpScale.toFixed(3)})`;
+          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${tpYaw.toFixed(4)}rad) rotateX(${tpPitch.toFixed(4)}rad) scale(${tpScale.toFixed(3)})`;
         }
       }
 
