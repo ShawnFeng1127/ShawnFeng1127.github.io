@@ -124,6 +124,7 @@ function playFullEntranceSequence(isManualReplay) {
 
   const canvas = document.getElementById('intro-light-canvas');
   const ctx = canvas ? canvas.getContext('2d') : null;
+  const flashOverlay = overlay.querySelector('.pixel-flash-overlay');
   const skipBtn = document.getElementById('pixel-skip-btn');
 
   let viewW = window.innerWidth;
@@ -140,31 +141,32 @@ function playFullEntranceSequence(isManualReplay) {
   resizeIntroCanvas();
   window.addEventListener('resize', resizeIntroCanvas);
 
-  const duration = isManualReplay ? 2050 : 2150;
+  const duration = isManualReplay ? 2400 : 2500;
   const startTime = performance.now();
   let finished = false;
 
-  // Floating micro-sparks shed by the light particle as it flies from top-left to bottom-right
+  // Floating micro-sparks shed by the light dot in Act 1
   const sparks = [];
 
   function completeIntro() {
     if (finished) return;
     finished = true;
     window.removeEventListener('resize', resizeIntroCanvas);
+    if (flashOverlay) flashOverlay.style.opacity = '1';
     overlay.classList.add('is-flash');
-    overlay.classList.add('is-opening');
+    if (skipBtn) skipBtn.style.opacity = '0';
     document.body.classList.remove('is-intro-stage-hold');
 
+    // Hold pure white screen briefly, then smoothly dissolve the white screen to reveal the site
     setTimeout(() => {
-      overlay.classList.remove('is-flash');
-    }, 300);
-
-    setTimeout(() => {
-      overlay.classList.add('is-hidden');
+      overlay.classList.add('is-opening');
       setTimeout(() => {
-        if (overlay.parentNode) overlay.remove();
-      }, 650);
-    }, 760);
+        overlay.classList.add('is-hidden');
+        setTimeout(() => {
+          if (overlay.parentNode) overlay.remove();
+        }, 800);
+      }, 780);
+    }, 180);
   }
 
   if (skipBtn) {
@@ -192,96 +194,60 @@ function playFullEntranceSequence(isManualReplay) {
     if (ctx) {
       ctx.clearRect(0, 0, viewW, viewH);
 
-      // Trajectory from Top-Left (x0, y0) -> Bottom-Right (x1, y1)
-      const x0 = viewW * 0.04;
-      const y0 = viewH * 0.04;
-      const x1 = viewW * 0.96;
-      const y1 = viewH * 0.96;
+      // Diagonal trajectory from Top-Left (x0, y0) -> Bottom-Right (x1, y1)
+      const x0 = viewW * 0.05;
+      const y0 = viewH * 0.05;
+      const x1 = viewW * 0.95;
+      const y1 = viewH * 0.95;
+      const diagAngle = Math.atan2(y1 - y0, x1 - x0);
+      const maxDiag = Math.hypot(viewW, viewH);
 
-      // Smooth accelerating-then-gliding ease along the diagonal
-      const travelT = progress < 0.5
-        ? 2 * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      // Three-Act Timeline:
+      // Act 1 (0.00 -> 0.38): Pure isolated Point of Light (光点) flying from top-left toward center
+      // Act 2 (0.38 -> 0.74): Point of Light stretches and transforms into a Diagonal Light Beam (光点变成光束)
+      // Act 3 (0.74 -> 1.00): Light Beam expands outward until the entire screen turns pure White (最后屏幕变白)
+      const beamMorph = smoothstep(0.36, 0.72, progress);
+      const whiteoutT = smoothstep(0.74, 0.98, progress);
+
+      // Position of the light dot / beam front along the diagonal
+      let travelT;
+      if (progress < 0.38) {
+        // Gentle glide of the isolated light dot from (5%, 5%) to (36%, 36%)
+        const p1 = progress / 0.38;
+        travelT = 0.34 * (0.25 * p1 + 0.75 * p1 * p1);
+      } else {
+        // Accelerating shoot across the screen as it transforms into a beam
+        const p2 = Math.min(1, (progress - 0.38) / 0.42);
+        const easeP2 = 1 - Math.pow(1 - p2, 2.4);
+        travelT = 0.34 + 0.66 * easeP2;
+      }
 
       const headX = x0 + (x1 - x0) * travelT;
       const headY = y0 + (y1 - y0) * travelT;
 
-      // Morph factor: 0 = single glowing light particle, 1 = full collimated diagonal light beam
-      const beamMorph = smoothstep(0.20, 0.78, progress);
-      // Final expansion bloom as beam reaches bottom-right
-      const endFlare = smoothstep(0.76, 1.0, progress);
+      // In Act 1 (beamMorph === 0), tailX === headX (zero beam length — pure dot!)
+      // In Act 2 (beamMorph 0 -> 1), tail extends back to top-left while head shoots to bottom-right
+      const tailT = travelT * (1 - beamMorph);
+      const tailX = x0 - viewW * 0.05 * beamMorph + (x1 - x0) * tailT;
+      const tailY = y0 - viewH * 0.05 * beamMorph + (y1 - y0) * tailT;
+      const beamTipX = headX + viewW * 0.06 * beamMorph;
+      const beamTipY = headY + viewH * 0.06 * beamMorph;
 
-      // Tail starts close to the particle in Phase 1 (short comet), then locks back toward top-left to form the full beam
-      const shortTailT = Math.max(0, travelT - 0.12);
-      const beamTailT = shortTailT * (1 - beamMorph * 0.95);
-      const tailX = x0 + (x1 - x0) * beamTailT;
-      const tailY = y0 + (y1 - y0) * beamTailT;
-
-      // Spawn delicate photon dust motes around the flying particle
-      if (sparks.length < 70 && Math.random() < 0.85) {
-        const angle = Math.atan2(y1 - y0, x1 - x0) + Math.PI + (Math.random() - 0.5) * 1.4;
-        const speed = 0.4 + Math.random() * 1.6;
+      // Spawn subtle photon dust around the light dot during Act 1 & early Act 2
+      if (progress < 0.65 && sparks.length < 55 && Math.random() < 0.7) {
+        const angle = diagAngle + Math.PI + (Math.random() - 0.5) * 1.8;
+        const speed = 0.3 + Math.random() * 1.1;
         sparks.push({
-          x: headX + (Math.random() - 0.5) * 8,
-          y: headY + (Math.random() - 0.5) * 8,
+          x: headX + (Math.random() - 0.5) * 6,
+          y: headY + (Math.random() - 0.5) * 6,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          r: 1.0 + Math.random() * 2.2,
-          alpha: 0.55 + Math.random() * 0.45,
-          decay: 0.012 + Math.random() * 0.014
+          r: 1.0 + Math.random() * 1.8,
+          alpha: (0.45 + Math.random() * 0.4) * (1 - beamMorph * 0.7),
+          decay: 0.015 + Math.random() * 0.015
         });
       }
 
-      // 1. Render Diagonal Light Beam with True Gaussian Optical Falloff
-      if (travelT > 0.01) {
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.globalCompositeOperation = 'lighter';
-
-        const maxOuterW = 16 + beamMorph * 96 + endFlare * 120;
-        const glowLayers = [
-          { ratio: 1.00, alpha: 0.018 * beamMorph },
-          { ratio: 0.72, alpha: 0.032 * beamMorph },
-          { ratio: 0.48, alpha: 0.055 * (0.3 + 0.7 * beamMorph) },
-          { ratio: 0.28, alpha: 0.11 * (0.4 + 0.6 * beamMorph) },
-          { ratio: 0.15, alpha: 0.24 * (0.5 + 0.5 * beamMorph) },
-          { ratio: 0.07, alpha: 0.52 * (0.6 + 0.4 * beamMorph) }
-        ];
-
-        glowLayers.forEach((layer) => {
-          const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
-          grad.addColorStop(0, 'rgba(195, 225, 255, 0)');
-          grad.addColorStop(0.35, `rgba(210, 234, 255, ${(layer.alpha * 0.55).toFixed(4)})`);
-          grad.addColorStop(0.82, `rgba(235, 246, 255, ${layer.alpha.toFixed(4)})`);
-          grad.addColorStop(1, `rgba(255, 255, 255, ${(layer.alpha * 1.25).toFixed(4)})`);
-          ctx.strokeStyle = grad;
-          ctx.lineWidth = Math.max(1.5, maxOuterW * layer.ratio);
-          ctx.beginPath();
-          ctx.moveTo(tailX, tailY);
-          ctx.lineTo(headX, headY);
-          ctx.stroke();
-        });
-
-        // Razor-sharp white-hot beam core
-        const coreWidth = 1.5 + beamMorph * 3.6 + endFlare * 4.2;
-        const coreGrad = ctx.createLinearGradient(tailX, tailY, headX, headY);
-        coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-        coreGrad.addColorStop(0.22, `rgba(255, 255, 255, ${(0.38 * beamMorph).toFixed(3)})`);
-        coreGrad.addColorStop(0.7, `rgba(255, 255, 255, ${(0.75 + 0.22 * beamMorph).toFixed(3)})`);
-        coreGrad.addColorStop(1, 'rgba(255, 255, 255, 1)');
-        ctx.strokeStyle = coreGrad;
-        ctx.lineWidth = coreWidth;
-        ctx.shadowColor = 'rgba(220, 238, 255, 0.95)';
-        ctx.shadowBlur = 18 + beamMorph * 22;
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(headX, headY);
-        ctx.stroke();
-
-        ctx.restore();
-      }
-
-      // 2. Update & Render Drifting Photon Sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
         const sp = sparks[i];
         sp.x += sp.vx;
@@ -293,48 +259,102 @@ function playFullEntranceSequence(isManualReplay) {
         }
         ctx.save();
         ctx.fillStyle = `rgba(235, 245, 255, ${sp.alpha.toFixed(3)})`;
-        ctx.shadowColor = 'rgba(215, 235, 255, 0.8)';
-        ctx.shadowBlur = 6;
         ctx.beginPath();
         ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
 
-      // 3. Render Leading Light Particle Head (Radiant Orb + Cross Star Flare)
-      const pulse = 0.92 + 0.08 * Math.sin(now * 0.012);
-      const haloRadius = (36 + beamMorph * 46 + endFlare * 60) * pulse;
-      const particleGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, haloRadius);
-      particleGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      particleGrad.addColorStop(0.14, 'rgba(245, 250, 255, 0.92)');
-      particleGrad.addColorStop(0.38, 'rgba(205, 232, 255, 0.38)');
-      particleGrad.addColorStop(1, 'rgba(185, 220, 255, 0)');
+      // 1. Render the Light Beam (Appears as the dot stretches into a beam in Act 2, then floods screen white in Act 3)
+      if (beamMorph > 0.005) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.globalCompositeOperation = 'lighter';
 
-      ctx.save();
-      ctx.fillStyle = particleGrad;
-      ctx.beginPath();
-      ctx.arc(headX, headY, haloRadius, 0, Math.PI * 2);
-      ctx.fill();
+        // In Act 3, whiteoutExpansion rapidly widens the beam until it covers the entire viewport in white
+        const whiteoutExpansion = Math.pow(whiteoutT, 2.4) * maxDiag * 1.85;
+        const maxOuterW = 18 + beamMorph * 95 + whiteoutExpansion;
 
-      // Solid white-hot particle nucleus
-      ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = '#FFFFFF';
-      ctx.shadowBlur = 20;
-      ctx.beginPath();
-      ctx.arc(headX, headY, 4.2 + beamMorph * 2.4, 0, Math.PI * 2);
-      ctx.fill();
+        const glowLayers = [
+          { ratio: 1.00, alpha: 0.035 * beamMorph + whiteoutT * 0.45 },
+          { ratio: 0.70, alpha: 0.065 * beamMorph + whiteoutT * 0.55 },
+          { ratio: 0.45, alpha: 0.12 * beamMorph + whiteoutT * 0.65 },
+          { ratio: 0.26, alpha: 0.25 * beamMorph + whiteoutT * 0.75 },
+          { ratio: 0.13, alpha: 0.50 * beamMorph + whiteoutT * 0.85 },
+          { ratio: 0.06, alpha: 0.85 * beamMorph + whiteoutT * 0.95 }
+        ];
 
-      // Subtle optical star flare on the particle head
-      const flareLen = (18 + beamMorph * 22) * pulse;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.moveTo(headX - flareLen, headY);
-      ctx.lineTo(headX + flareLen, headY);
-      ctx.moveTo(headX, headY - flareLen);
-      ctx.lineTo(headX, headY + flareLen);
-      ctx.stroke();
-      ctx.restore();
+        glowLayers.forEach((layer) => {
+          const a = Math.min(1, layer.alpha);
+          const grad = ctx.createLinearGradient(tailX, tailY, beamTipX, beamTipY);
+          const edgeAlpha = Math.min(1, a * (0.25 + whiteoutT * 0.75));
+          grad.addColorStop(0, `rgba(225, 240, 255, ${edgeAlpha.toFixed(4)})`);
+          grad.addColorStop(0.5, `rgba(245, 250, 255, ${a.toFixed(4)})`);
+          grad.addColorStop(1, `rgba(255, 255, 255, ${Math.min(1, a * 1.15).toFixed(4)})`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = Math.max(1.5, maxOuterW * layer.ratio);
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(beamTipX, beamTipY);
+          ctx.stroke();
+        });
+
+        // Intense white-hot beam core
+        const coreWidth = 2.0 + beamMorph * 5.0 + Math.pow(whiteoutT, 2.0) * maxDiag * 0.9;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${Math.min(1, 0.7 + 0.3 * beamMorph).toFixed(3)})`;
+        ctx.lineWidth = coreWidth;
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 24 + beamMorph * 30;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(beamTipX, beamTipY);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // 2. Render the Point of Light (光点) & its Elliptical Stretching into the Beam
+      // In Act 1: Pure circular glowing dot (stretchX = 1, stretchY = 1)
+      // In early Act 2: Visibly stretches along the diagonal (stretchX grows, stretchY narrows) as it morphs into the beam!
+      const dotPresence = 1 - smoothstep(0.58, 0.82, progress);
+      if (dotPresence > 0.01) {
+        const stretchFactor = smoothstep(0.30, 0.62, progress);
+        const scaleAlongBeam = 1 + stretchFactor * 6.5;
+        const scalePerpBeam = 1 - stretchFactor * 0.52;
+        const pulse = 0.92 + 0.08 * Math.sin(now * 0.014);
+
+        ctx.save();
+        ctx.translate(headX, headY);
+        ctx.rotate(diagAngle);
+        ctx.scale(scaleAlongBeam, scalePerpBeam);
+
+        const haloR = 34 * pulse;
+        const dotGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, haloR);
+        dotGrad.addColorStop(0, `rgba(255, 255, 255, ${dotPresence.toFixed(3)})`);
+        dotGrad.addColorStop(0.18, `rgba(245, 250, 255, ${(0.92 * dotPresence).toFixed(3)})`);
+        dotGrad.addColorStop(0.45, `rgba(205, 232, 255, ${(0.36 * dotPresence).toFixed(3)})`);
+        dotGrad.addColorStop(1, 'rgba(185, 220, 255, 0)');
+
+        ctx.fillStyle = dotGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, haloR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crisp bright nucleus of the light dot
+        ctx.fillStyle = `rgba(255, 255, 255, ${dotPresence.toFixed(3)})`;
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(0, 0, 4.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 3. Drive Full-Screen Whiteout Overlay in Act 3
+      if (flashOverlay) {
+        const flashAlpha = Math.pow(whiteoutT, 1.65);
+        flashOverlay.style.opacity = flashAlpha.toFixed(3);
+      }
     }
 
     if (progress < 1) {
