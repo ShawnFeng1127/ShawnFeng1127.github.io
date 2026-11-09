@@ -221,6 +221,67 @@
       transform: translateY(0);
     }
 
+    /* Portal Suction / Dive-In States ("照片把人吸进去") */
+    .dome-photo-card.is-suction-target {
+      border-color: rgba(255, 255, 255, 1) !important;
+      box-shadow:
+        0 0 80px rgba(215, 236, 255, 0.78),
+        0 0 160px rgba(185, 220, 255, 0.45),
+        inset 0 0 28px rgba(255, 255, 255, 0.55) !important;
+    }
+
+    .dome-photo-card.is-suction-target .dome-photo-bottom,
+    .dome-photo-card.is-suction-target .dome-photo-overlay {
+      opacity: 0 !important;
+      transition: opacity 0.22s ease !important;
+    }
+
+    .dome-photo-card.is-suction-Target-img,
+    .dome-photo-card.is-suction-target .dome-photo-img {
+      transform: scale(1.12) !important;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+
+    .dome-photo-card.is-suction-peripheral {
+      filter: blur(2.5px) brightness(0.55);
+      transition: filter 0.35s ease;
+    }
+
+    /* Fullscreen Optical Portal Suction Tunnel Overlay */
+    .dome-portal-tunnel {
+      position: fixed;
+      inset: 0;
+      z-index: 22;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(235, 245, 255, 0.35) 0%, rgba(190, 220, 255, 0.12) 26%, rgba(4, 6, 10, 0.82) 72%, rgba(2, 3, 6, 0.96) 100%);
+      transition: opacity 0.18s linear;
+    }
+
+    .dome-hud-header,
+    .dome-hud-bottom {
+      transition: opacity 0.38s ease, transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    body.is-portal-sucking .dome-hud-header,
+    body.is-portal-sucking .dome-hud-bottom {
+      opacity: 0.12;
+      transform: scale(0.96);
+    }
+
+    /* Smooth Portal Emergence on Lightbox Content */
+    #project-lightbox .lightbox-content {
+      transform: scale(0.92);
+      opacity: 0;
+      transition: transform 0.46s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.36s ease;
+    }
+
+    #project-lightbox.is-active .lightbox-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+
     /* 4. Top Floating Controls (Top Title Removed per User Request) */
     .dome-hud-header {
       position: fixed;
@@ -441,6 +502,7 @@
   <!-- 1. Dynamic Spherical Ambient Light & Starlight Dust Canvas -->
   <canvas id="dome-bg-canvas" aria-hidden="true"></canvas>
   <div class="dome-ambient-vignette" aria-hidden="true"></div>
+  <div class="dome-portal-tunnel" id="dome-portal-tunnel" aria-hidden="true"></div>
 
   <!-- 2. First-Person Center Crosshair -->
   <div class="dome-crosshair" id="dome-crosshair" aria-hidden="true">
@@ -729,6 +791,7 @@
     const scene3d = document.getElementById('dome-scene-3d');
     const centerPersonEl = document.getElementById('dome-center-person');
     const crosshair = document.getElementById('dome-crosshair');
+    const portalTunnelEl = document.getElementById('dome-portal-tunnel');
 
     const telemetryYaw = document.getElementById('telemetry-yaw');
     const telemetryPitch = document.getElementById('telemetry-pitch');
@@ -755,11 +818,15 @@
     let lastUserActionTime = 0;
     const AUTO_RESUME_MS = 3000;
 
-    // Smooth Steer to Clicked Panel
+    // Portal Suction ("照片把人吸进去") & Release State
     let isSteering = false;
+    let isReleasing = false;
+    let steerPanelIndex = -1;
+    let steerBaseFov = 70;
     let steerStartYaw = 0, steerStartPitch = 0;
     let steerTargetYaw = 0, steerTargetPitch = 0;
     let steerProgress = 0;
+    let suctionStrength = 0;   // 0 = normal dome, 1 = fully sucked inside photo portal
     let steerPhotoId = null;
 
     // Drag State
@@ -824,13 +891,13 @@
         card.addEventListener('click', (e) => {
           e.stopPropagation();
           if (totalDragDist > 7) return;
-          steerAndOpenPhoto(ux, uy, uz, item.id);
+          steerAndOpenPhoto(i, ux, uy, uz, item.id);
         });
 
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            steerAndOpenPhoto(ux, uy, uz, item.id);
+            steerAndOpenPhoto(i, ux, uy, uz, item.id);
           }
         });
 
@@ -845,13 +912,20 @@
       }
     }
 
-    // --- 2. Smooth Steer Camera to Clicked Panel & Open Original Lightbox ---
-    function steerAndOpenPhoto(ux, uy, uz, photoId) {
+    // --- 2. Gravitational Portal Suction ("照片把人吸进去") & Open Original Lightbox ---
+    function steerAndOpenPhoto(panelIndex, ux, uy, uz, photoId) {
+      if (isSteering) return;
       isSteering = true;
+      isReleasing = false;
+      steerPanelIndex = panelIndex;
+      steerBaseFov = fov;
       steerProgress = 0;
+      suctionStrength = 0;
       steerPhotoId = photoId;
       steerStartYaw = yaw;
       steerStartPitch = pitch;
+      velYaw = 0;
+      velPitch = 0;
 
       steerTargetYaw = Math.atan2(ux, -uz);
       steerTargetPitch = Math.asin(Math.max(-1, Math.min(1, uy)));
@@ -860,6 +934,21 @@
       if (deltaYaw > Math.PI) deltaYaw -= Math.PI * 2;
       if (deltaYaw < -Math.PI) deltaYaw += Math.PI * 2;
       steerTargetYaw = steerStartYaw + deltaYaw;
+
+      document.body.classList.add('is-portal-sucking');
+      panelNodes.forEach((node, idx) => {
+        node.el.classList.toggle('is-suction-target', idx === panelIndex);
+        node.el.classList.toggle('is-suction-peripheral', idx !== panelIndex);
+      });
+    }
+
+    function startPortalRelease() {
+      isSteering = false;
+      isReleasing = true;
+      document.body.classList.remove('is-portal-sucking');
+      panelNodes.forEach((node) => {
+        node.el.classList.remove('is-suction-target', 'is-suction-peripheral');
+      });
     }
 
     // --- 3. Ambient Light Effects, Volumetric Rays & Starlight Background Renderer ---
@@ -885,6 +974,20 @@
         phase: i * 0.73,
         speed: 0.0015 + (i % 5) * 0.0005,
         isBokeh: i % 5 === 0
+      };
+    });
+
+    // Radial Hyperspace Light Streaks for Portal Suction ("照片把人吸进去")
+    const SUCTION_STREAKS = Array.from({ length: 56 }, (_, i) => {
+      const angle = (i / 56) * Math.PI * 2 + (i % 3) * 0.08;
+      return {
+        angle,
+        cos: Math.cos(angle),
+        sin: Math.sin(angle),
+        offset: (i * 0.19) % 1,
+        speed: 1.4 + (i % 5) * 0.35,
+        length: 65 + (i % 4) * 35,
+        width: 1.1 + (i % 3) * 0.65
       };
     });
 
@@ -1007,25 +1110,106 @@
           bgCtx.fill();
         }
       });
+
+      // 6. Gravitational Portal Suction Vortex & Radial Light Streaks (Active when clicking a photo)
+      if (suctionStrength > 0.008) {
+        const maxDist = Math.hypot(cx, cy);
+        bgCtx.save();
+
+        // Concentric gravitational event-horizon rings rushing inward/outward
+        for (let rIdx = 0; rIdx < 3; rIdx++) {
+          const ringPhase = (1 - ((suctionStrength * 1.8 + rIdx * 0.33) % 1));
+          const ringRadius = Math.max(12, ringPhase * maxDist * 0.72);
+          const ringAlpha = Math.sin(ringPhase * Math.PI) * suctionStrength * 0.38;
+          bgCtx.beginPath();
+          bgCtx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
+          bgCtx.strokeStyle = `rgba(215, 236, 255, ${ringAlpha.toFixed(3)})`;
+          bgCtx.lineWidth = 1.5 + (1 - ringPhase) * 2.5;
+          bgCtx.stroke();
+        }
+
+        // Radial warp-speed light streaks pulling viewer into the photo center
+        SUCTION_STREAKS.forEach((st) => {
+          const travel = (st.offset - suctionStrength * st.speed * 0.85 + 2) % 1;
+          const innerR = 40 + travel * maxDist * 0.85;
+          const streakLen = st.length * (0.4 + suctionStrength * 2.4);
+          const outerR = innerR + streakLen;
+
+          const x1 = cx + st.cos * innerR;
+          const y1 = cy + st.sin * innerR;
+          const x2 = cx + st.cos * outerR;
+          const y2 = cy + st.sin * outerR;
+
+          const grad = bgCtx.createLinearGradient(x1, y1, x2, y2);
+          const alpha = Math.min(0.78, suctionStrength * 0.75 * Math.sin(travel * Math.PI));
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha.toFixed(3)})`);
+          grad.addColorStop(0.5, `rgba(200, 228, 255, ${(alpha * 0.6).toFixed(3)})`);
+          grad.addColorStop(1, 'rgba(180, 215, 255, 0)');
+
+          bgCtx.beginPath();
+          bgCtx.moveTo(x1, y1);
+          bgCtx.lineTo(x2, y2);
+          bgCtx.strokeStyle = grad;
+          bgCtx.lineWidth = st.width;
+          bgCtx.stroke();
+        });
+
+        bgCtx.restore();
+      }
     }
 
     // --- 4. Main 3D Spherical Dome Render Loop ---
     function animate(now) {
       requestAnimationFrame(animate);
 
-      // Handle Smooth Steer to Clicked Photo
+      // Handle Gravitational Portal Suction ("照片把人吸进去") or Release
       if (isSteering) {
-        steerProgress += 0.055;
+        steerProgress += 0.023;
         const t = Math.min(1, steerProgress);
-        const ease = 1 - Math.pow(1 - t, 3);
-        yaw = steerStartYaw + (steerTargetYaw - steerStartYaw) * ease;
-        pitch = steerStartPitch + (steerTargetPitch - steerStartPitch) * ease;
+
+        // Stage 1: Rapid Magnetic Gaze Lock onto Clicked Photo (0 -> 0.45)
+        const lockT = Math.min(1, t / 0.45);
+        const easeLock = 1 - Math.pow(1 - lockT, 3);
+        yaw = steerStartYaw + (steerTargetYaw - steerStartYaw) * easeLock;
+        pitch = steerStartPitch + (steerTargetPitch - steerStartPitch) * easeLock;
+
+        // Stage 2: Accelerating Gravitational Portal Pull (0.06 -> 1.0)
+        const suctionT = Math.max(0, (t - 0.06) / 0.94);
+        suctionStrength = Math.pow(suctionT, 2.15);
+
+        // Stage 3: Optical Dolly-Zoom FOV Vertigo (slight inhale widen -> deep tunnel plunge)
+        const intakePulse = Math.sin(Math.min(1, t / 0.35) * Math.PI) * 8.5;
+        fov = Math.max(28, steerBaseFov + intakePulse - suctionStrength * (steerBaseFov - 30));
+        telemetryFov.textContent = `${Math.round(fov)}°`;
+
+        if (portalTunnelEl) {
+          portalTunnelEl.style.opacity = (suctionStrength * 0.92).toFixed(3);
+        }
 
         if (t >= 1) {
           isSteering = false;
           if (steerPhotoId && typeof window.openPhotoLightbox === 'function') {
             window.openPhotoLightbox(steerPhotoId);
           }
+        }
+      } else if (isReleasing) {
+        // Smoothly emerge back into the dome center when closing the photo detail modal
+        suctionStrength *= 0.82;
+        fov += (steerBaseFov - fov) * 0.16;
+        telemetryFov.textContent = `${Math.round(fov)}°`;
+
+        if (portalTunnelEl) {
+          portalTunnelEl.style.opacity = (suctionStrength * 0.85).toFixed(3);
+        }
+
+        if (suctionStrength < 0.008 && Math.abs(fov - steerBaseFov) < 0.3) {
+          suctionStrength = 0;
+          fov = steerBaseFov;
+          telemetryFov.textContent = `${Math.round(fov)}°`;
+          if (portalTunnelEl) portalTunnelEl.style.opacity = '0';
+          isReleasing = false;
+          steerPanelIndex = -1;
+          lastUserActionTime = Date.now();
         }
       } else if (!isDragging) {
         if (Math.abs(velYaw) > 0.00008 || Math.abs(velPitch) > 0.00008) {
@@ -1078,20 +1262,36 @@
 
           node.el.style.display = 'block';
 
-          const Xcss = R * xc;
-          const Ycss = -R * yc;
-          const Zcss = focalLength + R * zc;
+          const isTarget = i === steerPanelIndex && suctionStrength > 0.001;
+          const effectiveR = isTarget
+            ? R * (1 - suctionStrength * 0.84)
+            : R * (1 + suctionStrength * 0.42);
+
+          const Xcss = effectiveR * xc;
+          const Ycss = -effectiveR * yc;
+          const Zcss = focalLength + effectiveR * zc;
 
           // Inner-wall orientation facing the sphere center (lookAt origin)
           const panelYaw = Math.atan2(-xc, -zc);
           const panelPitch = -Math.asin(Math.max(-1, Math.min(1, yc)));
 
           const forwardness = Math.min(1, (-zc - 0.14) / 0.32);
-          const opacity = 0.45 + 0.55 * forwardness;
+          let opacity = 0.45 + 0.55 * forwardness;
+          let portalScale = 1;
+
+          if (suctionStrength > 0.001) {
+            if (isTarget) {
+              opacity = 1;
+              portalScale = 1 + suctionStrength * 3.35;
+            } else {
+              opacity *= Math.max(0.04, 1 - suctionStrength * 0.94);
+              portalScale = Math.max(0.72, 1 - suctionStrength * 0.22);
+            }
+          }
 
           node.el.style.opacity = opacity.toFixed(3);
-          node.el.style.zIndex = Math.round(1000 + zc * -500);
-          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad)`;
+          node.el.style.zIndex = isTarget ? 5000 : Math.round(1000 + zc * -500);
+          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) scale(${portalScale.toFixed(3)})`;
         }
       } else {
         // Third-Person Mode
@@ -1117,13 +1317,17 @@
           const zc = -node.uy * sinPitch + z1 * cosPitch;
           const xc = x1;
 
-          const Xcss = Rtp * xc;
-          const Ycss = -Rtp * yc;
-          const Zcss = centerZ + Rtp * zc;
+          const isTarget = i === steerPanelIndex && suctionStrength > 0.001;
+          const Xcss = Rtp * xc * (isTarget ? (1 - suctionStrength * 0.85) : 1);
+          const Ycss = -Rtp * yc * (isTarget ? (1 - suctionStrength * 0.85) : 1);
+          const Zcss = isTarget
+            ? (centerZ + Rtp * zc) + suctionStrength * 920
+            : centerZ + Rtp * zc;
+          const tpScale = isTarget ? (0.78 + suctionStrength * 2.8) : 0.78;
 
-          node.el.style.opacity = zc >= 0 ? '0.96' : '0.48';
-          node.el.style.zIndex = Math.round(1000 + zc * 400);
-          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) scale(0.78)`;
+          node.el.style.opacity = isTarget ? '1' : (zc >= 0 ? '0.96' : '0.48');
+          node.el.style.zIndex = isTarget ? 5000 : Math.round(1000 + zc * 400);
+          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) scale(${tpScale.toFixed(3)})`;
         }
       }
 
@@ -1372,6 +1576,7 @@
       function closeLightbox() {
         modal.classList.remove('is-active');
         modal.setAttribute('aria-hidden', 'true');
+        startPortalRelease();
       }
 
       window.openPhotoLightbox = openLightboxByPhotoId;
