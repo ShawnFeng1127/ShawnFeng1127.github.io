@@ -2501,23 +2501,23 @@ body.unified-canvas-page {
 }
 
 /* ==========================================================================
-   Gian Media Style Pixel Art Entrance Preloader
+   Diagonal Light Particle -> Light Beam Entrance Animation
+   (Top-Left -> Bottom-Right Particle Morphing into a Volumetric Light Beam)
    ========================================================================== */
 .site-pixel-preloader {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: #08090A;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 32px 40px;
-  box-sizing: border-box;
+  background: #06070A;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0.65s ease;
+  transition: opacity 0.78s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.78s ease;
+}
+
+.site-pixel-preloader.is-opening {
+  opacity: 0;
 }
 
 .site-pixel-preloader.is-hidden {
@@ -2526,213 +2526,53 @@ body.unified-canvas-page {
   pointer-events: none;
 }
 
-/* Retro CRT scanlines overlay */
-.site-pixel-preloader::after {
-  content: "";
+.intro-light-canvas {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.22) 0px,
-    rgba(0, 0, 0, 0.22) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  pointer-events: none;
-  z-index: 30;
-}
-
-/* Subtle digital grid backdrop */
-.pixel-grid-backdrop {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Top & Bottom Brutalist Telemetry Rows */
-.pixel-header-row,
-.pixel-footer-row {
-  position: relative;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.pixel-studio-badge {
-  color: #FFFFFF;
-  font-weight: 600;
-}
-
-/* Center Pixel Art Main Stage */
-.pixel-center-stage {
-  position: relative;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto 0;
-  text-align: center;
-  transition: opacity 0.4s ease, transform 0.6s ease;
-}
-
-.pixel-canvas-frame {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.pixel-canvas-frame::before {
-  content: "";
-  position: absolute;
-  inset: -12px;
-  border: 1px dashed rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-.pixel-matrix-canvas {
-  width: 200px;
-  height: 200px;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.45));
-}
-
-.pixel-phase-badge {
-  font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 2.5px;
-  color: #FFFFFF;
-  margin-bottom: 16px;
-  min-height: 18px;
-  text-transform: uppercase;
-}
-
-.pixel-counter-text {
-  font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  font-size: clamp(48px, 6vw, 72px);
-  font-weight: 800;
-  letter-spacing: 4px;
-  color: #FFFFFF;
-  line-height: 1;
-  margin-bottom: 16px;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 24px rgba(255, 255, 255, 0.4);
-}
-
-.pixel-progress-wrap {
-  width: min(320px, 80vw);
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-
-.pixel-progress-bar {
+  width: 100%;
   height: 100%;
-  width: 0%;
-  background: #FFFFFF;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
-  border-radius: 999px;
-  transition: width 0.08s linear;
+  display: block;
+  z-index: 5;
+  pointer-events: none;
 }
 
-.pixel-status-ticker {
-  font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.5);
-  min-height: 16px;
-}
-
-/* Skip Button */
+/* Subtle Skip Button */
 .pixel-skip-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.75);
+  position: absolute;
+  top: 28px;
+  right: 36px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.68);
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 1.5px;
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.22s ease;
 }
 
 .pixel-skip-btn:hover {
-  background: #FFFFFF;
-  color: #08090A;
+  background: rgba(255, 255, 255, 0.92);
+  color: #06070A;
   border-color: #FFFFFF;
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.38);
 }
 
-/* Split Curtains on Finish Reveal */
-.pixel-shutter-curtain {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50.5%;
-  background: #08090A;
-  z-index: 5;
-  transition: transform 0.85s cubic-bezier(0.76, 0, 0.18, 1);
-  will-change: transform;
-}
-
-.pixel-shutter-curtain--top {
-  top: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.pixel-shutter-curtain--bottom {
-  bottom: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.site-pixel-preloader.is-opening { background: transparent !important; }
-.site-pixel-preloader.is-opening .pixel-grid-backdrop,
-.site-pixel-preloader.is-opening .pixel-header-row,
-.site-pixel-preloader.is-opening .pixel-footer-row { opacity: 0; }
-.site-pixel-preloader.is-opening .pixel-shutter-curtain--top {
-  transform: translate3d(0, -102%, 0);
-}
-
-.site-pixel-preloader.is-opening .pixel-shutter-curtain--bottom {
-  transform: translate3d(0, 102%, 0);
-}
-
-.site-pixel-preloader.is-opening .pixel-center-stage {
-  opacity: 0;
-  transform: scale(1.08);
-}
-
-/* Flash effect */
+/* Soft Optical Bloom on Beam Completion */
 .pixel-flash-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, rgba(220, 236, 255, 0.22) 0%, rgba(255, 255, 255, 0.32) 50%, rgba(210, 230, 255, 0.22) 100%);
   opacity: 0;
   pointer-events: none;
-  z-index: 25;
-  transition: opacity 0.25s ease;
+  z-index: 15;
+  transition: opacity 0.42s ease;
 }
 
 .site-pixel-preloader.is-flash .pixel-flash-overlay {

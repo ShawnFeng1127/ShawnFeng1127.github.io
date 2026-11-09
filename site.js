@@ -115,160 +115,56 @@ function playFullEntranceSequence(isManualReplay) {
   overlay.className = 'site-pixel-preloader';
   overlay.setAttribute('aria-hidden', 'true');
   overlay.innerHTML = `
-    <div class="pixel-grid-backdrop" aria-hidden="true"></div>
-    <div class="pixel-shutter-curtain pixel-shutter-curtain--top" aria-hidden="true"></div>
-    <div class="pixel-shutter-curtain pixel-shutter-curtain--bottom" aria-hidden="true"></div>
+    <canvas id="intro-light-canvas" class="intro-light-canvas"></canvas>
     <div class="pixel-flash-overlay" aria-hidden="true"></div>
-
-    <header class="pixel-header-row">
-      <span>// SYS.BOOT : <strong class="pixel-studio-badge">SHAWN FENG</strong></span>
-      <span>[ PIXEL MATRIX 2026 ]</span>
-    </header>
-
-    <main class="pixel-center-stage">
-      <div class="pixel-canvas-frame">
-        <canvas id="pixel-matrix-canvas" class="pixel-matrix-canvas" width="160" height="160"></canvas>
-      </div>
-      <div class="pixel-phase-badge" id="pixel-phase-badge">INITIALIZING IDENTITY</div>
-      <div class="pixel-counter-text" id="pixel-counter-text">00%</div>
-      <div class="pixel-progress-wrap">
-        <div class="pixel-progress-bar" id="pixel-progress-bar"></div>
-      </div>
-      <div class="pixel-status-ticker" id="pixel-status-ticker">MOUNTING PIXEL GRAPHICS ENGINE...</div>
-    </main>
-
-    <footer class="pixel-footer-row">
-      <span>[ 像素风加载 // S · 镜头 · 无人机 ]</span>
-      <button type="button" class="pixel-skip-btn" id="pixel-skip-btn">SKIP // ESC</button>
-    </footer>
+    <button type="button" class="pixel-skip-btn" id="pixel-skip-btn">SKIP // ESC</button>
   `;
 
   document.body.appendChild(overlay);
 
-  const canvas = document.getElementById('pixel-matrix-canvas');
+  const canvas = document.getElementById('intro-light-canvas');
   const ctx = canvas ? canvas.getContext('2d') : null;
-  const phaseBadge = document.getElementById('pixel-phase-badge');
-  const counterText = document.getElementById('pixel-counter-text');
-  const progressBar = document.getElementById('pixel-progress-bar');
-  const tickerText = document.getElementById('pixel-status-ticker');
   const skipBtn = document.getElementById('pixel-skip-btn');
 
-  // 16x16 Pixel Art Matrices
-  const MATRIX_S = [
-    "................",
-    "....########....",
-    "...##########...",
-    "..############..",
-    "..###......###..",
-    "..###...........",
-    "..###...........",
-    "...##########...",
-    "....##########..",
-    "...........###..",
-    "...........###..",
-    "..###......###..",
-    "..############..",
-    "...##########...",
-    "....########....",
-    "................"
-  ];
-
-  const MATRIX_LENS = [
-    ".....######.....",
-    "...##########...",
-    "..############..",
-    ".###...##...###.",
-    ".##...####...##.",
-    "###..######..###",
-    "###..##..##..###",
-    "###..##..##..###",
-    "###..##..##..###",
-    "###..######..###",
-    ".##...####...##.",
-    ".###...##...###.",
-    "..############..",
-    "...##########...",
-    ".....######.....",
-    "................"
-  ];
-
-  const MATRIX_DRONE_1 = [
-    "###..........###",
-    ".#............#.",
-    "..#..........#..",
-    "...#........#...",
-    "....#..##..#....",
-    ".....######.....",
-    "....########....",
-    "....###..###....",
-    "....###..###....",
-    "....########....",
-    ".....######.....",
-    "....#..##..#....",
-    "...#........#...",
-    "..#..........#..",
-    ".#............#.",
-    "###..........###"
-  ];
-
-  const MATRIX_DRONE_2 = [
-    ".#............#.",
-    "###..........###",
-    "..#..........#..",
-    "...#........#...",
-    "....#..##..#....",
-    ".....######.....",
-    "....########....",
-    "....###..###....",
-    "....###..###....",
-    "....########....",
-    ".....######.....",
-    "....#..##..#....",
-    "...#........#...",
-    "..#..........#..",
-    "###..........###",
-    ".#............#."
-  ];
-
-  function getPixelMatrix(rows) {
-    const grid = [];
-    for (let r = 0; r < 16; r++) {
-      const row = [];
-      const line = rows[r] || '................';
-      for (let c = 0; c < 16; c++) {
-        row.push(line[c] === '#' ? 1 : 0);
-      }
-      grid.push(row);
-    }
-    return grid;
+  let viewW = window.innerWidth;
+  let viewH = window.innerHeight;
+  function resizeIntroCanvas() {
+    if (!canvas || !ctx) return;
+    viewW = window.innerWidth;
+    viewH = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = viewW * dpr;
+    canvas.height = viewH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
+  resizeIntroCanvas();
+  window.addEventListener('resize', resizeIntroCanvas);
 
-  const gridS = getPixelMatrix(MATRIX_S);
-  const gridLens = getPixelMatrix(MATRIX_LENS);
-  const gridDrone1 = getPixelMatrix(MATRIX_DRONE_1);
-  const gridDrone2 = getPixelMatrix(MATRIX_DRONE_2);
-
-  const duration = isManualReplay ? 1950 : 2150;
+  const duration = isManualReplay ? 2050 : 2150;
   const startTime = performance.now();
   let finished = false;
+
+  // Floating micro-sparks shed by the light particle as it flies from top-left to bottom-right
+  const sparks = [];
 
   function completeIntro() {
     if (finished) return;
     finished = true;
+    window.removeEventListener('resize', resizeIntroCanvas);
     overlay.classList.add('is-flash');
     overlay.classList.add('is-opening');
     document.body.classList.remove('is-intro-stage-hold');
 
     setTimeout(() => {
       overlay.classList.remove('is-flash');
-    }, 240);
+    }, 300);
 
     setTimeout(() => {
       overlay.classList.add('is-hidden');
       setTimeout(() => {
         if (overlay.parentNode) overlay.remove();
-      }, 550);
-    }, 850);
+      }, 650);
+    }, 760);
   }
 
   if (skipBtn) {
@@ -283,102 +179,168 @@ function playFullEntranceSequence(isManualReplay) {
   };
   document.addEventListener('keydown', onEscKey);
 
-  function drawPixelMatrix(grid, alpha = 1, accentColor = '#FFFFFF', glowColor = 'rgba(255, 255, 255, 0.85)') {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, 160, 160);
-    const cellSize = 8;
-    const gap = 2;
-
-    for (let r = 0; r < 16; r++) {
-      for (let c = 0; c < 16; c++) {
-        const val = grid[r][c];
-        const x = c * (cellSize + gap);
-        const y = r * (cellSize + gap);
-
-        if (val > 0.05) {
-          ctx.fillStyle = accentColor;
-          ctx.globalAlpha = Math.min(1, val * alpha);
-          ctx.shadowColor = glowColor;
-          ctx.shadowBlur = 10;
-          ctx.fillRect(x, y, cellSize, cellSize);
-        } else {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-          ctx.globalAlpha = 0.5;
-          ctx.shadowBlur = 0;
-          ctx.fillRect(x + 3, y + 3, 2, 2);
-        }
-      }
-    }
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-  }
-
-  function interpolateMatrices(m1, m2, t) {
-    const res = [];
-    for (let r = 0; r < 16; r++) {
-      const row = [];
-      for (let c = 0; c < 16; c++) {
-        const v1 = m1[r][c];
-        const v2 = m2[r][c];
-        row.push(v1 + (v2 - v1) * t);
-      }
-      res.push(row);
-    }
-    return res;
+  function smoothstep(edge0, edge1, x) {
+    const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
   }
 
   function step(now) {
     if (finished) return;
     const elapsed = now - startTime;
     const progress = Math.min(1, elapsed / duration);
-    const pct = Math.floor(progress * 100);
 
-    if (counterText) {
-      counterText.textContent = String(pct).padStart(2, '0') + '%';
-    }
-    if (progressBar) {
-      progressBar.style.width = pct + '%';
-    }
+    if (ctx) {
+      ctx.clearRect(0, 0, viewW, viewH);
 
-    if (progress < 0.35) {
-      // Phase 1: Letter S
-      if (phaseBadge) phaseBadge.textContent = 'PHASE 01: MOUNTING IDENTITY [S]';
-      if (tickerText) tickerText.textContent = 'SHAWN FENG // INITIALIZING VISUAL PORTFOLIO';
-      drawPixelMatrix(gridS, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.85)');
-    } else if (progress >= 0.35 && progress < 0.42) {
-      // Transition: S -> Lens
-      const t = (progress - 0.35) / 0.07;
-      if (phaseBadge) phaseBadge.textContent = 'TRANSITION: [S] -> [LENS]';
-      const blended = interpolateMatrices(gridS, gridLens, t);
-      drawPixelMatrix(blended, 1, '#E6F0FA', 'rgba(180, 215, 255, 0.8)');
-    } else if (progress >= 0.42 && progress < 0.70) {
-      // Phase 2: Camera Lens
-      if (phaseBadge) phaseBadge.textContent = 'PHASE 02: CALIBRATING OPTICAL LENS [CAM]';
-      if (tickerText) tickerText.textContent = 'APERTURE F/1.4 // RAW TWILIGHT EXPOSURE LOCK';
-      drawPixelMatrix(gridLens, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.85)');
-    } else if (progress >= 0.70 && progress < 0.76) {
-      // Transition: Lens -> Drone
-      const t = (progress - 0.70) / 0.06;
-      if (phaseBadge) phaseBadge.textContent = 'TRANSITION: [LENS] -> [DRONE]';
-      const blended = interpolateMatrices(gridLens, gridDrone1, t);
-      drawPixelMatrix(blended, 1, '#EBF5EB', 'rgba(190, 255, 200, 0.8)');
-    } else if (progress >= 0.76 && progress < 0.99) {
-      // Phase 3: Drone with live rotating blades
-      if (phaseBadge) phaseBadge.textContent = 'PHASE 03: ARMING DRONE FLIGHT MATRIX [UAV]';
-      if (tickerText) tickerText.textContent = 'DJI TELEMETRY ARMED // UOM AIRSPACE LEGAL 120M';
-      const isAltFrame = Math.floor(elapsed / 80) % 2 === 0;
-      drawPixelMatrix(isAltFrame ? gridDrone1 : gridDrone2, 1, '#FFFFFF', 'rgba(255, 255, 255, 0.9)');
-    } else {
-      // 100%: Finished
-      if (phaseBadge) phaseBadge.textContent = 'SYSTEM ARMED // LAUNCHING EXPERIENCE';
-      if (tickerText) tickerText.textContent = 'WELCOME TO SHAWN FENG 2026';
-      drawPixelMatrix(gridDrone1, 1, '#FFFFFF', 'rgba(255, 255, 255, 1)');
-      completeIntro();
-      return;
+      // Trajectory from Top-Left (x0, y0) -> Bottom-Right (x1, y1)
+      const x0 = viewW * 0.04;
+      const y0 = viewH * 0.04;
+      const x1 = viewW * 0.96;
+      const y1 = viewH * 0.96;
+
+      // Smooth accelerating-then-gliding ease along the diagonal
+      const travelT = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      const headX = x0 + (x1 - x0) * travelT;
+      const headY = y0 + (y1 - y0) * travelT;
+
+      // Morph factor: 0 = single glowing light particle, 1 = full collimated diagonal light beam
+      const beamMorph = smoothstep(0.20, 0.78, progress);
+      // Final expansion bloom as beam reaches bottom-right
+      const endFlare = smoothstep(0.76, 1.0, progress);
+
+      // Tail starts close to the particle in Phase 1 (short comet), then locks back toward top-left to form the full beam
+      const shortTailT = Math.max(0, travelT - 0.12);
+      const beamTailT = shortTailT * (1 - beamMorph * 0.95);
+      const tailX = x0 + (x1 - x0) * beamTailT;
+      const tailY = y0 + (y1 - y0) * beamTailT;
+
+      // Spawn delicate photon dust motes around the flying particle
+      if (sparks.length < 70 && Math.random() < 0.85) {
+        const angle = Math.atan2(y1 - y0, x1 - x0) + Math.PI + (Math.random() - 0.5) * 1.4;
+        const speed = 0.4 + Math.random() * 1.6;
+        sparks.push({
+          x: headX + (Math.random() - 0.5) * 8,
+          y: headY + (Math.random() - 0.5) * 8,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 1.0 + Math.random() * 2.2,
+          alpha: 0.55 + Math.random() * 0.45,
+          decay: 0.012 + Math.random() * 0.014
+        });
+      }
+
+      // 1. Render Diagonal Light Beam with True Gaussian Optical Falloff
+      if (travelT > 0.01) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.globalCompositeOperation = 'lighter';
+
+        const maxOuterW = 16 + beamMorph * 96 + endFlare * 120;
+        const glowLayers = [
+          { ratio: 1.00, alpha: 0.018 * beamMorph },
+          { ratio: 0.72, alpha: 0.032 * beamMorph },
+          { ratio: 0.48, alpha: 0.055 * (0.3 + 0.7 * beamMorph) },
+          { ratio: 0.28, alpha: 0.11 * (0.4 + 0.6 * beamMorph) },
+          { ratio: 0.15, alpha: 0.24 * (0.5 + 0.5 * beamMorph) },
+          { ratio: 0.07, alpha: 0.52 * (0.6 + 0.4 * beamMorph) }
+        ];
+
+        glowLayers.forEach((layer) => {
+          const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
+          grad.addColorStop(0, 'rgba(195, 225, 255, 0)');
+          grad.addColorStop(0.35, `rgba(210, 234, 255, ${(layer.alpha * 0.55).toFixed(4)})`);
+          grad.addColorStop(0.82, `rgba(235, 246, 255, ${layer.alpha.toFixed(4)})`);
+          grad.addColorStop(1, `rgba(255, 255, 255, ${(layer.alpha * 1.25).toFixed(4)})`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = Math.max(1.5, maxOuterW * layer.ratio);
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(headX, headY);
+          ctx.stroke();
+        });
+
+        // Razor-sharp white-hot beam core
+        const coreWidth = 1.5 + beamMorph * 3.6 + endFlare * 4.2;
+        const coreGrad = ctx.createLinearGradient(tailX, tailY, headX, headY);
+        coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        coreGrad.addColorStop(0.22, `rgba(255, 255, 255, ${(0.38 * beamMorph).toFixed(3)})`);
+        coreGrad.addColorStop(0.7, `rgba(255, 255, 255, ${(0.75 + 0.22 * beamMorph).toFixed(3)})`);
+        coreGrad.addColorStop(1, 'rgba(255, 255, 255, 1)');
+        ctx.strokeStyle = coreGrad;
+        ctx.lineWidth = coreWidth;
+        ctx.shadowColor = 'rgba(220, 238, 255, 0.95)';
+        ctx.shadowBlur = 18 + beamMorph * 22;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(headX, headY);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // 2. Update & Render Drifting Photon Sparks
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const sp = sparks[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.alpha -= sp.decay;
+        if (sp.alpha <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.fillStyle = `rgba(235, 245, 255, ${sp.alpha.toFixed(3)})`;
+        ctx.shadowColor = 'rgba(215, 235, 255, 0.8)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 3. Render Leading Light Particle Head (Radiant Orb + Cross Star Flare)
+      const pulse = 0.92 + 0.08 * Math.sin(now * 0.012);
+      const haloRadius = (36 + beamMorph * 46 + endFlare * 60) * pulse;
+      const particleGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, haloRadius);
+      particleGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      particleGrad.addColorStop(0.14, 'rgba(245, 250, 255, 0.92)');
+      particleGrad.addColorStop(0.38, 'rgba(205, 232, 255, 0.38)');
+      particleGrad.addColorStop(1, 'rgba(185, 220, 255, 0)');
+
+      ctx.save();
+      ctx.fillStyle = particleGrad;
+      ctx.beginPath();
+      ctx.arc(headX, headY, haloRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Solid white-hot particle nucleus
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = '#FFFFFF';
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(headX, headY, 4.2 + beamMorph * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle optical star flare on the particle head
+      const flareLen = (18 + beamMorph * 22) * pulse;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(headX - flareLen, headY);
+      ctx.lineTo(headX + flareLen, headY);
+      ctx.moveTo(headX, headY - flareLen);
+      ctx.lineTo(headX, headY + flareLen);
+      ctx.stroke();
+      ctx.restore();
     }
 
     if (progress < 1) {
       requestAnimationFrame(step);
+    } else {
+      completeIntro();
     }
   }
 
