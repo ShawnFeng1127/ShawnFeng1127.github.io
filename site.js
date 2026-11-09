@@ -1712,6 +1712,8 @@ function initScrollAndKeyGuidance() {
  */
 function getSiteLanguage() {
   try {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    if (urlLang === 'en' || urlLang === 'zh') return urlLang;
     return localStorage.getItem('shawn_site_lang') || 'zh';
   } catch (_) {
     return 'zh';

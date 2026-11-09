@@ -284,10 +284,12 @@ body {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(390px, 33.33vw, 530px);
-  max-width: 530px;
+  width: max-content;
+  min-width: clamp(460px, 34vw, 560px);
+  max-width: calc(100vw - 24px);
   height: 52px;
   margin: 0;
+  gap: 14px;
   border-radius: 999px;
   background: linear-gradient(
     135deg,
@@ -307,7 +309,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 18px;
   z-index: 100;
   overflow: hidden;
   box-sizing: border-box;
@@ -2051,11 +2053,13 @@ body.unified-canvas-page {
   top: 20px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  width: clamp(430px, 35vw, 580px) !important;
-  max-width: 580px !important;
+  width: max-content !important;
+  min-width: clamp(460px, 34vw, 560px) !important;
+  max-width: calc(100vw - 24px) !important;
   height: 52px !important;
   margin: 0 !important;
-  padding: 0 16px !important;
+  padding: 0 18px !important;
+  gap: 14px !important;
   border-radius: 999px !important;
   background: linear-gradient(
     135deg,
@@ -2090,6 +2094,7 @@ body.unified-canvas-page {
   align-items: center !important;
   gap: 8px !important;
   flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
 .nav-brand-dot {
@@ -2098,13 +2103,14 @@ body.unified-canvas-page {
   border-radius: 50%;
   background: #FFFFFF;
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
 }
 
 .nav-divider {
   width: 1px;
   height: 16px;
   background: rgba(255, 255, 255, 0.18);
-  margin: 0 4px;
+  margin: 0 2px;
   flex-shrink: 0;
 }
 
@@ -2112,6 +2118,7 @@ body.unified-canvas-page {
   display: flex !important;
   align-items: center !important;
   gap: 14px !important;
+  flex-shrink: 0 !important;
 }
 
 .nav-link {
@@ -2122,6 +2129,8 @@ body.unified-canvas-page {
   text-decoration: none !important;
   position: relative !important;
   padding: 4px 2px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
   transition: color var(--transition-fast) !important;
 }
 
@@ -2150,6 +2159,7 @@ body.unified-canvas-page {
   color: rgba(255, 255, 255, 0.85) !important;
   cursor: pointer !important;
   padding: 0 !important;
+  flex-shrink: 0 !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
@@ -2175,6 +2185,8 @@ body.unified-canvas-page {
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
   transition: all var(--transition-fast) !important;
 }
 
@@ -2187,20 +2199,23 @@ body.unified-canvas-page {
   .unified-canvas-page .glass-nav,
   .glass-nav {
     top: 10px !important;
-    width: calc(100% - 20px) !important;
-    max-width: 440px !important;
+    width: max-content !important;
+    min-width: min(330px, calc(100vw - 16px)) !important;
+    max-width: calc(100vw - 16px) !important;
     height: 48px !important;
-    padding: 0 10px !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
   }
-  .nav-brand-text {
-    display: none;
+  .nav-brand-text,
+  .nav-divider {
+    display: none !important;
   }
   .nav-links {
     gap: 8px !important;
   }
   .nav-link {
-    font-size: 11px !important;
-    letter-spacing: 0.6px !important;
+    font-size: 10.5px !important;
+    letter-spacing: 0.5px !important;
     padding: 2px 3px !important;
   }
   .nav-actions {
