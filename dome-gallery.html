@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="projects detail style.css">
   <style>
     :root {
-      --bg-dark: #07090D;
-      --glass-border: rgba(255, 255, 255, 0.16);
-      --text-main: #FFFFFF;
-      --text-muted: rgba(255, 255, 255, 0.62);
+      --bg-dark: #020306;
+      --glass-border: rgba(175, 200, 235, 0.12);
+      --text-main: rgba(238, 244, 255, 0.92);
+      --text-muted: rgba(185, 202, 228, 0.52);
     }
 
     * {
@@ -42,17 +42,15 @@
       pointer-events: none;
     }
 
-    /* Soft ambient light vignette & subtle dome glow */
+    /* Deep, mysterious nocturnal sanctuary vignette */
     .dome-ambient-vignette {
       position: fixed;
       inset: 0;
       z-index: 2;
       pointer-events: none;
       background:
-        radial-gradient(ellipse 75% 60% at 50% 35%, rgba(220, 235, 255, 0.08) 0%, rgba(175, 205, 255, 0.03) 52%, transparent 80%),
-        radial-gradient(ellipse 55% 45% at 20% 75%, rgba(255, 235, 215, 0.045) 0%, transparent 70%),
-        radial-gradient(ellipse 55% 45% at 80% 70%, rgba(200, 225, 255, 0.05) 0%, transparent 70%),
-        radial-gradient(circle at 50% 50%, transparent 48%, rgba(4, 5, 8, 0.58) 100%);
+        radial-gradient(ellipse 64% 50% at 50% 42%, rgba(48, 72, 120, 0.045) 0%, rgba(22, 34, 64, 0.02) 48%, transparent 76%),
+        radial-gradient(circle at 50% 50%, transparent 30%, rgba(2, 3, 7, 0.56) 68%, rgba(1, 2, 5, 0.92) 100%);
     }
 
     /* 2. Interactive 3D Spherical Viewport */
@@ -100,41 +98,48 @@
       height: 100%;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 18px 42px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 36px rgba(215, 232, 255, 0.22));
+      filter: brightness(0.78) drop-shadow(0 18px 42px rgba(0, 0, 0, 0.92));
     }
 
-    /* 3. Photo Panels Pasted on Inner Dome Wall (Bright, Directly Visible While Browsing) */
+    /* 3. Photo Panels Pasted on Inner Dome Wall (Horizontal & Vertical Preserved, Mysterious Low-Key Lighting) */
     .dome-photo-card {
       position: absolute;
       top: 0;
       left: 0;
-      width: 310px;
-      height: 210px;
-      border-radius: 14px;
+      width: 300px;
+      height: 196px;
+      border-radius: 12px;
       overflow: hidden;
-      background: #10131A;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      box-shadow:
-        0 18px 46px rgba(0, 0, 0, 0.65),
-        0 0 42px rgba(215, 232, 255, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      background: #05070C;
+      border: 1px solid rgba(165, 195, 238, 0.14);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.88);
       pointer-events: auto;
       cursor: pointer;
       transform-origin: center center;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      will-change: transform, opacity;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform;
+      contain: layout style paint;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
       outline: none;
+    }
+
+    .dome-photo-card.is-horizontal {
+      width: 300px;
+      height: 196px;
+    }
+
+    .dome-photo-card.is-vertical {
+      width: 204px;
+      height: 298px;
     }
 
     .dome-photo-card:hover,
     .dome-photo-card:focus-visible {
-      border-color: rgba(255, 255, 255, 0.95);
+      border-color: rgba(198, 224, 255, 0.58);
       box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.8),
-        0 0 56px rgba(255, 255, 255, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        0 20px 48px rgba(0, 0, 0, 0.94),
+        0 0 34px rgba(125, 170, 240, 0.18);
     }
 
     .dome-photo-img {
@@ -143,31 +148,37 @@
       object-fit: cover;
       display: block;
       pointer-events: none;
-      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+      filter: brightness(0.72) contrast(1.06) saturate(0.92);
+      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s ease;
     }
 
-    .dome-photo-card:hover .dome-photo-img {
-      transform: scale(1.05);
+    .dome-photo-card:hover .dome-photo-img,
+    .dome-photo-card:focus-visible .dome-photo-img {
+      transform: scale(1.04);
+      filter: brightness(0.96) contrast(1.04) saturate(1.02);
     }
 
-    /* Subtle bottom-only gradient so the photograph itself stays bright and clear */
+    /* Mysterious dark gallery inner vignette + bottom caption gradient */
     .dome-photo-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(0, 0, 0, 0.0) 0%,
-        rgba(0, 0, 0, 0.0) 58%,
-        rgba(0, 0, 0, 0.72) 100%
-      );
+      background:
+        radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0) 38%, rgba(2, 4, 10, 0.44) 100%),
+        linear-gradient(
+          180deg,
+          rgba(2, 4, 10, 0.18) 0%,
+          rgba(0, 0, 0, 0.0) 36%,
+          rgba(0, 0, 0, 0.14) 60%,
+          rgba(2, 4, 9, 0.86) 100%
+        );
       pointer-events: none;
     }
 
     .dome-photo-bottom {
       position: absolute;
       bottom: 10px;
-      left: 14px;
-      right: 14px;
+      left: 13px;
+      right: 13px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -181,21 +192,21 @@
     }
 
     .dome-photo-title {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(238, 244, 255, 0.92);
       margin: 0 0 2px 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.92);
     }
 
     .dome-photo-loc {
       font-family: 'SF Mono', monospace;
-      font-size: 9.5px;
+      font-size: 9px;
       letter-spacing: 0.06em;
-      color: rgba(255, 255, 255, 0.78);
+      color: rgba(185, 205, 232, 0.64);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -203,17 +214,17 @@
 
     .dome-photo-inspect {
       font-family: 'SF Mono', monospace;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 600;
       letter-spacing: 0.05em;
-      color: #08090C;
-      background: rgba(255, 255, 255, 0.92);
+      color: #05070C;
+      background: rgba(225, 238, 255, 0.88);
       padding: 3px 8px;
       border-radius: 6px;
       flex-shrink: 0;
       opacity: 0;
       transform: translateY(3px);
-      transition: all 0.22s ease;
+      transition: opacity 0.22s ease, transform 0.22s ease;
     }
 
     .dome-photo-card:hover .dome-photo-inspect {
@@ -223,28 +234,28 @@
 
     /* Portal Suction / Dive-In States ("照片把人吸进去") */
     .dome-photo-card.is-suction-target {
-      border-color: rgba(255, 255, 255, 1) !important;
+      z-index: 5000;
+      border-color: rgba(215, 235, 255, 0.92) !important;
       box-shadow:
-        0 0 80px rgba(215, 236, 255, 0.78),
-        0 0 160px rgba(185, 220, 255, 0.45),
-        inset 0 0 28px rgba(255, 255, 255, 0.55) !important;
+        0 0 64px rgba(145, 190, 255, 0.55),
+        0 0 120px rgba(95, 145, 235, 0.32) !important;
     }
 
     .dome-photo-card.is-suction-target .dome-photo-bottom,
     .dome-photo-card.is-suction-target .dome-photo-overlay {
       opacity: 0 !important;
-      transition: opacity 0.22s ease !important;
+      transition: opacity 0.2s ease !important;
     }
 
-    .dome-photo-card.is-suction-Target-img,
     .dome-photo-card.is-suction-target .dome-photo-img {
-      transform: scale(1.12) !important;
-      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      filter: brightness(1) contrast(1.04) !important;
+      transform: scale(1.1) !important;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
     }
 
     .dome-photo-card.is-suction-peripheral {
-      filter: blur(2.5px) brightness(0.55);
-      transition: filter 0.35s ease;
+      opacity: 0.16 !important;
+      transition: opacity 0.28s ease;
     }
 
     /* Fullscreen Optical Portal Suction Tunnel Overlay */
@@ -255,7 +266,7 @@
       pointer-events: none;
       opacity: 0;
       background:
-        radial-gradient(circle at 50% 50%, rgba(235, 245, 255, 0.35) 0%, rgba(190, 220, 255, 0.12) 26%, rgba(4, 6, 10, 0.82) 72%, rgba(2, 3, 6, 0.96) 100%);
+        radial-gradient(circle at 50% 50%, rgba(165, 205, 255, 0.24) 0%, rgba(95, 140, 215, 0.08) 26%, rgba(2, 4, 8, 0.88) 70%, rgba(1, 2, 4, 0.98) 100%);
       transition: opacity 0.18s linear;
     }
 
@@ -266,7 +277,7 @@
 
     body.is-portal-sucking .dome-hud-header,
     body.is-portal-sucking .dome-hud-bottom {
-      opacity: 0.12;
+      opacity: 0.08;
       transform: scale(0.96);
     }
 
@@ -282,7 +293,7 @@
       opacity: 1;
     }
 
-    /* 4. Top Floating Controls (Top Title Removed per User Request) */
+    /* 4. Top Floating Controls (Low-key dark obsidian pills, zero heavy backdrop-filter lag) */
     .dome-hud-header {
       position: fixed;
       top: 22px;
@@ -305,23 +316,22 @@
       gap: 8px;
       padding: 9px 18px;
       border-radius: 9999px;
-      background: rgba(14, 17, 23, 0.65);
+      background: rgba(6, 9, 15, 0.82);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #FFFFFF;
+      color: rgba(225, 236, 252, 0.85);
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
       font-family: 'SF Mono', 'Fira Code', monospace;
       letter-spacing: 0.04em;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
     .dome-back-btn:hover {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.38);
+      background: rgba(24, 34, 52, 0.88);
+      border-color: rgba(185, 212, 250, 0.35);
+      color: #FFFFFF;
       transform: translateX(-2px);
     }
 
@@ -337,28 +347,27 @@
       gap: 6px;
       padding: 8px 16px;
       border-radius: 9999px;
-      background: rgba(14, 17, 23, 0.65);
+      background: rgba(6, 9, 15, 0.82);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #FFFFFF;
-      font-size: 12px;
+      color: rgba(220, 232, 250, 0.82);
+      font-size: 11.5px;
       font-weight: 600;
       font-family: 'SF Mono', monospace;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
 
     .dome-hud-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(24, 34, 52, 0.88);
+      border-color: rgba(185, 212, 250, 0.32);
+      color: #FFFFFF;
     }
 
     .dome-hud-btn.is-active {
-      background: rgba(255, 255, 255, 0.92);
-      color: #07080A;
-      border-color: #FFFFFF;
+      background: rgba(210, 228, 255, 0.88);
+      color: #04060A;
+      border-color: rgba(230, 240, 255, 0.95);
     }
 
     /* 5. Bottom Telemetry & Hint HUD */
@@ -380,13 +389,11 @@
       gap: 4px;
       padding: 10px 16px;
       border-radius: 12px;
-      background: rgba(14, 17, 22, 0.62);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(6, 9, 15, 0.78);
+      border: 1px solid rgba(175, 200, 235, 0.09);
       font-family: 'SF Mono', monospace;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.65);
+      font-size: 10.5px;
+      color: rgba(175, 195, 222, 0.52);
       pointer-events: auto;
     }
 
@@ -396,19 +403,17 @@
     }
 
     .telemetry-val {
-      color: #FFFFFF;
+      color: rgba(220, 234, 255, 0.85);
       font-weight: 600;
     }
 
     .dome-hint-box {
-      padding: 10px 20px;
+      padding: 9px 18px;
       border-radius: 9999px;
-      background: rgba(14, 17, 22, 0.62);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.75);
+      background: rgba(6, 9, 15, 0.78);
+      border: 1px solid rgba(175, 200, 235, 0.09);
+      font-size: 11.5px;
+      color: rgba(185, 204, 230, 0.58);
       font-family: 'SF Mono', monospace;
       display: flex;
       align-items: center;
@@ -422,19 +427,19 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       pointer-events: none;
       z-index: 15;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-      opacity: 0.65;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      opacity: 0.36;
     }
 
     .dome-crosshair::before,
     .dome-crosshair::after {
       content: "";
       position: absolute;
-      background: rgba(255, 255, 255, 0.45);
+      background: rgba(190, 215, 250, 0.38);
       border-radius: 1px;
     }
 
@@ -457,19 +462,19 @@
     .dome-crosshair-ring {
       position: absolute;
       inset: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(190, 215, 250, 0.28);
       border-radius: 50%;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, background 0.2s ease;
     }
 
     .dome-crosshair.is-hovering {
-      transform: translate(-50%, -50%) scale(1.55);
-      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.48);
+      opacity: 0.88;
     }
 
     .dome-crosshair.is-hovering .dome-crosshair-ring {
-      border-color: #FFFFFF;
-      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(215, 234, 255, 0.85);
+      background: rgba(165, 202, 255, 0.14);
     }
 
     @media (max-width: 768px) {
@@ -478,9 +483,14 @@
         left: 14px;
         right: 14px;
       }
-      .dome-photo-card {
-        width: 220px;
-        height: 150px;
+      .dome-photo-card,
+      .dome-photo-card.is-horizontal {
+        width: 212px;
+        height: 140px;
+      }
+      .dome-photo-card.is-vertical {
+        width: 146px;
+        height: 214px;
       }
       .dome-hud-bottom {
         left: 14px;
@@ -614,6 +624,7 @@
         orientation: 'horizontal',
         ratio: 3936 / 2624,
         src: 'Project pictures/Project 1.png',
+        thumb: 'Project pictures/thumbs/Project 1.jpg',
         title: '郑州 · 黑川纪章纪念馆',
         subtitle: 'KISHO KUROKAWA MEMORIAL HALL · ZHENGZHOU',
         tag: 'SERIES 01 · 横幅构图',
@@ -628,6 +639,7 @@
         orientation: 'horizontal',
         ratio: 8192 / 4608,
         src: 'Project pictures/Project 2.jpg',
+        thumb: 'Project pictures/thumbs/Project 2.jpg',
         title: '甘肃 · 苦水丹霞',
         subtitle: 'KUSHU DANXIA LANDFORM · GANSU',
         tag: 'SERIES 02 · 航拍横幅',
@@ -642,6 +654,7 @@
         orientation: 'horizontal',
         ratio: 5855 / 3293,
         src: 'Project pictures/Project 3.png',
+        thumb: 'Project pictures/thumbs/Project 3.jpg',
         title: '北京 · CBD 核心区夜色',
         subtitle: 'BEIJING CBD · AFTER DARK',
         tag: 'SERIES 03 · 都市横幅',
@@ -657,6 +670,7 @@
         orientation: 'horizontal',
         ratio: 6510 / 3864,
         src: 'Project pictures/project 4a.jpg',
+        thumb: 'Project pictures/thumbs/project 4a.jpg',
         title: '西安 · 中轴线航拍',
         subtitle: "XI'AN CENTRAL AXIS · BLUE HOUR AERIAL",
         tag: 'SERIES 04A · 航拍横幅',
@@ -672,6 +686,7 @@
         orientation: 'horizontal',
         ratio: 8192 / 4608,
         src: 'Project pictures/project 4b.jpg',
+        thumb: 'Project pictures/thumbs/project 4b.jpg',
         title: '西安 · 永宁门航拍',
         subtitle: "XI'AN YONGNING GATE · NIGHT AERIAL",
         tag: 'SERIES 04B · 航拍横幅',
@@ -686,6 +701,7 @@
         orientation: 'horizontal',
         ratio: 3990 / 2244,
         src: 'Project pictures/project 5.jpg',
+        thumb: 'Project pictures/thumbs/project 5.jpg',
         title: '川西 · 九寨沟航拍',
         subtitle: 'JIUZHAIGOU VALLEY · TOP-DOWN AERIAL',
         tag: 'SERIES 05 · 航拍横幅',
@@ -700,6 +716,7 @@
         orientation: 'vertical',
         ratio: 3072 / 4096,
         src: 'Project pictures/project 6.jpg',
+        thumb: 'Project pictures/thumbs/project 6.jpg',
         title: '上海 · 陆家嘴 CBD',
         subtitle: 'SHANGHAI LUJIAZUI CBD · VERTICAL SKYLINE',
         tag: 'SERIES 06 · 竖幅构图',
@@ -714,6 +731,7 @@
         orientation: 'horizontal',
         ratio: 9755 / 3500,
         src: 'Project pictures/project 7.jpg',
+        thumb: 'Project pictures/thumbs/project 7.jpg',
         title: '郑州 · 龙湖湿地公园',
         subtitle: 'ZHENGZHOU LONGHU WETLAND PARK · PANORAMA',
         tag: 'SERIES 07 · 全景横幅',
@@ -728,6 +746,7 @@
         orientation: 'vertical',
         ratio: 2624 / 3936,
         src: 'Project pictures/project 8.jpg',
+        thumb: 'Project pictures/thumbs/project 8.jpg',
         title: '重庆 · 朝天门与千佛寺',
         subtitle: 'CHONGQING CHAOTIANMEN & QIANFO TEMPLE',
         tag: 'SERIES 08 · 竖幅构图',
@@ -742,6 +761,7 @@
         orientation: 'horizontal',
         ratio: 3936 / 2624,
         src: 'Project pictures/project 9.jpg',
+        thumb: 'Project pictures/thumbs/project 9.jpg',
         title: '北京 · CBD 漫天晚霞',
         subtitle: 'BEIJING CBD · SUNSET AFTERGLOW',
         tag: 'SERIES 09 · 横幅构图',
@@ -757,6 +777,7 @@
         orientation: 'vertical',
         ratio: 2326 / 3486,
         src: 'Project pictures/project 10a.jpg',
+        thumb: 'Project pictures/thumbs/project 10a.jpg',
         title: '郑州 · 二七塔与大玉米（蓝调）',
         subtitle: 'ERQI TOWER & MILLENNIUM PLAZA · BLUE HOUR',
         tag: 'SERIES 10A · 竖幅构图',
@@ -772,6 +793,7 @@
         orientation: 'vertical',
         ratio: 2288 / 3428,
         src: 'Project pictures/project 10b.jpg',
+        thumb: 'Project pictures/thumbs/project 10b.jpg',
         title: '郑州 · 二七塔与大玉米（黄昏）',
         subtitle: 'ERQI TOWER & MILLENNIUM PLAZA · GOLDEN DUSK',
         tag: 'SERIES 10B · 竖幅构图',
@@ -786,7 +808,7 @@
 
     // --- DOM Elements ---
     const bgCanvas = document.getElementById('dome-bg-canvas');
-    const bgCtx = bgCanvas.getContext('2d');
+    const bgCtx = bgCanvas.getContext('2d', { alpha: false });
     const viewport = document.getElementById('dome-viewport');
     const scene3d = document.getElementById('dome-scene-3d');
     const centerPersonEl = document.getElementById('dome-center-person');
@@ -811,6 +833,9 @@
     let velPitch = 0;
     const FRICTION = 0.92;
     let fov = 70;              // Field of view in degrees [38, 85]
+    let lastFocalLength = -1;
+    let lastYawStr = '';
+    let lastPitchStr = '';
 
     let currentViewMode = 'first-person'; // 'first-person' | 'third-person'
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -836,25 +861,27 @@
 
     function getSphereRadius() {
       const w = window.innerWidth;
-      if (w < 600) return 520;
-      if (w < 960) return 650;
-      return 740;
+      if (w < 600) return 500;
+      if (w < 960) return 620;
+      return 700;
     }
 
-    // --- 1. Build 18 Spherical Inner-Wall Panels ---
-    // Balanced Fibonacci Sphere distribution so 4~5 large, vivid photos are always in view
-    const TOTAL_PANELS = 18;
+    // --- 1. Build 12 Spherical Inner-Wall Panels (True Vertical & Horizontal Aspect Ratios) ---
+    // Interleave vertical (6, 8, 10a, 10b) and horizontal photos across all latitudes of the Fibonacci sphere
+    const SPHERE_ORDER = [0, 6, 2, 8, 4, 10, 1, 5, 7, 11, 3, 9];
+    const TOTAL_PANELS = SPHERE_ORDER.length; // 12 unique works
     const panelNodes = [];
 
     function buildDomePanels() {
       const phi = Math.PI * (Math.sqrt(5) - 1); // golden angle ~2.39996 rad
 
       for (let i = 0; i < TOTAL_PANELS; i++) {
-        const item = PHOTO_CATALOG[i % PHOTO_CATALOG.length];
+        const catalogIdx = SPHERE_ORDER[i];
+        const item = PHOTO_CATALOG[catalogIdx];
 
-        // Distribute y in [-0.70, +0.70] so panels wrap around the horizon & upper/lower vaults
+        // Distribute y in [-0.58, +0.58] so panels wrap around the horizon & upper/lower vaults without crowding
         const t = i / (TOTAL_PANELS - 1);
-        const y = (1 - 2 * t) * 0.70;
+        const y = (1 - 2 * t) * 0.58;
         const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
         const theta = phi * i;
 
@@ -862,15 +889,16 @@
         const uy = y;
         const uz = -Math.sin(theta) * radiusAtY;
 
+        const isVertical = item.orientation === 'vertical';
         const card = document.createElement('article');
-        card.className = 'dome-photo-card';
+        card.className = `dome-photo-card ${isVertical ? 'is-vertical' : 'is-horizontal'}`;
         card.setAttribute('data-photo-id', item.id);
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
         card.setAttribute('aria-label', `${item.shortTag}: ${item.title}`);
 
         card.innerHTML = `
-          <img class="dome-photo-img" src="${item.src}" alt="${item.title}">
+          <img class="dome-photo-img" src="${item.thumb || item.src}" decoding="async" alt="${item.title}">
           <div class="dome-photo-overlay"></div>
           <div class="dome-photo-bottom">
             <div class="dome-photo-info">
@@ -907,7 +935,8 @@
           item,
           ux,
           uy,
-          uz
+          uz,
+          visible: true
         });
       }
     }
@@ -948,38 +977,55 @@
       document.body.classList.remove('is-portal-sucking');
       panelNodes.forEach((node) => {
         node.el.classList.remove('is-suction-target', 'is-suction-peripheral');
+        node.el.style.opacity = '';
       });
     }
 
-    // --- 3. Ambient Light Effects, Volumetric Rays & Starlight Background Renderer ---
+    // --- 3. Pre-Baked Mysterious Low-Luminance Ambient Nebulae & Deep-Space Dust Renderer ---
+    function createGlowSprite(size, rgb, peakAlpha) {
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d');
+      const half = size * 0.5;
+      const g = ctx.createRadialGradient(half, half, 0, half, half, half);
+      g.addColorStop(0, `rgba(${rgb}, ${peakAlpha})`);
+      g.addColorStop(0.42, `rgba(${rgb}, ${(peakAlpha * 0.45).toFixed(4)})`);
+      g.addColorStop(1, `rgba(${rgb}, 0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      return c;
+    }
+
     const AMBIENT_NEBULAE = [
-      { ux: 0.0, uy: 0.12, uz: -1.0, radius: 640, color: '215, 232, 255', alpha: 0.17 },
-      { ux: 0.82, uy: -0.08, uz: -0.55, radius: 580, color: '255, 228, 200', alpha: 0.13 },
-      { ux: -0.82, uy: 0.18, uz: -0.5, radius: 600, color: '195, 224, 255', alpha: 0.14 },
-      { ux: 0.45, uy: 0.55, uz: 0.70, radius: 620, color: '225, 220, 255', alpha: 0.13 },
-      { ux: -0.5, uy: -0.48, uz: 0.72, radius: 580, color: '205, 238, 248', alpha: 0.12 },
-      { ux: 0.0, uy: 0.85, uz: 0.0, radius: 680, color: '240, 246, 255', alpha: 0.12 }
+      { ux: 0.0, uy: 0.12, uz: -1.0, radius: 560, sprite: createGlowSprite(192, '72, 108, 175', 0.068) },
+      { ux: 0.82, uy: -0.08, uz: -0.55, radius: 520, sprite: createGlowSprite(192, '96, 82, 155', 0.052) },
+      { ux: -0.82, uy: 0.18, uz: -0.5, radius: 540, sprite: createGlowSprite(192, '54, 102, 152', 0.058) },
+      { ux: 0.45, uy: 0.55, uz: 0.70, radius: 540, sprite: createGlowSprite(192, '82, 95, 162', 0.052) },
+      { ux: -0.5, uy: -0.48, uz: 0.72, radius: 500, sprite: createGlowSprite(192, '58, 112, 148', 0.048) }
     ];
 
-    const LIGHT_MOTES = Array.from({ length: 95 }, (_, i) => {
+    const BOKEH_SPRITE = createGlowSprite(64, '165, 200, 245', 0.14);
+
+    const LIGHT_MOTES = Array.from({ length: 54 }, (_, i) => {
       const phi = Math.PI * (Math.sqrt(5) - 1);
-      const y = 1 - (i / 94) * 2;
+      const y = 1 - (i / 53) * 2;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const theta = phi * i * 1.7;
       return {
         ux: Math.cos(theta) * r,
         uy: y,
         uz: Math.sin(theta) * r,
-        size: 1.5 + (i % 4) * 0.9,
+        size: 1.1 + (i % 3) * 0.65,
         phase: i * 0.73,
-        speed: 0.0015 + (i % 5) * 0.0005,
-        isBokeh: i % 5 === 0
+        speed: 0.0012 + (i % 4) * 0.0004,
+        isBokeh: i % 6 === 0
       };
     });
 
     // Radial Hyperspace Light Streaks for Portal Suction ("照片把人吸进去")
-    const SUCTION_STREAKS = Array.from({ length: 56 }, (_, i) => {
-      const angle = (i / 56) * Math.PI * 2 + (i % 3) * 0.08;
+    const SUCTION_STREAKS = Array.from({ length: 36 }, (_, i) => {
+      const angle = (i / 36) * Math.PI * 2 + (i % 3) * 0.08;
       return {
         angle,
         cos: Math.cos(angle),
@@ -987,15 +1033,14 @@
         offset: (i * 0.19) % 1,
         speed: 1.4 + (i % 5) * 0.35,
         length: 65 + (i % 4) * 35,
-        width: 1.1 + (i % 3) * 0.65
+        width: 1.1 + (i % 3) * 0.6
       };
     });
 
     function resizeBgCanvas() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      bgCanvas.width = window.innerWidth * dpr;
-      bgCanvas.height = window.innerHeight * dpr;
-      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Use 1x CSS pixel resolution for soft atmospheric background canvas (saves 75% fill-rate on HiDPI screens)
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
     }
 
     function projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy) {
@@ -1015,63 +1060,40 @@
     }
 
     function renderAmbientLightBackground(now, cosYaw, sinYaw, cosPitch, sinPitch, focalLength) {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = bgCanvas.width;
+      const h = bgCanvas.height;
       const cx = w * 0.5;
       const cy = h * 0.5;
 
-      bgCtx.clearRect(0, 0, w, h);
-
-      // 1. Soft atmospheric center & zenith light wash
-      const centerGrad = bgCtx.createRadialGradient(cx, cy * 0.85, 10, cx, cy, Math.max(w, h) * 0.72);
-      centerGrad.addColorStop(0, 'rgba(38, 46, 62, 0.48)');
-      centerGrad.addColorStop(0.45, 'rgba(18, 22, 32, 0.28)');
-      centerGrad.addColorStop(1, 'rgba(7, 9, 13, 0)');
-      bgCtx.fillStyle = centerGrad;
+      // 1. Deep abyssal midnight background fill
+      bgCtx.fillStyle = '#020306';
       bgCtx.fillRect(0, 0, w, h);
 
-      // 2. Subtle Volumetric Dome Light Beams (Soft Diagonal Aurora Shimmer)
-      bgCtx.save();
-      const beamShift = Math.sin(yaw * 0.6 + now * 0.0004) * 120;
-      const beamGrad = bgCtx.createLinearGradient(cx - 380 + beamShift, 0, cx + 380 + beamShift, h);
-      beamGrad.addColorStop(0, 'rgba(220, 235, 255, 0)');
-      beamGrad.addColorStop(0.35, 'rgba(220, 235, 255, 0.032)');
-      beamGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.055)');
-      beamGrad.addColorStop(0.65, 'rgba(210, 228, 255, 0.032)');
-      beamGrad.addColorStop(1, 'rgba(210, 228, 255, 0)');
-      bgCtx.fillStyle = beamGrad;
-      bgCtx.fillRect(0, 0, w, h);
-      bgCtx.restore();
-
-      // 3. 3D Parallax Volumetric Light Nebulae
-      const pulse = 0.92 + 0.08 * Math.sin(now * 0.0012);
-      AMBIENT_NEBULAE.forEach((neb) => {
+      // 2. Pre-baked 3D Parallax Mysterious Deep-Space Nebulae (fast drawImage, zero gradient allocations)
+      const scaleFactor = focalLength / 820;
+      for (let i = 0; i < AMBIENT_NEBULAE.length; i++) {
+        const neb = AMBIENT_NEBULAE[i];
         const pt = projectUnitVectorToScreen(neb.ux, neb.uy, neb.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
-        if (!pt) return;
-        const r = neb.radius * (focalLength / 820);
-        const grad = bgCtx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
-        grad.addColorStop(0, `rgba(${neb.color}, ${(neb.alpha * pulse).toFixed(3)})`);
-        grad.addColorStop(0.45, `rgba(${neb.color}, ${(neb.alpha * 0.48 * pulse).toFixed(3)})`);
-        grad.addColorStop(1, `rgba(${neb.color}, 0)`);
-        bgCtx.fillStyle = grad;
-        bgCtx.beginPath();
-        bgCtx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
-        bgCtx.fill();
-      });
+        if (!pt) continue;
+        const r = neb.radius * scaleFactor;
+        if (pt.x + r < 0 || pt.x - r > w || pt.y + r < 0 || pt.y - r > h) continue;
+        bgCtx.drawImage(neb.sprite, pt.x - r, pt.y - r, r * 2, r * 2);
+      }
 
-      // 4. Geodesic Dome Latitude & Longitude Light Rings
-      const latAngles = [-0.52, -0.26, 0, 0.26, 0.52];
-      latAngles.forEach((lat, idx) => {
+      // 3. Whisper-faint Astronomical Geodesic Dome Latitude Rings
+      const latAngles = [-0.46, 0, 0.46];
+      for (let idx = 0; idx < latAngles.length; idx++) {
+        const lat = latAngles[idx];
         const uy = Math.sin(lat);
         const rLat = Math.cos(lat);
         bgCtx.beginPath();
         let started = false;
-        for (let step = 0; step <= 72; step++) {
-          const lon = (step / 72) * Math.PI * 2;
+        for (let step = 0; step <= 48; step++) {
+          const lon = (step / 48) * Math.PI * 2;
           const ux = Math.cos(lon) * rLat;
           const uz = Math.sin(lon) * rLat;
           const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
-          if (pt && pt.x >= -200 && pt.x <= w + 200 && pt.y >= -200 && pt.y <= h + 200) {
+          if (pt && pt.x >= -150 && pt.x <= w + 150 && pt.y >= -150 && pt.y <= h + 150) {
             if (!started) {
               bgCtx.moveTo(pt.x, pt.y);
               started = true;
@@ -1082,89 +1104,69 @@
             started = false;
           }
         }
-        bgCtx.strokeStyle = idx === 2 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.04)';
-        bgCtx.lineWidth = idx === 2 ? 1.2 : 0.8;
+        bgCtx.strokeStyle = idx === 1 ? 'rgba(145, 180, 235, 0.032)' : 'rgba(135, 170, 225, 0.015)';
+        bgCtx.lineWidth = 0.8;
         bgCtx.stroke();
-      });
+      }
 
-      // 5. Floating Luminous Starlight & Bokeh Motes
-      LIGHT_MOTES.forEach((m) => {
+      // 4. Floating Mysterious Deep-Space Dust & Faint Bokeh Motes
+      bgCtx.fillStyle = 'rgba(185, 212, 250, 0.24)';
+      for (let i = 0; i < LIGHT_MOTES.length; i++) {
+        const m = LIGHT_MOTES[i];
         const pt = projectUnitVectorToScreen(m.ux, m.uy, m.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
-        if (!pt || pt.x < -80 || pt.x > w + 80 || pt.y < -80 || pt.y > h + 80) return;
+        if (!pt || pt.x < -40 || pt.x > w + 40 || pt.y < -40 || pt.y > h + 40) continue;
 
-        const twinkle = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(now * m.speed + m.phase));
         if (m.isBokeh) {
-          const bokehR = m.size * 12;
-          const bGrad = bgCtx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, bokehR);
-          bGrad.addColorStop(0, `rgba(235, 244, 255, ${(0.15 * twinkle).toFixed(3)})`);
-          bGrad.addColorStop(0.5, `rgba(210, 228, 255, ${(0.06 * twinkle).toFixed(3)})`);
-          bGrad.addColorStop(1, 'rgba(210, 228, 255, 0)');
-          bgCtx.fillStyle = bGrad;
-          bgCtx.beginPath();
-          bgCtx.arc(pt.x, pt.y, bokehR, 0, Math.PI * 2);
-          bgCtx.fill();
+          const d = m.size * 20;
+          bgCtx.drawImage(BOKEH_SPRITE, pt.x - d * 0.5, pt.y - d * 0.5, d, d);
         } else {
-          bgCtx.fillStyle = `rgba(255, 255, 255, ${(0.45 * twinkle).toFixed(3)})`;
-          bgCtx.beginPath();
-          bgCtx.arc(pt.x, pt.y, m.size, 0, Math.PI * 2);
-          bgCtx.fill();
+          bgCtx.fillRect(pt.x - m.size * 0.5, pt.y - m.size * 0.5, m.size, m.size);
         }
-      });
+      }
 
-      // 6. Gravitational Portal Suction Vortex & Radial Light Streaks (Active when clicking a photo)
+      // 5. Gravitational Portal Suction Vortex & Radial Light Streaks (Active only when clicking a photo)
       if (suctionStrength > 0.008) {
         const maxDist = Math.hypot(cx, cy);
         bgCtx.save();
 
-        // Concentric gravitational event-horizon rings rushing inward/outward
         for (let rIdx = 0; rIdx < 3; rIdx++) {
           const ringPhase = (1 - ((suctionStrength * 1.8 + rIdx * 0.33) % 1));
           const ringRadius = Math.max(12, ringPhase * maxDist * 0.72);
-          const ringAlpha = Math.sin(ringPhase * Math.PI) * suctionStrength * 0.38;
+          const ringAlpha = Math.sin(ringPhase * Math.PI) * suctionStrength * 0.28;
           bgCtx.beginPath();
           bgCtx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
-          bgCtx.strokeStyle = `rgba(215, 236, 255, ${ringAlpha.toFixed(3)})`;
-          bgCtx.lineWidth = 1.5 + (1 - ringPhase) * 2.5;
+          bgCtx.strokeStyle = `rgba(175, 210, 255, ${ringAlpha.toFixed(3)})`;
+          bgCtx.lineWidth = 1.2 + (1 - ringPhase) * 2.0;
           bgCtx.stroke();
         }
 
-        // Radial warp-speed light streaks pulling viewer into the photo center
-        SUCTION_STREAKS.forEach((st) => {
+        const streakAlpha = Math.min(0.55, suctionStrength * 0.52);
+        bgCtx.strokeStyle = `rgba(195, 222, 255, ${streakAlpha.toFixed(3)})`;
+        bgCtx.beginPath();
+        for (let i = 0; i < SUCTION_STREAKS.length; i++) {
+          const st = SUCTION_STREAKS[i];
           const travel = (st.offset - suctionStrength * st.speed * 0.85 + 2) % 1;
           const innerR = 40 + travel * maxDist * 0.85;
-          const streakLen = st.length * (0.4 + suctionStrength * 2.4);
+          const streakLen = st.length * (0.4 + suctionStrength * 2.2);
           const outerR = innerR + streakLen;
 
-          const x1 = cx + st.cos * innerR;
-          const y1 = cy + st.sin * innerR;
-          const x2 = cx + st.cos * outerR;
-          const y2 = cy + st.sin * outerR;
-
-          const grad = bgCtx.createLinearGradient(x1, y1, x2, y2);
-          const alpha = Math.min(0.78, suctionStrength * 0.75 * Math.sin(travel * Math.PI));
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha.toFixed(3)})`);
-          grad.addColorStop(0.5, `rgba(200, 228, 255, ${(alpha * 0.6).toFixed(3)})`);
-          grad.addColorStop(1, 'rgba(180, 215, 255, 0)');
-
-          bgCtx.beginPath();
-          bgCtx.moveTo(x1, y1);
-          bgCtx.lineTo(x2, y2);
-          bgCtx.strokeStyle = grad;
-          bgCtx.lineWidth = st.width;
-          bgCtx.stroke();
-        });
+          bgCtx.moveTo(cx + st.cos * innerR, cy + st.sin * innerR);
+          bgCtx.lineTo(cx + st.cos * outerR, cy + st.sin * outerR);
+        }
+        bgCtx.lineWidth = 1.2;
+        bgCtx.stroke();
 
         bgCtx.restore();
       }
     }
 
-    // --- 4. Main 3D Spherical Dome Render Loop ---
+    // --- 4. Main 3D Spherical Dome Render Loop (Zero Layout/Layer Thrashing) ---
     function animate(now) {
       requestAnimationFrame(animate);
 
       // Handle Gravitational Portal Suction ("照片把人吸进去") or Release
       if (isSteering) {
-        steerProgress += 0.023;
+        steerProgress += 0.025;
         const t = Math.min(1, steerProgress);
 
         // Stage 1: Rapid Magnetic Gaze Lock onto Clicked Photo (0 -> 0.45)
@@ -1177,8 +1179,8 @@
         const suctionT = Math.max(0, (t - 0.06) / 0.94);
         suctionStrength = Math.pow(suctionT, 2.15);
 
-        // Stage 3: Optical Dolly-Zoom FOV Vertigo (slight inhale widen -> deep tunnel plunge)
-        const intakePulse = Math.sin(Math.min(1, t / 0.35) * Math.PI) * 8.5;
+        // Stage 3: Optical Dolly-Zoom FOV Vertigo
+        const intakePulse = Math.sin(Math.min(1, t / 0.35) * Math.PI) * 7.5;
         fov = Math.max(28, steerBaseFov + intakePulse - suctionStrength * (steerBaseFov - 30));
         telemetryFov.textContent = `${Math.round(fov)}°`;
 
@@ -1219,7 +1221,7 @@
           velPitch *= FRICTION;
         } else if (isAutoRotating && !document.getElementById('project-lightbox').classList.contains('is-active')) {
           if (Date.now() - lastUserActionTime > AUTO_RESUME_MS) {
-            yaw += 0.0014;
+            yaw += 0.0011;
           }
         }
       }
@@ -1227,7 +1229,10 @@
       const h = window.innerHeight;
       const fovRad = (fov * Math.PI) / 180;
       const focalLength = (h * 0.5) / Math.tan(fovRad * 0.5);
-      viewport.style.perspective = `${focalLength.toFixed(1)}px`;
+      if (Math.abs(focalLength - lastFocalLength) > 0.25) {
+        viewport.style.perspective = `${focalLength.toFixed(1)}px`;
+        lastFocalLength = focalLength;
+      }
 
       const cosYaw = Math.cos(yaw);
       const sinYaw = Math.sin(yaw);
@@ -1240,8 +1245,6 @@
       const R = getSphereRadius();
 
       if (currentViewMode === 'first-person') {
-        centerPersonEl.style.display = 'none';
-
         for (let i = 0; i < panelNodes.length; i++) {
           const node = panelNodes[i];
 
@@ -1254,13 +1257,21 @@
           const zc = -y1 * sinPitch + z1 * cosPitch;
           const xc = x1;
 
-          // Cull panels behind the viewer's head (zc >= -0.14)
+          // Cull panels behind the viewer's head (zc >= -0.14) without layout-thrashing display toggles
           if (zc >= -0.14) {
-            node.el.style.display = 'none';
+            if (node.visible) {
+              node.el.style.visibility = 'hidden';
+              node.el.style.pointerEvents = 'none';
+              node.visible = false;
+            }
             continue;
           }
 
-          node.el.style.display = 'block';
+          if (!node.visible) {
+            node.el.style.visibility = 'visible';
+            node.el.style.pointerEvents = 'auto';
+            node.visible = true;
+          }
 
           const isTarget = i === steerPanelIndex && suctionStrength > 0.001;
           const effectiveR = isTarget
@@ -1275,23 +1286,14 @@
           const panelYaw = Math.atan2(-xc, -zc);
           const panelPitch = -Math.asin(Math.max(-1, Math.min(1, yc)));
 
-          const forwardness = Math.min(1, (-zc - 0.14) / 0.32);
-          let opacity = 0.45 + 0.55 * forwardness;
-          let portalScale = 1;
-
           if (suctionStrength > 0.001) {
-            if (isTarget) {
-              opacity = 1;
-              portalScale = 1 + suctionStrength * 3.35;
-            } else {
-              opacity *= Math.max(0.04, 1 - suctionStrength * 0.94);
-              portalScale = Math.max(0.72, 1 - suctionStrength * 0.22);
-            }
+            const portalScale = isTarget
+              ? 1 + suctionStrength * 3.35
+              : Math.max(0.72, 1 - suctionStrength * 0.22);
+            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) scale(${portalScale.toFixed(3)})`;
+          } else {
+            node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad)`;
           }
-
-          node.el.style.opacity = opacity.toFixed(3);
-          node.el.style.zIndex = isTarget ? 5000 : Math.round(1000 + zc * -500);
-          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad) scale(${portalScale.toFixed(3)})`;
         }
       } else {
         // Third-Person Mode
@@ -1299,17 +1301,15 @@
         const Rtp = R * 0.62;
         const centerZ = focalLength - orbitDist;
 
-        centerPersonEl.style.display = 'flex';
-        centerPersonEl.style.zIndex = '1000';
         centerPersonEl.style.transform = `translate3d(-50%, -50%, ${centerZ.toFixed(1)}px)`;
 
         for (let i = 0; i < panelNodes.length; i++) {
           const node = panelNodes[i];
-          if (i >= 12) {
-            node.el.style.display = 'none';
-            continue;
+          if (!node.visible) {
+            node.el.style.visibility = 'visible';
+            node.el.style.pointerEvents = 'auto';
+            node.visible = true;
           }
-          node.el.style.display = 'block';
 
           const x1 = node.ux * cosYaw + node.uz * sinYaw;
           const z1 = -node.ux * sinYaw + node.uz * cosYaw;
@@ -1325,17 +1325,21 @@
             : centerZ + Rtp * zc;
           const tpScale = isTarget ? (0.78 + suctionStrength * 2.8) : 0.78;
 
-          node.el.style.opacity = isTarget ? '1' : (zc >= 0 ? '0.96' : '0.48');
-          node.el.style.zIndex = isTarget ? 5000 : Math.round(1000 + zc * 400);
           node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) scale(${tpScale.toFixed(3)})`;
         }
       }
 
-      // Update Telemetry HUD
+      // Update Telemetry HUD only when rounded values change
       const degYaw = (((yaw * 180 / Math.PI) % 360 + 360) % 360).toFixed(1);
       const degPitch = (pitch * 180 / Math.PI).toFixed(1);
-      telemetryYaw.textContent = `${degYaw}°`;
-      telemetryPitch.textContent = `${degPitch}°`;
+      if (degYaw !== lastYawStr) {
+        telemetryYaw.textContent = `${degYaw}°`;
+        lastYawStr = degYaw;
+      }
+      if (degPitch !== lastPitchStr) {
+        telemetryPitch.textContent = `${degPitch}°`;
+        lastPitchStr = degPitch;
+      }
     }
 
     // --- 5. Interaction Setup ---
@@ -1416,11 +1420,13 @@
           viewModeText.textContent = '第三人称视点';
           telemetryMode.textContent = 'THIRD-PERSON ORBIT';
           btnToggleView.classList.add('is-active');
+          centerPersonEl.style.display = 'flex';
         } else {
           currentViewMode = 'first-person';
           viewModeText.textContent = '第一人称球幕';
           telemetryMode.textContent = 'FIRST-PERSON DOME';
           btnToggleView.classList.remove('is-active');
+          centerPersonEl.style.display = 'none';
         }
       });
 

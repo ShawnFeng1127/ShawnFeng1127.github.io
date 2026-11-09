@@ -819,7 +819,7 @@ function initPageTransitions() {
 }
 
 /**
- * 4. Infinite Ring Gallery Exhibition + High-Sensitivity Silky Wheel + Dual A/B Click Switch
+ * 4. Infinite Ring Gallery Exhibition + Slow Autonomous Glide + Dual A/B Click Switch
  */
 function initInfiniteRingGallery() {
   const viewport = document.getElementById('projects-gallery-viewport');
@@ -855,6 +855,14 @@ function initInfiniteRingGallery() {
   let ringInitialized = false;
   let currentOffset = 0;
   let targetOffset = 0;
+  let isDragging = false;
+  let isTouchDragging = false;
+  let isHoveringGalleryCard = false;
+  const modal = document.getElementById('project-lightbox');
+  const prefersReducedMotion =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const AUTO_SCROLL_PX_PER_SEC = prefersReducedMotion ? 0 : 44; // Slow, steady autonomous gallery drift
+  let lastRingTime = performance.now();
 
   function ensureInitialPosition() {
     const w = getSingleRingWidth();
@@ -873,9 +881,20 @@ function initInfiniteRingGallery() {
   });
   ensureInitialPosition();
 
-  function animateRing() {
+  function animateRing(now) {
+    const currentNow = typeof now === 'number' ? now : performance.now();
+    const dt = Math.min(0.05, Math.max(0.001, (currentNow - lastRingTime) / 1000));
+    lastRingTime = currentNow;
+
     ensureInitialPosition();
     const ringWidth = getSingleRingWidth();
+
+    // Slow autonomous continuous scroll (not controlled by mouse wheel)
+    const isModalOpen = modal && modal.classList.contains('is-active');
+    if (!isDragging && !isTouchDragging && !isModalOpen && AUTO_SCROLL_PX_PER_SEC > 0) {
+      const speedFactor = isHoveringGalleryCard ? 0.35 : 1.0;
+      targetOffset += AUTO_SCROLL_PX_PER_SEC * speedFactor * dt;
+    }
 
     currentOffset += (targetOffset - currentOffset) * 0.14;
 
@@ -910,34 +929,6 @@ function initInfiniteRingGallery() {
     });
   }
 
-  // When mouse hovers on the portfolio gallery, rolling the mouse wheel (vertical or horizontal)
-  // scrolls through the photographs smoothly in an infinite ring!
-  const gallerySection = document.querySelector('.projects-gallery-section') || viewport;
-  const modal = document.getElementById('project-lightbox');
-
-  function handleGalleryWheel(e) {
-    if (modal && modal.classList.contains('is-active')) return;
-    if (e.__galleryWheelHandled) return;
-    e.__galleryWheelHandled = true;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    let delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (e.deltaMode === 1) {
-      delta *= 33;
-    } else if (e.deltaMode === 2) {
-      delta *= 320;
-    }
-
-    targetOffset += delta * 1.8;
-  }
-
-  gallerySection.addEventListener('wheel', handleGalleryWheel, { passive: false });
-  if (gallerySection !== viewport) {
-    viewport.addEventListener('wheel', handleGalleryWheel, { passive: false });
-  }
-
   // Keyboard Left / Right Arrows to slide the gallery when lightbox is closed
   window.addEventListener('keydown', (e) => {
     if (modal && modal.classList.contains('is-active')) return;
@@ -949,7 +940,6 @@ function initInfiniteRingGallery() {
   });
 
   // Mouse Drag with Release Momentum
-  let isDragging = false;
   let lastDragX = 0;
   let dragVelocity = 0;
   let totalDragDistance = 0;
@@ -986,7 +976,6 @@ function initInfiniteRingGallery() {
   });
 
   // Mobile Touch Swipe Drag with Inertial Momentum
-  let isTouchDragging = false;
   let touchStartX = 0;
   let touchStartY = 0;
   let lastTouchX = 0;
@@ -1051,6 +1040,7 @@ function initInfiniteRingGallery() {
 
   // Hover Spotlight Effect across all ring cards
   function activateCardHover(hoveredCard) {
+    isHoveringGalleryCard = true;
     document.body.classList.add('is-gallery-dimmed');
     allCards.forEach((card) => {
       if (card === hoveredCard) {
@@ -1064,6 +1054,7 @@ function initInfiniteRingGallery() {
   }
 
   function clearCardHover() {
+    isHoveringGalleryCard = false;
     document.body.classList.remove('is-gallery-dimmed');
     allCards.forEach((card) => {
       card.classList.remove('is-active-hover', 'is-sibling-shrunk');
