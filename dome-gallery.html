@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>360° 第一人称球幕影院 — 冯靖翔 (Shawn Feng)</title>
-  <!-- Three.js CDN with Local Fallback Engine -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <title>360° 球幕摄影空间 — 冯靖翔 (Shawn Feng)</title>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="projects detail style.css">
   <style>
     :root {
-      --bg-dark: #07080A;
-      --card-bg: rgba(18, 21, 28, 0.75);
-      --glass-border: rgba(255, 255, 255, 0.14);
+      --bg-dark: #07090D;
+      --glass-border: rgba(255, 255, 255, 0.16);
       --text-main: #FFFFFF;
-      --text-muted: rgba(255, 255, 255, 0.6);
-      --accent: #E6EDF5;
+      --text-muted: rgba(255, 255, 255, 0.62);
     }
 
     * {
@@ -29,41 +27,211 @@
       height: 100%;
       overflow: hidden;
       background-color: var(--bg-dark);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       color: var(--text-main);
       touch-action: none;
     }
 
-    /* 3D WebGL / CSS3D Canvas Host */
-    #dome-canvas-container {
-      position: absolute;
+    /* 1. Ambient Light, Volumetric Beams & Starlight Dust Background Canvas */
+    #dome-bg-canvas {
+      position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       z-index: 1;
-      cursor: grab;
+      pointer-events: none;
     }
 
-    #dome-canvas-container.is-dragging {
+    /* Soft ambient light vignette & subtle dome glow */
+    .dome-ambient-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 75% 60% at 50% 35%, rgba(220, 235, 255, 0.08) 0%, rgba(175, 205, 255, 0.03) 52%, transparent 80%),
+        radial-gradient(ellipse 55% 45% at 20% 75%, rgba(255, 235, 215, 0.045) 0%, transparent 70%),
+        radial-gradient(ellipse 55% 45% at 80% 70%, rgba(200, 225, 255, 0.05) 0%, transparent 70%),
+        radial-gradient(circle at 50% 50%, transparent 48%, rgba(4, 5, 8, 0.58) 100%);
+    }
+
+    /* 2. Interactive 3D Spherical Viewport */
+    .dome-viewport {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 5;
+      overflow: hidden;
+      cursor: grab;
+      perspective: 850px;
+      perspective-origin: 50% 50%;
+    }
+
+    .dome-viewport.is-dragging {
       cursor: grabbing !important;
     }
 
-    /* Top HUD Navigation Bar */
-    .dome-hud-header {
+    .dome-scene-3d {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    /* Optional Third-Person Central Creator Figure */
+    .dome-center-person {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 260px;
+      height: 360px;
+      transform-style: preserve-3d;
+      pointer-events: none;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dome-center-person img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 42px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 36px rgba(215, 232, 255, 0.22));
+    }
+
+    /* 3. Photo Panels Pasted on Inner Dome Wall (Bright, Directly Visible While Browsing) */
+    .dome-photo-card {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      height: 72px;
-      padding: 0 32px;
+      width: 310px;
+      height: 210px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #10131A;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.65),
+        0 0 42px rgba(215, 232, 255, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      pointer-events: auto;
+      cursor: pointer;
+      transform-origin: center center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform, opacity;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      outline: none;
+    }
+
+    .dome-photo-card:hover,
+    .dome-photo-card:focus-visible {
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.8),
+        0 0 56px rgba(255, 255, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .dome-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .dome-photo-card:hover .dome-photo-img {
+      transform: scale(1.05);
+    }
+
+    /* Subtle bottom-only gradient so the photograph itself stays bright and clear */
+    .dome-photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.0) 0%,
+        rgba(0, 0, 0, 0.0) 58%,
+        rgba(0, 0, 0, 0.72) 100%
+      );
+      pointer-events: none;
+    }
+
+    .dome-photo-bottom {
+      position: absolute;
+      bottom: 10px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .dome-photo-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .dome-photo-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin: 0 0 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+    }
+
+    .dome-photo-loc {
+      font-family: 'SF Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.78);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dome-photo-inspect {
+      font-family: 'SF Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #08090C;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 3px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      opacity: 0;
+      transform: translateY(3px);
+      transition: all 0.22s ease;
+    }
+
+    .dome-photo-card:hover .dome-photo-inspect {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 4. Top Floating Controls (Top Title Removed per User Request) */
+    .dome-hud-header {
+      position: fixed;
+      top: 22px;
+      left: 28px;
+      right: 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 20;
+      z-index: 30;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(7, 8, 10, 0.85) 0%, rgba(7, 8, 10, 0.4) 60%, transparent 100%);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
     }
 
     .dome-hud-header > * {
@@ -74,44 +242,26 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 18px;
+      padding: 9px 18px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(14, 17, 23, 0.65);
       border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #FFFFFF;
       text-decoration: none;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       font-family: 'SF Mono', 'Fira Code', monospace;
       letter-spacing: 0.04em;
       transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     .dome-back-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.38);
       transform: translateX(-2px);
-    }
-
-    .dome-header-info {
-      text-align: center;
-    }
-
-    .dome-header-tag {
-      font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      color: rgba(255, 255, 255, 0.45);
-      text-transform: uppercase;
-    }
-
-    .dome-header-title {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: #FFFFFF;
-      margin-top: 2px;
     }
 
     .dome-hud-tools {
@@ -124,39 +274,42 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 15px;
+      padding: 8px 16px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(14, 17, 23, 0.65);
       border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #FFFFFF;
       font-size: 12px;
       font-weight: 600;
       font-family: 'SF Mono', monospace;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     .dome-hud-btn:hover {
       background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.35);
     }
 
     .dome-hud-btn.is-active {
-      background: #FFFFFF;
+      background: rgba(255, 255, 255, 0.92);
       color: #07080A;
       border-color: #FFFFFF;
     }
 
-    /* Bottom Telemetry & Crosshair HUD */
+    /* 5. Bottom Telemetry & Hint HUD */
     .dome-hud-bottom {
-      position: absolute;
+      position: fixed;
       bottom: 24px;
-      left: 32px;
-      right: 32px;
+      left: 28px;
+      right: 28px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      z-index: 20;
+      z-index: 30;
       pointer-events: none;
     }
 
@@ -166,10 +319,10 @@
       gap: 4px;
       padding: 10px 16px;
       border-radius: 12px;
-      background: rgba(14, 17, 22, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(14, 17, 22, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       font-family: 'SF Mono', monospace;
       font-size: 11px;
       color: rgba(255, 255, 255, 0.65);
@@ -189,12 +342,12 @@
     .dome-hint-box {
       padding: 10px 20px;
       border-radius: 9999px;
-      background: rgba(14, 17, 22, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(14, 17, 22, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.75);
       font-family: 'SF Mono', monospace;
       display: flex;
       align-items: center;
@@ -202,24 +355,25 @@
       pointer-events: auto;
     }
 
-    /* First-Person Center Crosshair / Sight Reticle */
+    /* First-Person Center Sight Reticle */
     .dome-crosshair {
-      position: absolute;
+      position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       pointer-events: none;
-      z-index: 10;
+      z-index: 15;
       transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      opacity: 0.65;
     }
 
     .dome-crosshair::before,
     .dome-crosshair::after {
       content: "";
       position: absolute;
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.45);
       border-radius: 1px;
     }
 
@@ -242,227 +396,62 @@
     .dome-crosshair-ring {
       position: absolute;
       inset: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 50%;
       transition: all 0.2s ease;
     }
 
     .dome-crosshair.is-hovering {
-      transform: translate(-50%, -50%) scale(1.6);
+      transform: translate(-50%, -50%) scale(1.55);
+      opacity: 1;
     }
 
     .dome-crosshair.is-hovering .dome-crosshair-ring {
       border-color: #FFFFFF;
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    /* Ambient Dome Vignette */
-    .dome-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, transparent 40%, rgba(5, 6, 8, 0.7) 100%);
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* ==========================================================================
-       Photo Detail Lightbox Modal (Full EXIF & Stories Preserved)
-       ========================================================================== */
-    .dome-lightbox {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(4, 5, 7, 0.88);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-      padding: 32px;
-    }
-
-    .dome-lightbox.is-open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .dome-lightbox-card {
-      position: relative;
-      max-width: 1100px;
-      width: 100%;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      border-radius: 20px;
-      background: rgba(15, 18, 24, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8);
-      overflow: hidden;
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .dome-lightbox.is-open .dome-lightbox-card {
-      transform: translateY(0) scale(1);
-    }
-
-    .dome-lightbox-close {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #FFFFFF;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.2s ease;
-    }
-
-    .dome-lightbox-close:hover {
-      background: #FFFFFF;
-      color: #000000;
-    }
-
-    .dome-lightbox-media-wrap {
-      width: 100%;
-      height: 58vh;
-      max-height: 540px;
-      background: #000000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .dome-lightbox-media-wrap img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .dome-lightbox-body {
-      padding: 24px 32px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-    }
-
-    .dome-lightbox-top-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: 'SF Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .dome-lightbox-series-badge {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #FFFFFF;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 700;
-    }
-
-    .dome-lightbox-title {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: #FFFFFF;
-      margin: 0;
-    }
-
-    .dome-lightbox-subtitle {
-      font-size: 12.5px;
-      font-family: 'SF Mono', monospace;
-      color: rgba(255, 255, 255, 0.55);
-      margin-top: -6px;
-    }
-
-    .dome-lightbox-bio {
-      font-size: 13.5px;
-      line-height: 1.7;
-      color: rgba(255, 255, 255, 0.85);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 12px;
-    }
-
-    .dome-lightbox-bio-en {
-      font-size: 12.5px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.55);
-      font-style: italic;
+      background: rgba(255, 255, 255, 0.18);
     }
 
     @media (max-width: 768px) {
       .dome-hud-header {
-        padding: 0 16px;
-        height: 60px;
+        top: 14px;
+        left: 14px;
+        right: 14px;
       }
-      .dome-header-info {
-        display: none;
+      .dome-photo-card {
+        width: 220px;
+        height: 150px;
       }
       .dome-hud-bottom {
-        left: 16px;
-        right: 16px;
-        bottom: 16px;
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         align-items: stretch;
       }
       .dome-telemetry-badge, .dome-hint-box {
         width: 100%;
         justify-content: center;
-      }
-      .dome-lightbox {
-        padding: 12px;
-      }
-      .dome-lightbox-media-wrap {
-        height: 40vh;
-      }
-      .dome-lightbox-body {
-        padding: 16px;
-      }
-      .dome-lightbox-title {
-        font-size: 19px;
+        font-size: 10.5px;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Ambient Viewport Vignette -->
-  <div class="dome-vignette" aria-hidden="true"></div>
+  <!-- 1. Dynamic Spherical Ambient Light & Starlight Dust Canvas -->
+  <canvas id="dome-bg-canvas" aria-hidden="true"></canvas>
+  <div class="dome-ambient-vignette" aria-hidden="true"></div>
 
-  <!-- First-Person Sight Reticle -->
+  <!-- 2. First-Person Center Crosshair -->
   <div class="dome-crosshair" id="dome-crosshair" aria-hidden="true">
     <div class="dome-crosshair-ring"></div>
   </div>
 
-  <!-- Top Header HUD -->
+  <!-- 3. Top Floating Controls (Top Header Title Deleted per User Request) -->
   <header class="dome-hud-header">
     <a href="index.html#section-work" class="dome-back-btn" title="退出球幕，返回主站摄影板块">
       <span>← BACK // 返回摄影</span>
     </a>
-
-    <div class="dome-header-info">
-      <div class="dome-header-tag">// 360° FIRST-PERSON DOME CINEMA</div>
-      <div class="dome-header-title">第一人称球幕影院 · 全景摄影展</div>
-    </div>
 
     <div class="dome-hud-tools">
       <button type="button" class="dome-hud-btn" id="btn-toggle-view" title="切换第一人称球幕 / 第三人称中心人物视角">
@@ -479,7 +468,7 @@
     </div>
   </header>
 
-  <!-- Bottom Telemetry HUD -->
+  <!-- 4. Bottom Telemetry HUD -->
   <footer class="dome-hud-bottom">
     <div class="dome-telemetry-badge">
       <div class="dome-telemetry-row">
@@ -487,35 +476,60 @@
         <span>PITCH (俯仰): <strong class="telemetry-val" id="telemetry-pitch">0.0°</strong></span>
       </div>
       <div class="dome-telemetry-row">
-        <span>FOV 视场角: <strong class="telemetry-val" id="telemetry-fov">65°</strong></span>
-        <span>WORKS: <strong class="telemetry-val">12 EXHIBITS</strong></span>
+        <span>FOV 视场角: <strong class="telemetry-val" id="telemetry-fov">70°</strong></span>
+        <span>MODE: <strong class="telemetry-val" id="telemetry-mode">FIRST-PERSON DOME</strong></span>
       </div>
     </div>
 
     <div class="dome-hint-box">
-      <span>✥ 按住鼠标拖拽“转头环顾四周” · 滚轮推拉镜头 FOV · 点击作品面板平滑转向并查看详情</span>
+      <span>✥ 按住拖拽“转头环顾四周” · 滚轮推拉镜头 FOV · 点击照片平滑转向并打开详情</span>
     </div>
   </footer>
 
-  <!-- 3D Three.js WebGL Host Container -->
-  <div id="dome-canvas-container"></div>
-
-  <!-- Detail Lightbox Modal (100% Preserved Metadata & EXIF) -->
-  <div class="dome-lightbox" id="dome-lightbox" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="dome-lightbox-card">
-      <button type="button" class="dome-lightbox-close" id="dome-lightbox-close" aria-label="关闭预览 (ESC)">✕</button>
-      <div class="dome-lightbox-media-wrap">
-        <img id="modal-img" src="" alt="Photo Full View">
+  <!-- 5. 3D Spherical Dome Stage (Photos Directly Visible on Inner Dome Wall) -->
+  <div class="dome-viewport" id="dome-viewport" role="region" aria-label="360度第一人称球幕摄影空间">
+    <div class="dome-scene-3d" id="dome-scene-3d">
+      <!-- Optional Third-Person Creator Figure -->
+      <div class="dome-center-person" id="dome-center-person" aria-hidden="true">
+        <img src="Project pictures/home page人物.png" alt="Shawn Feng">
       </div>
-      <div class="dome-lightbox-body">
-        <div class="dome-lightbox-top-meta">
-          <span class="dome-lightbox-series-badge" id="modal-series">SERIES 01</span>
-          <span id="modal-location">HENAN · ZHENGZHOU / ARCHITECTURE</span>
+      <!-- Photo Panels Injected Here -->
+    </div>
+  </div>
+
+  <!-- 6. Exact Original Photo Detail Lightbox (#project-lightbox - 100% Unchanged Format) -->
+  <div id="project-lightbox" class="lightbox-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox-content is-horizontal" id="lightbox-content">
+      <div class="lightbox-img-wrap">
+        <img class="lightbox-img" src="" alt="Expanded Photography View">
+      </div>
+      <div class="lightbox-details">
+        <div class="lightbox-meta-header">
+          <div class="lightbox-header-left">
+            <span class="lightbox-series-tag" id="lightbox-series-tag">SERIES 01 / HORIZONTAL</span>
+            <div class="lightbox-dual-switcher" id="lightbox-dual-switcher" hidden>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="a" id="lightbox-variant-a">A</button>
+              <button type="button" class="lightbox-variant-btn" data-target-variant="b" id="lightbox-variant-b">B</button>
+            </div>
+          </div>
+          <div class="lightbox-header-right">
+            <span class="lightbox-wheel-pill">↕ 滚轮阅读简介</span>
+            <span class="lightbox-location-meta" id="lightbox-location-meta">SHAWN FENG PHOTOGRAPHY</span>
+            <div class="lightbox-controls">
+              <button class="lightbox-btn lightbox-prev" type="button" aria-label="上一张作品" title="上一张 (←)">←</button>
+              <button class="lightbox-btn lightbox-next" type="button" aria-label="下一张作品" title="下一张 (→)">→</button>
+              <button class="lightbox-btn lightbox-close" type="button" aria-label="关闭大图" title="关闭 (Esc)">&times;</button>
+            </div>
+          </div>
         </div>
-        <h2 class="dome-lightbox-title" id="modal-title">郑州 · 黑川纪章纪念馆</h2>
-        <p class="dome-lightbox-subtitle" id="modal-subtitle">KISHO KUROKAWA MEMORIAL HALL</p>
-        <p class="dome-lightbox-bio" id="modal-bio"></p>
-        <p class="dome-lightbox-bio-en" id="modal-bio-en"></p>
+
+        <div class="lightbox-bio-scroll" id="lightbox-bio-scroll" tabindex="0" aria-label="作品中英文详情（滚轮可上下滚动查看）">
+          <h3 class="lightbox-title"></h3>
+          <p class="lightbox-subtitle"></p>
+          <div class="lightbox-divider"></div>
+          <p class="lightbox-bio lightbox-bio-cn" id="lightbox-bio"></p>
+          <p class="lightbox-bio lightbox-bio-en" id="lightbox-bio-en"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -524,677 +538,910 @@
     /**
      * ==========================================================================
      * 360° First-Person Spherical Dome Cinema Engine
-     * - Camera fixed at (0, 0, 0) spherical origin (True First-Person Look)
-     * - Dragging turns camera orientation (Yaw: 360° continuous, Pitch: clamped [-84°, +84°])
-     * - Works placed on inner spherical dome surface using Fibonacci Sphere (R = 850)
-     * - Every work panel faces origin: lookAt(0, 0, 0)
-     * - Raycaster interaction: clicking work smoothly steers camera lookAt and opens detail modal
-     * - Mouse wheel / pinch zooms camera FOV (38° to 85°)
-     * - Optional Third-Person View Mode pulls camera out to show central figure
+     * - Native HTML <img> + Hardware-Accelerated 3D Spherical Inner Wall Projection:
+     *   Every photograph is 100% directly visible while browsing (zero CORS issues)
+     * - Volumetric Ambient Light Beams, Nebula Glows, Geodesic Dome Rings & Starlight
+     * - Camera fixed at (0, 0, 0) in First-Person Mode (Yaw 360° + Pitch [-82°, +82°])
+     * - Clicking any photo smoothly steers camera to center it and opens #project-lightbox
      * ==========================================================================
      */
-
-    const PHOTO_DATA = [
+    const PHOTO_CATALOG = [
       {
         id: '1',
-        series: 'SERIES 01',
+        series: '1',
+        orientation: 'horizontal',
+        ratio: 3936 / 2624,
+        src: 'Project pictures/Project 1.png',
         title: '郑州 · 黑川纪章纪念馆',
         subtitle: 'KISHO KUROKAWA MEMORIAL HALL · ZHENGZHOU',
+        tag: 'SERIES 01 · 横幅构图',
+        shortTag: 'SERIES 01',
         location: 'HENAN · ZHENGZHOU / ARCHITECTURE',
-        src: 'Project pictures/Project 1.png',
         bio: '坐落于郑州郑东新区龙湖之畔的黑川纪章纪念馆，承载着建筑大师“共生思想”与环形城市规划的哲思。暮色四合之际，冷峻的几何玻璃幕墙与湖面残存的暖调天光相互映照，环形建筑体量在黄昏静谧的空气中呈现出纯粹的秩序感与空间张力，仿佛一座连接城市未来与自然生态的静默坐标。',
         bioEn: 'Situated along the shore of Longhu Lake in Zhengzhou, the Kisho Kurokawa Memorial Hall embodies the late master architect’s philosophy of symbiosis and ring-shaped urbanism. At dusk, crisp geometric glass facades mirror the warm lingering twilight across the water, projecting a quiet sense of spatial order and architectural tension between the city’s future and its natural ecology.'
       },
       {
         id: '2',
-        series: 'SERIES 02',
+        series: '2',
+        orientation: 'horizontal',
+        ratio: 8192 / 4608,
+        src: 'Project pictures/Project 2.jpg',
         title: '甘肃 · 苦水丹霞',
         subtitle: 'KUSHU DANXIA LANDFORM · GANSU',
+        tag: 'SERIES 02 · 航拍横幅',
+        shortTag: 'SERIES 02',
         location: 'GANSU · YONGDENG / AERIAL LANDSCAPE',
-        src: 'Project pictures/Project 2.jpg',
         bio: '以高空航拍视角俯瞰甘肃永登苦水丹霞，亿万年地质运动雕琢出的赤红与赭黄岩层，如大地隆起的脉搏般在荒原上层叠延展。侧逆光勾勒出沟壑纵横的肌理与山脊阴影，苍茫而炽烈的色彩在广袤大地上交织成一幅未经人工修饰的自然抽象画卷，展现出西北大地原始而磅礴的生命力。',
         bioEn: 'Captured from an aerial vantage point over Yongdeng, Gansu, the Kushu Danxia landforms unfold in stratified waves of crimson and ochre sculpted by millions of years of geological movement. Low-angle side lighting carves out labyrinthine ravines and sharp ridge shadows, transforming the vast northwestern wilderness into an untamed canvas of natural abstraction.'
       },
       {
         id: '3',
-        series: 'SERIES 03',
+        series: '3',
+        orientation: 'horizontal',
+        ratio: 5855 / 3293,
+        src: 'Project pictures/Project 3.png',
         title: '北京 · CBD 核心区夜色',
         subtitle: 'BEIJING CBD · AFTER DARK',
+        tag: 'SERIES 03 · 都市横幅',
+        shortTag: 'SERIES 03',
         location: 'BEIJING · CHAOYANG / URBAN NIGHT',
-        src: 'Project pictures/Project 3.png',
         bio: '夜幕降临后的北京中央商务区（CBD），中国尊与林立的摩天楼群化作刺破夜空的垂直光柱。纵横交错的城市主干道上，川流不息的车灯汇聚成金色与绯红的光轨动脉，在深邃冷冽的夜色映衬下，定格下当代超大都市昼夜不息的律动、秩序与繁华锋芒。',
         bioEn: 'After nightfall in Beijing’s Central Business District, CITIC Tower (China Zun) and surrounding skyscrapers rise like vertical pillars of light against the dark sky. Below, intersecting avenues carry relentless streams of golden and crimson traffic trails, capturing the ceaseless pulse, geometry, and kinetic energy of a modern megacity.'
       },
       {
         id: '4a',
-        series: 'SERIES 04A',
+        series: '4',
+        variant: 'a',
+        orientation: 'horizontal',
+        ratio: 6510 / 3864,
+        src: 'Project pictures/project 4a.jpg',
         title: '西安 · 中轴线航拍',
         subtitle: "XI'AN CENTRAL AXIS · BLUE HOUR AERIAL",
+        tag: 'SERIES 04A · 航拍横幅',
+        shortTag: 'SERIES 04A',
         location: "SHAANXI · XI'AN / CENTRAL AXIS",
-        src: 'Project pictures/project 4a.jpg',
         bio: '蓝调时刻自高空沿着十三朝古都的千年长安中轴线遥望，钟楼居中而立，南北大街与东西轴线在暮色中笔直延展。古典重檐的璀璨灯火与四周现代都市街区的冷暖光影严丝合缝地交织，对称而庄严的空间格局将千年盛唐的礼序文脉与今日西安的都会烟火浓缩于同一画幅之中。',
-        bioEn: 'Looking down the millennial central axis of Xi’an during blue hour, the historic Bell Tower stands at the exact geometric heart where the north-south and east-west avenues converge. Warm golden illumination on traditional flying eaves interweaves seamlessly with the cool neon grid of the modern metropolis.'
+        bioEn: 'Looking down the millennial central axis of Xi’an during blue hour, the historic Bell Tower stands at the exact geometric heart where the north-south and east-west avenues converge. Warm golden illumination on traditional flying eaves interweaves seamlessly with the cool neon grid of the modern metropolis, uniting ancient imperial symmetry with contemporary urban life.'
       },
       {
         id: '4b',
-        series: 'SERIES 04B',
+        series: '4',
+        variant: 'b',
+        orientation: 'horizontal',
+        ratio: 8192 / 4608,
+        src: 'Project pictures/project 4b.jpg',
         title: '西安 · 永宁门航拍',
         subtitle: "XI'AN YONGNING GATE · NIGHT AERIAL",
+        tag: 'SERIES 04B · 航拍横幅',
+        shortTag: 'SERIES 04B',
         location: "SHAANXI · XI'AN / ANCIENT CITY WALL",
-        src: 'Project pictures/project 4b.jpg',
         bio: '俯瞰夜色中的西安明城墙南门——永宁门，厚重的青砖城垣在金黄暖光勾勒下宛如一条盘踞于城市中心的金色巨龙。瓮城、箭楼与城墙内外奔涌的现代环形车流形成跨越六百年的时空对话：城墙之内是古朴深沉的历史印记，城墙之外是生机勃勃的当代长夜。',
-        bioEn: 'An aerial view of Yongning Gate, the southern ceremonial entrance of Xi’an’s Ming Dynasty City Wall. Bathed in warm amber light, the fortified barbican and ancient ramparts stand in striking dialogue with the swirling rings of modern nighttime traffic.'
+        bioEn: 'An aerial view of Yongning Gate, the southern ceremonial entrance of Xi’an’s Ming Dynasty City Wall. Bathed in warm amber light, the fortified barbican and ancient ramparts stand in striking dialogue with the swirling rings of modern nighttime traffic—bridging six centuries of history and the vibrant rhythm of the present day.'
       },
       {
         id: '5',
-        series: 'SERIES 05',
+        series: '5',
+        orientation: 'horizontal',
+        ratio: 3990 / 2244,
+        src: 'Project pictures/project 5.jpg',
         title: '川西 · 九寨沟航拍',
         subtitle: 'JIUZHAIGOU VALLEY · TOP-DOWN AERIAL',
+        tag: 'SERIES 05 · 航拍横幅',
+        shortTag: 'SERIES 05',
         location: 'SICHUAN · JIUZHAIGOU / NATURE AERIAL',
-        src: 'Project pictures/project 5.jpg',
         bio: '采用垂直上帝视角俯拍九寨沟的高山海子与原始森林交界处。富含碳酸钙沉积的湖水由岸边的浅翠、琥珀黄渐变为深邃的孔雀蓝，钙华滩流与水下枯木清晰可见；岸畔苍翠茂密的针叶林与碧水形成极致的冷暖与明暗对比，宛如大地镶嵌在川西群山深处的一块天然翡翠。',
-        bioEn: 'Shot straight down from above, this top-down aerial frame captures the meeting edge between an alpine lake and primeval coniferous forest in Jiuzhaigou Valley. Mineral-rich waters transition from translucent amber and jade along the travertine shore to deep peacock blue.'
+        bioEn: 'Shot straight down from above, this top-down aerial frame captures the meeting edge between an alpine lake and primeval coniferous forest in Jiuzhaigou Valley. Mineral-rich waters transition from translucent amber and jade along the travertine shore to deep peacock blue, revealing submerged ancient trunks in crystalline detail.'
       },
       {
         id: '6',
-        series: 'SERIES 06',
+        series: '6',
+        orientation: 'vertical',
+        ratio: 3072 / 4096,
+        src: 'Project pictures/project 6.jpg',
         title: '上海 · 陆家嘴 CBD',
         subtitle: 'SHANGHAI LUJIAZUI CBD · VERTICAL SKYLINE',
+        tag: 'SERIES 06 · 竖幅构图',
+        shortTag: 'SERIES 06',
         location: 'SHANGHAI · PUDONG / SKYLINE',
-        src: 'Project pictures/project 6.jpg',
         bio: '以竖幅构图仰望黄浦江畔的上海陆家嘴金融中心，上海中心大厦、环球金融中心、金茂大厦与东方明珠在暮色苍穹下构成极具压迫感与未来感的垂直天际线。玻璃幕墙折射着黄昏最后一抹冷冽金属光泽，向上延伸的建筑线条展现出魔都直抵云霄的野心与现代建筑几何之美。',
-        bioEn: 'Framed in a towering vertical composition, the financial skyline of Lujiazui rises above the Huangpu River as Shanghai Tower, the Shanghai World Financial Center, Jin Mao Tower, and the Oriental Pearl Tower pierce the twilight sky.'
+        bioEn: 'Framed in a towering vertical composition, the financial skyline of Lujiazui rises above the Huangpu River as Shanghai Tower, the Shanghai World Financial Center, Jin Mao Tower, and the Oriental Pearl Tower pierce the twilight sky. Cool metallic reflections across glass curtain walls emphasize the geometric ambition and vertical momentum of the city.'
       },
       {
         id: '7',
-        series: 'SERIES 07',
+        series: '7',
+        orientation: 'horizontal',
+        ratio: 9755 / 3500,
+        src: 'Project pictures/project 7.jpg',
         title: '郑州 · 龙湖湿地公园',
         subtitle: 'ZHENGZHOU LONGHU WETLAND PARK · PANORAMA',
+        tag: 'SERIES 07 · 全景横幅',
+        shortTag: 'SERIES 07',
         location: 'HENAN · ZHENGZHOU / WETLAND PANORAMA',
-        src: 'Project pictures/project 7.jpg',
         bio: '超宽画幅下的郑州龙湖湿地公园，横跨湖面的桥体与远方城市天际线在平静如镜的水面上投射出近乎完美的上下对称倒影。黄昏暖金与紫灰交融的暮霭笼罩着开阔水域，飞鸟掠过之处水波轻漾，在繁华都市腹地辟出一片静谧、开阔而富有诗意的自然呼吸空间。',
-        bioEn: 'Presented in an ultra-wide panoramic format, Zhengzhou’s Longhu Wetland Park stretches across mirror-still waters that cast a near-perfect symmetrical reflection of the spanning bridge and distant skyline.'
+        bioEn: 'Presented in an ultra-wide panoramic format, Zhengzhou’s Longhu Wetland Park stretches across mirror-still waters that cast a near-perfect symmetrical reflection of the spanning bridge and distant skyline. Soft golden and violet dusk mist settles over the open lake, offering a poetic sanctuary of stillness within the urban core.'
       },
       {
         id: '8',
-        series: 'SERIES 08',
+        series: '8',
+        orientation: 'vertical',
+        ratio: 2624 / 3936,
+        src: 'Project pictures/project 8.jpg',
         title: '重庆 · 朝天门与千佛寺',
         subtitle: 'CHONGQING CHAOTIANMEN & QIANFO TEMPLE',
+        tag: 'SERIES 08 · 竖幅构图',
+        shortTag: 'SERIES 08',
         location: 'CHONGQING · NANAN / HERITAGE & FUTURE',
-        src: 'Project pictures/project 8.jpg',
         bio: '站在江畔隔水相望，近处是明代古刹千佛寺古朴沉静的飞檐翘角与青瓦暖灯，紧贴其后的则是拔地而起、宛如巨型未来风帆的朝天门来福士广场摩天建筑群。传统巴渝古建的温润肌理与赛博朋克式的庞大现代玻璃巨构在同一竖幅取景框中剧烈碰撞，定格下山城重庆独有的魔幻空间折叠感。',
-        bioEn: 'Viewed across the river, the warm lantern-lit tiled eaves of Ming-era Qianfo Temple sit directly beneath the monumental glass sails of Raffles City Chaotianmen. This vertical frame compresses centuries of Bayu architectural heritage against a cyberpunk megastructure.'
+        bioEn: 'Viewed across the river, the warm lantern-lit tiled eaves of Ming-era Qianfo Temple sit directly beneath the monumental glass sails of Raffles City Chaotianmen. This vertical frame compresses centuries of Bayu architectural heritage against a cyberpunk megastructure, distilling Chongqing’s surreal, multi-layered urban topography.'
       },
       {
         id: '9',
-        series: 'SERIES 09',
+        series: '9',
+        orientation: 'horizontal',
+        ratio: 3936 / 2624,
+        src: 'Project pictures/project 9.jpg',
         title: '北京 · CBD 漫天晚霞',
         subtitle: 'BEIJING CBD · SUNSET AFTERGLOW',
+        tag: 'SERIES 09 · 横幅构图',
+        shortTag: 'SERIES 09',
         location: 'BEIJING · CHAOYANG / SUNSET HORIZON',
-        src: 'Project pictures/project 9.jpg',
         bio: '日落时分的北京CBD迎来一场绚烂至极的漫天晚霞，炽烈的金橙、玫红与紫罗兰色云层在天际翻涌铺陈。远方中国尊与摩天楼群化作深邃挺拔的剪影，将钢筋森林的坚硬冷峻柔化于温柔而壮丽的暮色余晖之中，记录下北方都市天空最浪漫的片刻燃烧。',
-        bioEn: 'At sunset, the sky above Beijing’s CBD erupts into a dramatic canopy of burnished gold, magenta, and deep violet clouds. Against this fiery horizon, CITIC Tower and the surrounding skyline stand in crisp silhouette.'
+        bioEn: 'At sunset, the sky above Beijing’s CBD erupts into a dramatic canopy of burnished gold, magenta, and deep violet clouds. Against this fiery horizon, CITIC Tower and the surrounding skyline stand in crisp silhouette—softening the steel-and-glass metropolis in a fleeting moment of atmospheric grandeur.'
       },
       {
         id: '10a',
-        series: 'SERIES 10A',
+        series: '10',
+        variant: 'a',
+        orientation: 'vertical',
+        ratio: 2326 / 3486,
+        src: 'Project pictures/project 10a.jpg',
         title: '郑州 · 二七塔与大玉米（蓝调）',
         subtitle: 'ERQI TOWER & MILLENNIUM PLAZA · BLUE HOUR',
+        tag: 'SERIES 10A · 竖幅构图',
+        shortTag: 'SERIES 10A',
         location: 'HENAN · ZHENGZHOU / BLUE HOUR',
-        src: 'Project pictures/project 10a.jpg',
         bio: '在深邃静谧的蓝调时刻（Blue Hour），通过长焦镜头压缩空间，将承载着郑州百年铁路记忆与红色历史的二七纪念塔，与郑东新区CBD地标千玺广场（“大玉米”）同框定格。澄澈的深蓝天幕下，双塔晶莹的白色灯光与远方“大玉米”璀璨的暖金光泽遥相呼应，串联起这座中原城市从历史走向现代的时空坐标。',
-        bioEn: 'Compressed through a telephoto lens during blue hour, Zhengzhou’s historic Erqi Memorial Tower aligns in a single vertical frame with the glowing golden spire of Millennium Royal Plaza in Zhengdong New Area.'
+        bioEn: 'Compressed through a telephoto lens during blue hour, Zhengzhou’s historic Erqi Memorial Tower aligns in a single vertical frame with the glowing golden spire of Millennium Royal Plaza (“Big Corn”) in Zhengdong New Area. Crisp white lights on the twin commemorative tower echo the warm amber beacon in the distance, linking the city’s railway heritage with its modern skyline.'
       },
       {
         id: '10b',
-        series: 'SERIES 10B',
+        series: '10',
+        variant: 'b',
+        orientation: 'vertical',
+        ratio: 2288 / 3428,
+        src: 'Project pictures/project 10b.jpg',
         title: '郑州 · 二七塔与大玉米（黄昏）',
         subtitle: 'ERQI TOWER & MILLENNIUM PLAZA · GOLDEN DUSK',
+        tag: 'SERIES 10B · 竖幅构图',
+        shortTag: 'SERIES 10B',
         location: 'HENAN · ZHENGZHOU / GOLDEN DUSK',
-        src: 'Project pictures/project 10b.jpg',
-        bio: '落日熔金的黄昏时分，夕阳将暖红与橘金色的余晖倾洒在郑州二七塔的层檐之上。远方千玺广场在温暖暮色中镀上一层金属辉光，古典塔影与现代高楼于暖色调光影中融为一体，赋予这座古老商都与现代都市一抹温厚而宏大的黄昏史诗感。',
-        bioEn: 'At golden hour, the setting sun washes warm crimson and amber light over the tiered eaves of Erqi Memorial Tower. In the distance, Millennium Plaza reflects the rich evening rays, bathing Zhengzhou’s historical spine in an atmospheric twilight glow.'
+        bio: '黄昏暖调时刻下的郑州新老地标同框：夕阳余晖将城市天际染成温润的琥珀金色，近处的二七纪念塔与远方高耸的千玺广场（“大玉米”）在层叠的楼宇与暮霭中隔空相望。相比蓝调时刻的清冷深邃，黄昏时分的漫射暖光赋予了整座城市浓郁的烟火气息与温暖厚重的时代质感。',
+        bioEn: 'Captured at golden dusk, the same iconic alignment of Erqi Memorial Tower and Millennium Royal Plaza takes on a warm amber glow. Diffused sunset light bathes the layered residential blocks and civic landmarks in a nostalgic atmospheric haze, contrasting the cool serenity of blue hour with the lived-in warmth of evening twilight.'
       }
     ];
 
-    // --- State Variables ---
-    let camera, scene, renderer;
-    const SPHERE_RADIUS = 850;
-    const workMeshes = [];
-    let centerPersonMesh = null;
-    let domeWireframe = null;
+    window.PHOTO_DATA = PHOTO_CATALOG;
 
-    // First Person Look Euler Angles (in radians)
-    let yaw = 0;              // Horizontal look angle
-    let pitch = 0;            // Vertical look angle [-1.46, +1.46] (~[-84°, +84°])
-    let velYaw = 0;
-    let velPitch = 0;
-    const FRICTION = 0.92;
-
-    // View Mode: 'first-person' (default) | 'third-person'
-    let currentViewMode = 'first-person';
-
-    // Auto Look-Around State
-    let isAutoRotating = true;
-    let lastUserActionTime = Date.now();
-    const AUTO_ROTATE_DELAY_MS = 3200;
-
-    // Drag Interaction
-    let isDragging = false;
-    let prevMouseX = 0;
-    let prevMouseY = 0;
-    let dragDistance = 0;
-
-    // Smooth Steer Animation to Clicked Work
-    let isSteering = false;
-    let steerStartYaw = 0, steerStartPitch = 0;
-    let steerTargetYaw = 0, steerTargetPitch = 0;
-    let steerProgress = 0;
-    let steerTargetItem = null;
-
-    // Raycaster & Crosshair
-    const raycaster = new THREE.Raycaster();
-    const mouseNDC = new THREE.Vector2();
-    let hoveredMesh = null;
-
-    // DOM Elements
-    const container = document.getElementById('dome-canvas-container');
+    // --- DOM Elements ---
+    const bgCanvas = document.getElementById('dome-bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const viewport = document.getElementById('dome-viewport');
+    const scene3d = document.getElementById('dome-scene-3d');
+    const centerPersonEl = document.getElementById('dome-center-person');
     const crosshair = document.getElementById('dome-crosshair');
+
     const telemetryYaw = document.getElementById('telemetry-yaw');
     const telemetryPitch = document.getElementById('telemetry-pitch');
     const telemetryFov = document.getElementById('telemetry-fov');
+    const telemetryMode = document.getElementById('telemetry-mode');
+
     const btnToggleView = document.getElementById('btn-toggle-view');
     const viewModeText = document.getElementById('view-mode-text');
     const btnToggleAuto = document.getElementById('btn-toggle-auto');
     const autoModeIcon = document.getElementById('auto-mode-icon');
     const btnReset = document.getElementById('btn-reset-orientation');
 
-    // Lightbox Elements
-    const lightbox = document.getElementById('dome-lightbox');
-    const lightboxClose = document.getElementById('dome-lightbox-close');
-    const modalImg = document.getElementById('modal-img');
-    const modalSeries = document.getElementById('modal-series');
-    const modalLocation = document.getElementById('modal-location');
-    const modalTitle = document.getElementById('modal-title');
-    const modalSubtitle = document.getElementById('modal-subtitle');
-    const modalBio = document.getElementById('modal-bio');
-    const modalBioEn = document.getElementById('modal-bio-en');
+    // --- Camera & Dome State ---
+    let yaw = 0;               // Horizontal look angle (radians, 360° unbounded)
+    let pitch = 0;             // Vertical look angle (radians, clamped [-1.42, +1.42])
+    let velYaw = 0;
+    let velPitch = 0;
+    const FRICTION = 0.92;
+    let fov = 70;              // Field of view in degrees [38, 85]
 
-    // --- 1. Fibonacci Sphere Point Distribution ---
-    function getFibonacciSpherePoints(samples, radius) {
-      const points = [];
-      const phi = Math.PI * (Math.sqrt(5) - 1); // golden ratio angle
-      for (let i = 0; i < samples; i++) {
-        const y = 1 - (i / (samples - 1)) * 2; // y: 1 to -1
+    let currentViewMode = 'first-person'; // 'first-person' | 'third-person'
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let isAutoRotating = !prefersReducedMotion;
+    let lastUserActionTime = 0;
+    const AUTO_RESUME_MS = 3000;
+
+    // Smooth Steer to Clicked Panel
+    let isSteering = false;
+    let steerStartYaw = 0, steerStartPitch = 0;
+    let steerTargetYaw = 0, steerTargetPitch = 0;
+    let steerProgress = 0;
+    let steerPhotoId = null;
+
+    // Drag State
+    let isDragging = false;
+    let prevX = 0, prevY = 0;
+    let totalDragDist = 0;
+
+    function getSphereRadius() {
+      const w = window.innerWidth;
+      if (w < 600) return 520;
+      if (w < 960) return 650;
+      return 740;
+    }
+
+    // --- 1. Build 18 Spherical Inner-Wall Panels ---
+    // Balanced Fibonacci Sphere distribution so 4~5 large, vivid photos are always in view
+    const TOTAL_PANELS = 18;
+    const panelNodes = [];
+
+    function buildDomePanels() {
+      const phi = Math.PI * (Math.sqrt(5) - 1); // golden angle ~2.39996 rad
+
+      for (let i = 0; i < TOTAL_PANELS; i++) {
+        const item = PHOTO_CATALOG[i % PHOTO_CATALOG.length];
+
+        // Distribute y in [-0.70, +0.70] so panels wrap around the horizon & upper/lower vaults
+        const t = i / (TOTAL_PANELS - 1);
+        const y = (1 - 2 * t) * 0.70;
         const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
         const theta = phi * i;
-        const x = Math.cos(theta) * radiusAtY * radius;
-        const z = Math.sin(theta) * radiusAtY * radius;
-        points.push({ x, y: y * radius, z });
-      }
-      return points;
-    }
 
-    // --- 2. Canvas Card Texture Generator (Fallback & Native Frame) ---
-    function createCardTexture(item) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 360;
-      const ctx = canvas.getContext('2d');
+        const ux = Math.cos(theta) * radiusAtY;
+        const uy = y;
+        const uz = -Math.sin(theta) * radiusAtY;
 
-      // Dark card base
-      ctx.fillStyle = '#0D0F14';
-      ctx.fillRect(0, 0, 512, 360);
+        const card = document.createElement('article');
+        card.className = 'dome-photo-card';
+        card.setAttribute('data-photo-id', item.id);
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${item.shortTag}: ${item.title}`);
 
-      // Loading fallback text while img loads
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 24px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(item.title, 256, 170);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '16px monospace';
-      ctx.fillText(item.series + ' // ' + item.location, 256, 210);
+        card.innerHTML = `
+          <img class="dome-photo-img" src="${item.src}" alt="${item.title}">
+          <div class="dome-photo-overlay"></div>
+          <div class="dome-photo-bottom">
+            <div class="dome-photo-info">
+              <h3 class="dome-photo-title">${item.title}</h3>
+              <p class="dome-photo-loc">${item.location}</p>
+            </div>
+            <span class="dome-photo-inspect">查看详情 ↗</span>
+          </div>
+        `;
 
-      const texture = new THREE.CanvasTexture(canvas);
-
-      // Asynchronously load real image
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function() {
-        ctx.clearRect(0, 0, 512, 360);
-
-        // Draw image cover
-        const aspectImg = img.width / img.height;
-        const aspectCanvas = 512 / 360;
-        let sW, sH, sX, sY;
-        if (aspectImg > aspectCanvas) {
-          sH = img.height;
-          sW = img.height * aspectCanvas;
-          sX = (img.width - sW) / 2;
-          sY = 0;
-        } else {
-          sW = img.width;
-          sH = img.width / aspectCanvas;
-          sX = 0;
-          sY = (img.height - sH) / 2;
-        }
-        ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 512, 360);
-
-        // Elegant Gradient Vignette on panel
-        const grad = ctx.createLinearGradient(0, 0, 0, 360);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
-        grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.0)');
-        grad.addColorStop(0.65, 'rgba(0, 0, 0, 0.2)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 512, 360);
-
-        // Luminous Glass Border
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(2, 2, 508, 356);
-
-        // Top Series Badge
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(16, 16, 110, 28);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 14px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText(item.series, 24, 35);
-
-        // Bottom Title & Meta
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 22px Inter, sans-serif';
-        ctx.fillText(item.title, 20, 310);
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.font = '13px monospace';
-        ctx.fillText(item.location, 20, 335);
-
-        texture.needsUpdate = true;
-      };
-      img.src = item.src;
-
-      return texture;
-    }
-
-    // --- 3. Initialize Three.js Scene ---
-    function initThreeScene() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x060709);
-      scene.fog = new THREE.FogExp2(0x060709, 0.00045);
-
-      camera = new THREE.PerspectiveCamera(65, width / height, 1, 3500);
-      camera.position.set(0, 0, 0); // Strictly fixed at spherical center for first-person
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
-
-      // Ambient Celestial Light
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
-      scene.add(ambientLight);
-
-      // Subtle Dome Wireframe Grid (Deep Space Atmosphere)
-      const domeGeo = new THREE.SphereGeometry(SPHERE_RADIUS + 30, 32, 24);
-      const domeMat = new THREE.MeshBasicMaterial({
-        color: 0x1f242d,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.12
-      });
-      domeWireframe = new THREE.Mesh(domeGeo, domeMat);
-      scene.add(domeWireframe);
-
-      // Create Works on Inner Sphere Surface (Fibonacci Distribution)
-      const points = getFibonacciSpherePoints(PHOTO_DATA.length, SPHERE_RADIUS);
-
-      PHOTO_DATA.forEach((item, index) => {
-        const pt = points[index];
-        const texture = createCardTexture(item);
-
-        // Curved / Flat Panel oriented towards center
-        const planeGeo = new THREE.PlaneGeometry(260, 182, 1, 1);
-        const planeMat = new THREE.MeshBasicMaterial({
-          map: texture,
-          side: THREE.DoubleSide
+        card.addEventListener('pointerenter', () => {
+          crosshair.classList.add('is-hovering');
+        });
+        card.addEventListener('pointerleave', () => {
+          crosshair.classList.remove('is-hovering');
         });
 
-        const mesh = new THREE.Mesh(planeGeo, planeMat);
-        mesh.position.set(pt.x, pt.y, pt.z);
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (totalDragDist > 7) return;
+          steerAndOpenPhoto(ux, uy, uz, item.id);
+        });
 
-        // Crucial: Every panel on the spherical inner wall faces the center origin (0, 0, 0)
-        mesh.lookAt(0, 0, 0);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            steerAndOpenPhoto(ux, uy, uz, item.id);
+          }
+        });
 
-        // Save reference data
-        mesh.userData = { item: item, baseScale: 1.0, isHovered: false };
-        scene.add(mesh);
-        workMeshes.push(mesh);
-      });
-
-      // Optional: Central Figure (Hidden in First-Person, Visible in Third-Person)
-      const personTexture = new THREE.TextureLoader().load('Project pictures/home page人物.png');
-      const personGeo = new THREE.PlaneGeometry(240, 320);
-      const personMat = new THREE.MeshBasicMaterial({
-        map: personTexture,
-        transparent: true,
-        opacity: 1,
-        side: THREE.DoubleSide
-      });
-      centerPersonMesh = new THREE.Mesh(personGeo, personMat);
-      centerPersonMesh.position.set(0, -50, 0);
-      centerPersonMesh.visible = false; // Hidden in First-Person Mode
-      scene.add(centerPersonMesh);
-    }
-
-    // --- 4. User Drag & Look-Around Controller ---
-    function setupInteraction() {
-      // Pointer down
-      container.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0 && e.pointerType === 'mouse') return;
-        isDragging = true;
-        dragDistance = 0;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-        velYaw = 0;
-        velPitch = 0;
-        isSteering = false; // Cancel any ongoing steer
-        isAutoRotating = false;
-        lastUserActionTime = Date.now();
-        container.classList.add('is-dragging');
-        try { container.setPointerCapture(e.pointerId); } catch (_) {}
-      });
-
-      // Pointer move
-      window.addEventListener('pointermove', (e) => {
-        // Update Normalized Device Coordinates for Raycaster
-        mouseNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouseNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-        if (!isDragging) return;
-
-        const dx = e.clientX - prevMouseX;
-        const dy = e.clientY - prevMouseY;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-        dragDistance += Math.hypot(dx, dy);
-
-        // Turn Camera (First-Person look around)
-        // Horizontal look (Yaw): positive dx looks left/right
-        yaw -= dx * 0.0035;
-
-        // Vertical look (Pitch): clamped to avoid tumbling over zenith/nadir
-        pitch = Math.max(-1.46, Math.min(1.46, pitch + dy * 0.0035));
-
-        // Store instantaneous velocity for inertia glide
-        velYaw = -dx * 0.0032;
-        velPitch = dy * 0.0032;
-
-        lastUserActionTime = Date.now();
-      });
-
-      function stopDrag(e) {
-        if (!isDragging) return;
-        isDragging = false;
-        container.classList.remove('is-dragging');
-        try { if (e && e.pointerId) container.releasePointerCapture(e.pointerId); } catch (_) {}
-        lastUserActionTime = Date.now();
+        scene3d.appendChild(card);
+        panelNodes.push({
+          el: card,
+          item,
+          ux,
+          uy,
+          uz
+        });
       }
-
-      window.addEventListener('pointerup', stopDrag);
-      window.addEventListener('pointercancel', stopDrag);
-
-      // Click on Work Panel Detection via Raycaster
-      container.addEventListener('click', (e) => {
-        // If dragged more than 6px, treat as look rotation, not click
-        if (dragDistance > 6) return;
-
-        raycaster.setFromCamera(mouseNDC, camera);
-        const intersects = raycaster.intersectObjects(workMeshes);
-
-        if (intersects.length > 0) {
-          const hit = intersects[0].object;
-          steerCameraToWork(hit.userData.item, hit.position);
-        }
-      });
-
-      // Mouse Wheel Zoom (Adjust Camera FOV)
-      window.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const fovDelta = e.deltaY * 0.04;
-        camera.fov = Math.max(38, Math.min(85, camera.fov + fovDelta));
-        camera.updateProjectionMatrix();
-        telemetryFov.textContent = Math.round(camera.fov) + '°';
-        lastUserActionTime = Date.now();
-      }, { passive: false });
-
-      // Mobile Touch Pinch Zoom
-      let initialDist = 0;
-      let initialFov = 65;
-
-      window.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-          initialDist = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-          initialFov = camera.fov;
-        }
-      }, { passive: true });
-
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2 && initialDist > 0) {
-          const currDist = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-          const ratio = initialDist / currDist;
-          camera.fov = Math.max(38, Math.min(85, initialFov * ratio));
-          camera.updateProjectionMatrix();
-          telemetryFov.textContent = Math.round(camera.fov) + '°';
-        }
-      }, { passive: true });
-
-      // View Mode Toggle (First-Person vs Third-Person)
-      btnToggleView.addEventListener('click', () => {
-        if (currentViewMode === 'first-person') {
-          currentViewMode = 'third-person';
-          viewModeText.textContent = '第三人称视点';
-          btnToggleView.classList.add('is-active');
-          if (centerPersonMesh) centerPersonMesh.visible = true;
-          camera.position.set(0, 160, 960);
-          camera.lookAt(0, 0, 0);
-        } else {
-          currentViewMode = 'first-person';
-          viewModeText.textContent = '第一人称球幕';
-          btnToggleView.classList.remove('is-active');
-          if (centerPersonMesh) centerPersonMesh.visible = false;
-          camera.position.set(0, 0, 0); // Back to sphere origin
-        }
-      });
-
-      // Auto-rotation toggle
-      btnToggleAuto.addEventListener('click', () => {
-        isAutoRotating = !isAutoRotating;
-        autoModeIcon.textContent = isAutoRotating ? '⏸' : '▶';
-        btnToggleAuto.classList.toggle('is-active', isAutoRotating);
-      });
-
-      // Reset orientation button
-      btnReset.addEventListener('click', () => {
-        yaw = 0;
-        pitch = 0;
-        velYaw = 0;
-        velPitch = 0;
-        camera.fov = 65;
-        camera.updateProjectionMatrix();
-        telemetryFov.textContent = '65°';
-      });
-
-      // Keyboard Controls (Esc to close lightbox)
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeLightbox();
-        }
-      });
-
-      lightboxClose.addEventListener('click', closeLightbox);
-      lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
-      });
-
-      window.addEventListener('resize', onWindowResize);
     }
 
-    // --- 5. Smooth Steer Camera to Work & Open Lightbox ---
-    function steerCameraToWork(item, workPos) {
+    // --- 2. Smooth Steer Camera to Clicked Panel & Open Original Lightbox ---
+    function steerAndOpenPhoto(ux, uy, uz, photoId) {
       isSteering = true;
       steerProgress = 0;
-      steerTargetItem = item;
-
+      steerPhotoId = photoId;
       steerStartYaw = yaw;
       steerStartPitch = pitch;
 
-      // Compute exact Yaw and Pitch from (0,0,0) to target point
-      // In Three.js: target direction vector D = (workPos.x, workPos.y, workPos.z)
-      const r = Math.hypot(workPos.x, workPos.y, workPos.z);
-      steerTargetPitch = Math.asin(workPos.y / r);
-      steerTargetYaw = Math.atan2(workPos.x, -workPos.z);
+      steerTargetYaw = Math.atan2(ux, -uz);
+      steerTargetPitch = Math.asin(Math.max(-1, Math.min(1, uy)));
 
-      // Normalize delta yaw to shortest path
       let deltaYaw = (steerTargetYaw - steerStartYaw) % (Math.PI * 2);
       if (deltaYaw > Math.PI) deltaYaw -= Math.PI * 2;
       if (deltaYaw < -Math.PI) deltaYaw += Math.PI * 2;
       steerTargetYaw = steerStartYaw + deltaYaw;
     }
 
-    window.openLightbox = openLightbox;
-    window.closeLightbox = closeLightbox;
-    window.PHOTO_DATA = PHOTO_DATA;
+    // --- 3. Ambient Light Effects, Volumetric Rays & Starlight Background Renderer ---
+    const AMBIENT_NEBULAE = [
+      { ux: 0.0, uy: 0.12, uz: -1.0, radius: 640, color: '215, 232, 255', alpha: 0.17 },
+      { ux: 0.82, uy: -0.08, uz: -0.55, radius: 580, color: '255, 228, 200', alpha: 0.13 },
+      { ux: -0.82, uy: 0.18, uz: -0.5, radius: 600, color: '195, 224, 255', alpha: 0.14 },
+      { ux: 0.45, uy: 0.55, uz: 0.70, radius: 620, color: '225, 220, 255', alpha: 0.13 },
+      { ux: -0.5, uy: -0.48, uz: 0.72, radius: 580, color: '205, 238, 248', alpha: 0.12 },
+      { ux: 0.0, uy: 0.85, uz: 0.0, radius: 680, color: '240, 246, 255', alpha: 0.12 }
+    ];
 
-    function openLightbox(item) {
-      modalImg.src = item.src;
-      modalSeries.textContent = item.series;
-      modalLocation.textContent = item.location;
-      modalTitle.textContent = item.title;
-      modalSubtitle.textContent = item.subtitle;
-      modalBio.textContent = item.bio;
-      modalBioEn.textContent = item.bioEn;
+    const LIGHT_MOTES = Array.from({ length: 95 }, (_, i) => {
+      const phi = Math.PI * (Math.sqrt(5) - 1);
+      const y = 1 - (i / 94) * 2;
+      const r = Math.sqrt(Math.max(0, 1 - y * y));
+      const theta = phi * i * 1.7;
+      return {
+        ux: Math.cos(theta) * r,
+        uy: y,
+        uz: Math.sin(theta) * r,
+        size: 1.5 + (i % 4) * 0.9,
+        phase: i * 0.73,
+        speed: 0.0015 + (i % 5) * 0.0005,
+        isBokeh: i % 5 === 0
+      };
+    });
 
-      lightbox.classList.add('is-open');
-      lightbox.setAttribute('aria-hidden', 'false');
+    function resizeBgCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      bgCanvas.width = window.innerWidth * dpr;
+      bgCanvas.height = window.innerHeight * dpr;
+      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    function closeLightbox() {
-      lightbox.classList.remove('is-open');
-      lightbox.setAttribute('aria-hidden', 'true');
-      modalImg.src = '';
+    function projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy) {
+      const x1 = ux * cosYaw + uz * sinYaw;
+      const z1 = -ux * sinYaw + uz * cosYaw;
+      const yc = uy * cosPitch + z1 * sinPitch;
+      const zc = -uy * sinPitch + z1 * cosPitch;
+      const xc = x1;
+
+      if (zc >= -0.05) return null;
+      const scale = focalLength / -zc;
+      return {
+        x: cx + xc * scale,
+        y: cy - yc * scale,
+        zc
+      };
     }
 
-    function onWindowResize() {
+    function renderAmbientLightBackground(now, cosYaw, sinYaw, cosPitch, sinPitch, focalLength) {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+
+      bgCtx.clearRect(0, 0, w, h);
+
+      // 1. Soft atmospheric center & zenith light wash
+      const centerGrad = bgCtx.createRadialGradient(cx, cy * 0.85, 10, cx, cy, Math.max(w, h) * 0.72);
+      centerGrad.addColorStop(0, 'rgba(38, 46, 62, 0.48)');
+      centerGrad.addColorStop(0.45, 'rgba(18, 22, 32, 0.28)');
+      centerGrad.addColorStop(1, 'rgba(7, 9, 13, 0)');
+      bgCtx.fillStyle = centerGrad;
+      bgCtx.fillRect(0, 0, w, h);
+
+      // 2. Subtle Volumetric Dome Light Beams (Soft Diagonal Aurora Shimmer)
+      bgCtx.save();
+      const beamShift = Math.sin(yaw * 0.6 + now * 0.0004) * 120;
+      const beamGrad = bgCtx.createLinearGradient(cx - 380 + beamShift, 0, cx + 380 + beamShift, h);
+      beamGrad.addColorStop(0, 'rgba(220, 235, 255, 0)');
+      beamGrad.addColorStop(0.35, 'rgba(220, 235, 255, 0.032)');
+      beamGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.055)');
+      beamGrad.addColorStop(0.65, 'rgba(210, 228, 255, 0.032)');
+      beamGrad.addColorStop(1, 'rgba(210, 228, 255, 0)');
+      bgCtx.fillStyle = beamGrad;
+      bgCtx.fillRect(0, 0, w, h);
+      bgCtx.restore();
+
+      // 3. 3D Parallax Volumetric Light Nebulae
+      const pulse = 0.92 + 0.08 * Math.sin(now * 0.0012);
+      AMBIENT_NEBULAE.forEach((neb) => {
+        const pt = projectUnitVectorToScreen(neb.ux, neb.uy, neb.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+        if (!pt) return;
+        const r = neb.radius * (focalLength / 820);
+        const grad = bgCtx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
+        grad.addColorStop(0, `rgba(${neb.color}, ${(neb.alpha * pulse).toFixed(3)})`);
+        grad.addColorStop(0.45, `rgba(${neb.color}, ${(neb.alpha * 0.48 * pulse).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(${neb.color}, 0)`);
+        bgCtx.fillStyle = grad;
+        bgCtx.beginPath();
+        bgCtx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
+
+      // 4. Geodesic Dome Latitude & Longitude Light Rings
+      const latAngles = [-0.52, -0.26, 0, 0.26, 0.52];
+      latAngles.forEach((lat, idx) => {
+        const uy = Math.sin(lat);
+        const rLat = Math.cos(lat);
+        bgCtx.beginPath();
+        let started = false;
+        for (let step = 0; step <= 72; step++) {
+          const lon = (step / 72) * Math.PI * 2;
+          const ux = Math.cos(lon) * rLat;
+          const uz = Math.sin(lon) * rLat;
+          const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+          if (pt && pt.x >= -200 && pt.x <= w + 200 && pt.y >= -200 && pt.y <= h + 200) {
+            if (!started) {
+              bgCtx.moveTo(pt.x, pt.y);
+              started = true;
+            } else {
+              bgCtx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            started = false;
+          }
+        }
+        bgCtx.strokeStyle = idx === 2 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.04)';
+        bgCtx.lineWidth = idx === 2 ? 1.2 : 0.8;
+        bgCtx.stroke();
+      });
+
+      // 5. Floating Luminous Starlight & Bokeh Motes
+      LIGHT_MOTES.forEach((m) => {
+        const pt = projectUnitVectorToScreen(m.ux, m.uy, m.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+        if (!pt || pt.x < -80 || pt.x > w + 80 || pt.y < -80 || pt.y > h + 80) return;
+
+        const twinkle = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(now * m.speed + m.phase));
+        if (m.isBokeh) {
+          const bokehR = m.size * 12;
+          const bGrad = bgCtx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, bokehR);
+          bGrad.addColorStop(0, `rgba(235, 244, 255, ${(0.15 * twinkle).toFixed(3)})`);
+          bGrad.addColorStop(0.5, `rgba(210, 228, 255, ${(0.06 * twinkle).toFixed(3)})`);
+          bGrad.addColorStop(1, 'rgba(210, 228, 255, 0)');
+          bgCtx.fillStyle = bGrad;
+          bgCtx.beginPath();
+          bgCtx.arc(pt.x, pt.y, bokehR, 0, Math.PI * 2);
+          bgCtx.fill();
+        } else {
+          bgCtx.fillStyle = `rgba(255, 255, 255, ${(0.45 * twinkle).toFixed(3)})`;
+          bgCtx.beginPath();
+          bgCtx.arc(pt.x, pt.y, m.size, 0, Math.PI * 2);
+          bgCtx.fill();
+        }
+      });
     }
 
-    // --- 6. Main 60/120 FPS Render Loop ---
-    function animate() {
+    // --- 4. Main 3D Spherical Dome Render Loop ---
+    function animate(now) {
       requestAnimationFrame(animate);
 
-      // Handle Smooth Steer to Clicked Work
+      // Handle Smooth Steer to Clicked Photo
       if (isSteering) {
-        steerProgress += 0.045;
+        steerProgress += 0.055;
         const t = Math.min(1, steerProgress);
-        // Ease-out cubic
         const ease = 1 - Math.pow(1 - t, 3);
         yaw = steerStartYaw + (steerTargetYaw - steerStartYaw) * ease;
         pitch = steerStartPitch + (steerTargetPitch - steerStartPitch) * ease;
 
         if (t >= 1) {
           isSteering = false;
-          openLightbox(steerTargetItem);
+          if (steerPhotoId && typeof window.openPhotoLightbox === 'function') {
+            window.openPhotoLightbox(steerPhotoId);
+          }
         }
-      } else {
-        // Inertia or Auto Look-Around
-        if (!isDragging) {
-          if (Math.abs(velYaw) > 0.0001 || Math.abs(velPitch) > 0.0001) {
-            yaw += velYaw;
-            pitch = Math.max(-1.46, Math.min(1.46, pitch + velPitch));
-            velYaw *= FRICTION;
-            velPitch *= FRICTION;
-          } else if (isAutoRotating) {
-            const timeSinceAction = Date.now() - lastUserActionTime;
-            if (timeSinceAction > AUTO_ROTATE_DELAY_MS) {
-              yaw += 0.0012; // Slow contemplative ambient look-around
-            }
+      } else if (!isDragging) {
+        if (Math.abs(velYaw) > 0.00008 || Math.abs(velPitch) > 0.00008) {
+          yaw += velYaw;
+          pitch = Math.max(-1.42, Math.min(1.42, pitch + velPitch));
+          velYaw *= FRICTION;
+          velPitch *= FRICTION;
+        } else if (isAutoRotating && !document.getElementById('project-lightbox').classList.contains('is-active')) {
+          if (Date.now() - lastUserActionTime > AUTO_RESUME_MS) {
+            yaw += 0.0014;
           }
         }
       }
 
-      // Update First-Person Camera Orientation (From Sphere Origin)
+      const h = window.innerHeight;
+      const fovRad = (fov * Math.PI) / 180;
+      const focalLength = (h * 0.5) / Math.tan(fovRad * 0.5);
+      viewport.style.perspective = `${focalLength.toFixed(1)}px`;
+
+      const cosYaw = Math.cos(yaw);
+      const sinYaw = Math.sin(yaw);
+      const cosPitch = Math.cos(pitch);
+      const sinPitch = Math.sin(pitch);
+
+      // Render Ambient Light & Starlight Canvas
+      renderAmbientLightBackground(now, cosYaw, sinYaw, cosPitch, sinPitch, focalLength);
+
+      const R = getSphereRadius();
+
       if (currentViewMode === 'first-person') {
-        camera.position.set(0, 0, 0);
+        centerPersonEl.style.display = 'none';
 
-        // Convert Yaw & Pitch to LookAt Target Point on sphere
-        const cosPitch = Math.cos(pitch);
-        const lookX = Math.sin(yaw) * cosPitch;
-        const lookY = Math.sin(pitch);
-        const lookZ = -Math.cos(yaw) * cosPitch;
+        for (let i = 0; i < panelNodes.length; i++) {
+          const node = panelNodes[i];
 
-        const targetPos = new THREE.Vector3(lookX, lookY, lookZ);
-        camera.lookAt(targetPos);
+          // Rotate world unit vector into Camera Space
+          const x1 = node.ux * cosYaw + node.uz * sinYaw;
+          const z1 = -node.ux * sinYaw + node.uz * cosYaw;
+          const y1 = node.uy;
+
+          const yc = y1 * cosPitch + z1 * sinPitch;
+          const zc = -y1 * sinPitch + z1 * cosPitch;
+          const xc = x1;
+
+          // Cull panels behind the viewer's head (zc >= -0.14)
+          if (zc >= -0.14) {
+            node.el.style.display = 'none';
+            continue;
+          }
+
+          node.el.style.display = 'block';
+
+          const Xcss = R * xc;
+          const Ycss = -R * yc;
+          const Zcss = focalLength + R * zc;
+
+          // Inner-wall orientation facing the sphere center (lookAt origin)
+          const panelYaw = Math.atan2(-xc, -zc);
+          const panelPitch = -Math.asin(Math.max(-1, Math.min(1, yc)));
+
+          const forwardness = Math.min(1, (-zc - 0.14) / 0.32);
+          const opacity = 0.45 + 0.55 * forwardness;
+
+          node.el.style.opacity = opacity.toFixed(3);
+          node.el.style.zIndex = Math.round(1000 + zc * -500);
+          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) rotateY(${panelYaw.toFixed(4)}rad) rotateX(${panelPitch.toFixed(4)}rad)`;
+        }
       } else {
-        // Third-Person Mode: Orbit around center person
-        const orbitRadius = 960;
-        camera.position.x = Math.sin(yaw) * orbitRadius * Math.cos(pitch);
-        camera.position.y = Math.sin(pitch) * orbitRadius + 60;
-        camera.position.z = Math.cos(yaw) * orbitRadius * Math.cos(pitch);
-        camera.lookAt(0, 0, 0);
-      }
+        // Third-Person Mode
+        const orbitDist = 1150;
+        const Rtp = R * 0.62;
+        const centerZ = focalLength - orbitDist;
 
-      // Raycasting for Crosshair Reticle & Hover States
-      if (!isDragging && !lightbox.classList.contains('is-open')) {
-        raycaster.setFromCamera(mouseNDC, camera);
-        const intersects = raycaster.intersectObjects(workMeshes);
+        centerPersonEl.style.display = 'flex';
+        centerPersonEl.style.zIndex = '1000';
+        centerPersonEl.style.transform = `translate3d(-50%, -50%, ${centerZ.toFixed(1)}px)`;
 
-        if (intersects.length > 0) {
-          crosshair.classList.add('is-hovering');
-          const hit = intersects[0].object;
-          if (hoveredMesh !== hit) {
-            if (hoveredMesh) hoveredMesh.scale.set(1, 1, 1);
-            hoveredMesh = hit;
-            hoveredMesh.scale.set(1.05, 1.05, 1.05);
+        for (let i = 0; i < panelNodes.length; i++) {
+          const node = panelNodes[i];
+          if (i >= 12) {
+            node.el.style.display = 'none';
+            continue;
           }
-        } else {
-          crosshair.classList.remove('is-hovering');
-          if (hoveredMesh) {
-            hoveredMesh.scale.set(1, 1, 1);
-            hoveredMesh = null;
-          }
+          node.el.style.display = 'block';
+
+          const x1 = node.ux * cosYaw + node.uz * sinYaw;
+          const z1 = -node.ux * sinYaw + node.uz * cosYaw;
+          const yc = node.uy * cosPitch + z1 * sinPitch;
+          const zc = -node.uy * sinPitch + z1 * cosPitch;
+          const xc = x1;
+
+          const Xcss = Rtp * xc;
+          const Ycss = -Rtp * yc;
+          const Zcss = centerZ + Rtp * zc;
+
+          node.el.style.opacity = zc >= 0 ? '0.96' : '0.48';
+          node.el.style.zIndex = Math.round(1000 + zc * 400);
+          node.el.style.transform = `translate3d(calc(-50% + ${Xcss.toFixed(1)}px), calc(-50% + ${Ycss.toFixed(1)}px), ${Zcss.toFixed(1)}px) scale(0.78)`;
         }
       }
 
-      // Update Telemetry Display
+      // Update Telemetry HUD
       const degYaw = (((yaw * 180 / Math.PI) % 360 + 360) % 360).toFixed(1);
       const degPitch = (pitch * 180 / Math.PI).toFixed(1);
       telemetryYaw.textContent = `${degYaw}°`;
       telemetryPitch.textContent = `${degPitch}°`;
+    }
 
-      // Render Scene
-      renderer.render(scene, camera);
+    // --- 5. Interaction Setup ---
+    function setupDomeInteractions() {
+      viewport.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        isDragging = true;
+        totalDragDist = 0;
+        prevX = e.clientX;
+        prevY = e.clientY;
+        velYaw = 0;
+        velPitch = 0;
+        isSteering = false;
+        lastUserActionTime = Date.now();
+        viewport.classList.add('is-dragging');
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - prevX;
+        const dy = e.clientY - prevY;
+        prevX = e.clientX;
+        prevY = e.clientY;
+        totalDragDist += Math.hypot(dx, dy);
+
+        yaw -= dx * 0.0034;
+        pitch = Math.max(-1.42, Math.min(1.42, pitch + dy * 0.0034));
+
+        velYaw = -dx * 0.0028;
+        velPitch = dy * 0.0028;
+        lastUserActionTime = Date.now();
+      });
+
+      function stopDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        viewport.classList.remove('is-dragging');
+        lastUserActionTime = Date.now();
+      }
+
+      window.addEventListener('pointerup', stopDrag);
+      window.addEventListener('pointercancel', stopDrag);
+
+      viewport.addEventListener('wheel', (e) => {
+        if (document.getElementById('project-lightbox').classList.contains('is-active')) return;
+        e.preventDefault();
+        fov = Math.max(38, Math.min(85, fov + e.deltaY * 0.035));
+        telemetryFov.textContent = `${Math.round(fov)}°`;
+        lastUserActionTime = Date.now();
+      }, { passive: false });
+
+      let initPinchDist = 0;
+      let initFov = 70;
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          initPinchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initFov = fov;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initPinchDist > 0) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          fov = Math.max(38, Math.min(85, initFov * (initPinchDist / dist)));
+          telemetryFov.textContent = `${Math.round(fov)}°`;
+        }
+      }, { passive: true });
+
+      btnToggleView.addEventListener('click', () => {
+        if (currentViewMode === 'first-person') {
+          currentViewMode = 'third-person';
+          viewModeText.textContent = '第三人称视点';
+          telemetryMode.textContent = 'THIRD-PERSON ORBIT';
+          btnToggleView.classList.add('is-active');
+        } else {
+          currentViewMode = 'first-person';
+          viewModeText.textContent = '第一人称球幕';
+          telemetryMode.textContent = 'FIRST-PERSON DOME';
+          btnToggleView.classList.remove('is-active');
+        }
+      });
+
+      btnToggleAuto.addEventListener('click', () => {
+        isAutoRotating = !isAutoRotating;
+        autoModeIcon.textContent = isAutoRotating ? '⏸' : '▶';
+        btnToggleAuto.classList.toggle('is-active', !isAutoRotating);
+      });
+
+      btnReset.addEventListener('click', () => {
+        yaw = 0;
+        pitch = 0;
+        velYaw = 0;
+        velPitch = 0;
+        fov = 70;
+        telemetryFov.textContent = '70°';
+      });
+
+      window.addEventListener('resize', resizeBgCanvas);
+    }
+
+    // --- 6. Exact Original Lightbox Controller (#project-lightbox) ---
+    function initOriginalLightbox() {
+      const modal = document.getElementById('project-lightbox');
+      const modalContent = document.getElementById('lightbox-content');
+      const modalImg = modal.querySelector('.lightbox-img');
+      const modalDetails = modal.querySelector('.lightbox-details');
+      const modalTitle = modal.querySelector('.lightbox-title');
+      const modalSubtitle = modal.querySelector('.lightbox-subtitle');
+      const modalBio = document.getElementById('lightbox-bio');
+      const modalBioEn = document.getElementById('lightbox-bio-en');
+      const modalBioScroll = document.getElementById('lightbox-bio-scroll');
+      const modalSeriesTag = document.getElementById('lightbox-series-tag');
+      const modalLocationMeta = document.getElementById('lightbox-location-meta');
+      const modalDualSwitcher = document.getElementById('lightbox-dual-switcher');
+      const modalVariantBtnA = document.getElementById('lightbox-variant-a');
+      const modalVariantBtnB = document.getElementById('lightbox-variant-b');
+      const prevBtn = modal.querySelector('.lightbox-prev');
+      const nextBtn = modal.querySelector('.lightbox-next');
+      const closeBtn = modal.querySelector('.lightbox-close');
+      const wheelHintPill = modal.querySelector('.lightbox-wheel-pill');
+
+      let activePhotoIndex = 0;
+
+      function syncModalDimensions() {
+        const item = PHOTO_CATALOG[activePhotoIndex];
+        if (!item || !modalImg || !modalDetails) return;
+
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const ratio =
+          modalImg.complete && modalImg.naturalWidth > 0 && modalImg.naturalHeight > 0
+            ? modalImg.naturalWidth / modalImg.naturalHeight
+            : item.ratio || 1.5;
+
+        if (item.orientation === 'horizontal') {
+          const gap = 10;
+          const verticalPadding = 20;
+          const bioHeight = Math.min(235, Math.max(188, Math.round(vh * 0.235)));
+          const maxPhotoH = Math.max(320, Math.round(vh - bioHeight - gap - verticalPadding));
+          const maxW = Math.min(1600, Math.round(vw * 0.96));
+          const matchedWidth = Math.round(Math.min(maxW, maxPhotoH * ratio));
+
+          modalImg.style.width = `${matchedWidth}px`;
+          modalImg.style.height = 'auto';
+          modalImg.style.maxWidth = 'none';
+          modalImg.style.maxHeight = 'none';
+
+          modalDetails.style.width = `${matchedWidth}px`;
+          modalDetails.style.height = `${bioHeight}px`;
+
+          requestAnimationFrame(() => {
+            const renderedW = Math.round(modalImg.getBoundingClientRect().width);
+            if (renderedW > 0) modalDetails.style.width = `${renderedW}px`;
+          });
+        } else {
+          const gap = 14;
+          const verticalPadding = 20;
+          const bioWidth = Math.min(700, Math.max(400, Math.round(vw * 0.48)));
+          const maxPhotoW = Math.max(320, Math.round(vw * 0.96 - bioWidth - gap));
+          const maxH = Math.min(960, Math.round(vh - verticalPadding));
+          const matchedHeight = Math.round(Math.min(maxH, maxPhotoW / ratio));
+
+          modalImg.style.height = `${matchedHeight}px`;
+          modalImg.style.width = 'auto';
+          modalImg.style.maxWidth = 'none';
+          modalImg.style.maxHeight = 'none';
+
+          modalDetails.style.height = `${matchedHeight}px`;
+          modalDetails.style.width = `${bioWidth}px`;
+
+          requestAnimationFrame(() => {
+            const renderedH = Math.round(modalImg.getBoundingClientRect().height);
+            if (renderedH > 0) modalDetails.style.height = `${renderedH}px`;
+          });
+        }
+      }
+
+      modalImg.addEventListener('load', () => {
+        modalImg.classList.remove('is-switching-photo');
+        syncModalDimensions();
+      });
+
+      window.addEventListener('resize', () => {
+        if (modal.classList.contains('is-active')) syncModalDimensions();
+      });
+
+      function renderModalByCatalogIndex(index) {
+        activePhotoIndex = (index + PHOTO_CATALOG.length) % PHOTO_CATALOG.length;
+        const item = PHOTO_CATALOG[activePhotoIndex];
+        if (!item) return;
+
+        modalContent.classList.toggle('is-vertical', item.orientation === 'vertical');
+        modalContent.classList.toggle('is-horizontal', item.orientation !== 'vertical');
+
+        if (modal.classList.contains('is-active') && modalImg.getAttribute('src') !== item.src) {
+          modalImg.classList.add('is-switching-photo');
+        }
+        modalImg.src = item.src;
+        modalImg.alt = item.title;
+
+        modalTitle.textContent = item.title;
+        modalSubtitle.textContent = item.subtitle;
+        modalBio.textContent = item.bio;
+        modalBioEn.textContent = item.bioEn || '';
+        modalBioScroll.scrollTop = 0;
+        if (wheelHintPill) wheelHintPill.classList.remove('is-scrolled');
+        modalSeriesTag.textContent = item.tag;
+        modalLocationMeta.textContent = item.location;
+
+        if (item.series === '4' || item.series === '10') {
+          modalDualSwitcher.hidden = false;
+          const num = item.series.padStart(2, '0');
+          modalVariantBtnA.textContent = item.series === '4' ? `${num}A · 中轴线` : `${num}A · 蓝调时刻`;
+          modalVariantBtnB.textContent = item.series === '4' ? `${num}B · 永宁门` : `${num}B · 黄昏时刻`;
+          modalVariantBtnA.classList.toggle('is-active', item.variant === 'a');
+          modalVariantBtnB.classList.toggle('is-active', item.variant === 'b');
+        } else {
+          modalDualSwitcher.hidden = true;
+        }
+
+        syncModalDimensions();
+      }
+
+      function openLightboxByPhotoId(photoId) {
+        const idx = PHOTO_CATALOG.findIndex((p) => p.id === photoId);
+        renderModalByCatalogIndex(idx >= 0 ? idx : 0);
+        modal.classList.add('is-active');
+        modal.setAttribute('aria-hidden', 'false');
+        modalBioScroll.focus({ preventScroll: true });
+      }
+
+      function closeLightbox() {
+        modal.classList.remove('is-active');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      window.openPhotoLightbox = openLightboxByPhotoId;
+      window.openLightbox = (item) => openLightboxByPhotoId(item ? item.id : '1');
+      window.closeLightbox = closeLightbox;
+
+      modalVariantBtnA.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const current = PHOTO_CATALOG[activePhotoIndex];
+        if (current && (current.series === '4' || current.series === '10')) {
+          openLightboxByPhotoId(`${current.series}a`);
+        }
+      });
+
+      modalVariantBtnB.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const current = PHOTO_CATALOG[activePhotoIndex];
+        if (current && (current.series === '4' || current.series === '10')) {
+          openLightboxByPhotoId(`${current.series}b`);
+        }
+      });
+
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        renderModalByCatalogIndex(activePhotoIndex - 1);
+      });
+
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        renderModalByCatalogIndex(activePhotoIndex + 1);
+      });
+
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeLightbox();
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeLightbox();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (!modal.classList.contains('is-active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        else if (e.key === 'ArrowLeft') renderModalByCatalogIndex(activePhotoIndex - 1);
+        else if (e.key === 'ArrowRight') renderModalByCatalogIndex(activePhotoIndex + 1);
+      });
+
+      window.addEventListener(
+        'wheel',
+        (e) => {
+          if (!modal.classList.contains('is-active')) return;
+          e.preventDefault();
+          e.stopPropagation();
+          let delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+          if (e.deltaMode === 1) delta *= 36;
+          else if (e.deltaMode === 2) delta *= 360;
+          modalBioScroll.scrollTop += delta;
+        },
+        { passive: false, capture: true }
+      );
     }
 
     // --- Boot ---
     window.addEventListener('DOMContentLoaded', () => {
-      initThreeScene();
-      setupInteraction();
-      animate();
+      resizeBgCanvas();
+      buildDomePanels();
+      setupDomeInteractions();
+      initOriginalLightbox();
+      requestAnimationFrame(animate);
     });
   </script>
 </body>
