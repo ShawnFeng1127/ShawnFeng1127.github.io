@@ -111,8 +111,10 @@
       border-radius: 14px;
       overflow: hidden;
       background: #05070C;
-      border: 1px solid rgba(165, 195, 238, 0.16);
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.88);
+      border: 1px solid rgba(168, 206, 255, 0.24);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.88),
+        0 0 26px rgba(92, 148, 238, 0.12);
       pointer-events: auto;
       cursor: pointer;
       transform-origin: center center;
@@ -994,7 +996,7 @@
       });
     }
 
-    // --- 3. Pre-Baked Mysterious Low-Luminance Ambient Nebulae & Deep-Space Dust Renderer ---
+    // --- 3. Pre-Baked Mysterious Ambient Nebulae, Spherical Guide Lines & Light Pulses Renderer ---
     function createGlowSprite(size, rgb, peakAlpha) {
       const c = document.createElement('canvas');
       c.width = size;
@@ -1011,30 +1013,53 @@
     }
 
     const AMBIENT_NEBULAE = [
-      { ux: 0.0, uy: 0.12, uz: -1.0, radius: 560, sprite: createGlowSprite(192, '72, 108, 175', 0.068) },
-      { ux: 0.82, uy: -0.08, uz: -0.55, radius: 520, sprite: createGlowSprite(192, '96, 82, 155', 0.052) },
-      { ux: -0.82, uy: 0.18, uz: -0.5, radius: 540, sprite: createGlowSprite(192, '54, 102, 152', 0.058) },
-      { ux: 0.45, uy: 0.55, uz: 0.70, radius: 540, sprite: createGlowSprite(192, '82, 95, 162', 0.052) },
-      { ux: -0.5, uy: -0.48, uz: 0.72, radius: 500, sprite: createGlowSprite(192, '58, 112, 148', 0.048) }
+      { ux: 0.0, uy: 0.10, uz: -1.0, radius: 640, sprite: createGlowSprite(192, '78, 128, 215', 0.135) },
+      { ux: 0.82, uy: -0.08, uz: -0.55, radius: 580, sprite: createGlowSprite(192, '108, 92, 195', 0.105) },
+      { ux: -0.82, uy: 0.18, uz: -0.5, radius: 600, sprite: createGlowSprite(192, '58, 124, 192', 0.115) },
+      { ux: 0.45, uy: 0.55, uz: 0.70, radius: 580, sprite: createGlowSprite(192, '88, 112, 198', 0.105) },
+      { ux: -0.5, uy: -0.48, uz: 0.72, radius: 560, sprite: createGlowSprite(192, '64, 134, 186', 0.098) },
+      // Zenith & Nadir Polar Aurora Halos (illuminating top and bottom of the sphere)
+      { ux: 0.0, uy: 0.94, uz: -0.34, radius: 620, sprite: createGlowSprite(192, '86, 148, 235', 0.125) },
+      { ux: 0.0, uy: -0.94, uz: -0.34, radius: 620, sprite: createGlowSprite(192, '72, 132, 218', 0.115) }
     ];
 
-    const BOKEH_SPRITE = createGlowSprite(64, '165, 200, 245', 0.14);
+    const GAZE_HALO_SPRITE = createGlowSprite(256, '92, 152, 242', 0.095);
+    const BOKEH_SPRITE = createGlowSprite(64, '175, 214, 255', 0.24);
+    const PULSE_GLOW_SPRITE = createGlowSprite(48, '195, 228, 255', 0.42);
 
-    const LIGHT_MOTES = Array.from({ length: 54 }, (_, i) => {
+    const LIGHT_MOTES = Array.from({ length: 64 }, (_, i) => {
       const phi = Math.PI * (Math.sqrt(5) - 1);
-      const y = 1 - (i / 53) * 2;
+      const y = 1 - (i / 63) * 2;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const theta = phi * i * 1.7;
       return {
         ux: Math.cos(theta) * r,
         uy: y,
         uz: Math.sin(theta) * r,
-        size: 1.1 + (i % 3) * 0.65,
+        size: 1.2 + (i % 3) * 0.75,
         phase: i * 0.73,
         speed: 0.0012 + (i % 4) * 0.0004,
-        isBokeh: i % 6 === 0
+        isBokeh: i % 5 === 0
       };
     });
+
+    // Flowing light pulses gliding along the 5 spherical latitude guide rings
+    const GUIDE_LIGHT_PULSES = [
+      { lat: -1.08, speed: 0.00032, phase: 0.0 },
+      { lat: -1.08, speed: 0.00032, phase: Math.PI },
+      { lat: -0.576, speed: -0.00026, phase: 0.8 },
+      { lat: -0.576, speed: -0.00026, phase: 0.8 + Math.PI * 0.66 },
+      { lat: -0.576, speed: -0.00026, phase: 0.8 + Math.PI * 1.33 },
+      { lat: 0.0, speed: 0.00022, phase: 0.3 },
+      { lat: 0.0, speed: 0.00022, phase: 0.3 + Math.PI * 0.5 },
+      { lat: 0.0, speed: 0.00022, phase: 0.3 + Math.PI },
+      { lat: 0.0, speed: 0.00022, phase: 0.3 + Math.PI * 1.5 },
+      { lat: 0.576, speed: -0.00026, phase: 1.9 },
+      { lat: 0.576, speed: -0.00026, phase: 1.9 + Math.PI * 0.66 },
+      { lat: 0.576, speed: -0.00026, phase: 1.9 + Math.PI * 1.33 },
+      { lat: 1.08, speed: 0.00032, phase: 1.2 },
+      { lat: 1.08, speed: 0.00032, phase: 1.2 + Math.PI }
+    ];
 
     // Radial Hyperspace Light Streaks for Portal Suction ("照片把人吸进去")
     const SUCTION_STREAKS = Array.from({ length: 36 }, (_, i) => {
@@ -1078,9 +1103,12 @@
       const cx = w * 0.5;
       const cy = h * 0.5;
 
-      // 1. Deep abyssal midnight background fill
+      // 1. Deep abyssal midnight background fill + subtle central gaze spotlight
       bgCtx.fillStyle = '#020306';
       bgCtx.fillRect(0, 0, w, h);
+
+      const gazeR = Math.min(w, h) * 0.58;
+      bgCtx.drawImage(GAZE_HALO_SPRITE, cx - gazeR, cy - gazeR, gazeR * 2, gazeR * 2);
 
       // 2. Pre-baked 3D Parallax Mysterious Deep-Space Nebulae (fast drawImage, zero gradient allocations)
       const scaleFactor = focalLength / 820;
@@ -1093,20 +1121,38 @@
         bgCtx.drawImage(neb.sprite, pt.x - r, pt.y - r, r * 2, r * 2);
       }
 
-      // 3. Whisper-faint Astronomical Geodesic Dome Latitude Rings & Longitude Meridians
-      const latAngles = [-1.08, -0.576, 0, 0.576, 1.08];
-      for (let idx = 0; idx < latAngles.length; idx++) {
-        const lat = latAngles[idx];
-        const uy = Math.sin(lat);
-        const rLat = Math.cos(lat);
+      // 3A. Primary Spherical Geodesic Dome Latitude Guide Rings (-62°, -33°, 0°, +33°, +62°) + Polar Oculus Rings (±76°)
+      const latRings = [
+        { lat: -1.326, alpha: 0.14, width: 1.0, dashed: false },
+        { lat: -1.082, alpha: 0.115, width: 1.0, dashed: false },
+        { lat: -0.820, alpha: 0.075, width: 0.85, dashed: true },
+        { lat: -0.576, alpha: 0.125, width: 1.05, dashed: false },
+        { lat: -0.288, alpha: 0.070, width: 0.8, dashed: true },
+        { lat: 0.0, alpha: 0.165, width: 1.2, dashed: false },
+        { lat: 0.288, alpha: 0.070, width: 0.8, dashed: true },
+        { lat: 0.576, alpha: 0.125, width: 1.05, dashed: false },
+        { lat: 0.820, alpha: 0.075, width: 0.85, dashed: true },
+        { lat: 1.082, alpha: 0.115, width: 1.0, dashed: false },
+        { lat: 1.326, alpha: 0.14, width: 1.0, dashed: false }
+      ];
+
+      for (let idx = 0; idx < latRings.length; idx++) {
+        const ringCfg = latRings[idx];
+        const uy = Math.sin(ringCfg.lat);
+        const rLat = Math.cos(ringCfg.lat);
         bgCtx.beginPath();
+        if (ringCfg.dashed) {
+          bgCtx.setLineDash([5, 7]);
+        } else {
+          bgCtx.setLineDash([]);
+        }
         let started = false;
-        for (let step = 0; step <= 48; step++) {
-          const lon = (step / 48) * Math.PI * 2;
+        for (let step = 0; step <= 64; step++) {
+          const lon = (step / 64) * Math.PI * 2;
           const ux = Math.cos(lon) * rLat;
           const uz = Math.sin(lon) * rLat;
           const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
-          if (pt && pt.x >= -150 && pt.x <= w + 150 && pt.y >= -150 && pt.y <= h + 150) {
+          if (pt && pt.x >= -180 && pt.x <= w + 180 && pt.y >= -180 && pt.y <= h + 180) {
             if (!started) {
               bgCtx.moveTo(pt.x, pt.y);
               started = true;
@@ -1117,25 +1163,27 @@
             started = false;
           }
         }
-        bgCtx.strokeStyle = idx === 2 ? 'rgba(145, 180, 235, 0.036)' : 'rgba(135, 170, 225, 0.022)';
-        bgCtx.lineWidth = 0.85;
+        bgCtx.strokeStyle = `rgba(148, 196, 255, ${ringCfg.alpha})`;
+        bgCtx.lineWidth = ringCfg.width;
         bgCtx.stroke();
       }
+      bgCtx.setLineDash([]);
 
-      for (let mIdx = 0; mIdx < 8; mIdx++) {
-        const lon = (mIdx / 8) * Math.PI * 2;
+      // 3B. 12 Spherical Longitude Meridian Guide Lines + Intersection Reticle Ticks
+      bgCtx.beginPath();
+      for (let mIdx = 0; mIdx < 12; mIdx++) {
+        const lon = (mIdx / 12) * Math.PI * 2;
         const cosLon = Math.cos(lon);
         const sinLon = Math.sin(lon);
-        bgCtx.beginPath();
         let started = false;
-        for (let step = -18; step <= 18; step++) {
-          const lat = (step / 18) * (Math.PI * 0.46);
+        for (let step = -24; step <= 24; step++) {
+          const lat = (step / 24) * 1.326;
           const uy = Math.sin(lat);
           const rLat = Math.cos(lat);
           const ux = cosLon * rLat;
           const uz = -sinLon * rLat;
           const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
-          if (pt && pt.x >= -150 && pt.x <= w + 150 && pt.y >= -150 && pt.y <= h + 150) {
+          if (pt && pt.x >= -180 && pt.x <= w + 180 && pt.y >= -180 && pt.y <= h + 180) {
             if (!started) {
               bgCtx.moveTo(pt.x, pt.y);
               started = true;
@@ -1146,20 +1194,64 @@
             started = false;
           }
         }
-        bgCtx.strokeStyle = 'rgba(135, 170, 225, 0.018)';
-        bgCtx.lineWidth = 0.75;
-        bgCtx.stroke();
+      }
+      bgCtx.strokeStyle = 'rgba(138, 188, 252, 0.088)';
+      bgCtx.lineWidth = 0.9;
+      bgCtx.stroke();
+
+      // 3C. Diagonal Geodesic Guide Struts Connecting Staggered Photo Nodes (Honeycomb Dome Truss)
+      bgCtx.beginPath();
+      // Ring offsets in panelNodes: Ring1 [0..3], Ring2 [4..11], Ring3 [12..19], Ring4 [20..27], Ring5 [28..31]
+      if (panelNodes.length >= 32) {
+        for (let k = 0; k < 8; k++) {
+          const nextK = (k + 1) % 8;
+          const nUpper = panelNodes[4 + k];
+          const nEqA = panelNodes[12 + k];
+          const nEqB = panelNodes[12 + nextK];
+          const nLower = panelNodes[20 + k];
+
+          const pUpper = projectUnitVectorToScreen(nUpper.ux, nUpper.uy, nUpper.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+          const pEqA = projectUnitVectorToScreen(nEqA.ux, nEqA.uy, nEqA.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+          const pEqB = projectUnitVectorToScreen(nEqB.ux, nEqB.uy, nEqB.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+          const pLower = projectUnitVectorToScreen(nLower.ux, nLower.uy, nLower.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+
+          if (pUpper && pEqA) { bgCtx.moveTo(pUpper.x, pUpper.y); bgCtx.lineTo(pEqA.x, pEqA.y); }
+          if (pUpper && pEqB) { bgCtx.moveTo(pUpper.x, pUpper.y); bgCtx.lineTo(pEqB.x, pEqB.y); }
+          if (pLower && pEqA) { bgCtx.moveTo(pLower.x, pLower.y); bgCtx.lineTo(pEqA.x, pEqA.y); }
+          if (pLower && pEqB) { bgCtx.moveTo(pLower.x, pLower.y); bgCtx.lineTo(pEqB.x, pEqB.y); }
+        }
+      }
+      bgCtx.strokeStyle = 'rgba(155, 204, 255, 0.085)';
+      bgCtx.lineWidth = 0.85;
+      bgCtx.setLineDash([4, 6]);
+      bgCtx.stroke();
+      bgCtx.setLineDash([]);
+
+      // 3D. Flowing Light Pulses Gliding Along the Spherical Guide Rings
+      const tMs = now || 0;
+      bgCtx.fillStyle = 'rgba(220, 240, 255, 0.85)';
+      for (let i = 0; i < GUIDE_LIGHT_PULSES.length; i++) {
+        const p = GUIDE_LIGHT_PULSES[i];
+        const lon = p.phase + tMs * p.speed;
+        const uy = Math.sin(p.lat);
+        const rLat = Math.cos(p.lat);
+        const ux = Math.cos(lon) * rLat;
+        const uz = -Math.sin(lon) * rLat;
+        const pt = projectUnitVectorToScreen(ux, uy, uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
+        if (!pt || pt.x < -30 || pt.x > w + 30 || pt.y < -30 || pt.y > h + 30) continue;
+        bgCtx.drawImage(PULSE_GLOW_SPRITE, pt.x - 16, pt.y - 16, 32, 32);
+        bgCtx.fillRect(pt.x - 1.5, pt.y - 1.5, 3, 3);
       }
 
       // 4. Floating Mysterious Deep-Space Dust & Faint Bokeh Motes
-      bgCtx.fillStyle = 'rgba(185, 212, 250, 0.24)';
+      bgCtx.fillStyle = 'rgba(195, 222, 255, 0.34)';
       for (let i = 0; i < LIGHT_MOTES.length; i++) {
         const m = LIGHT_MOTES[i];
         const pt = projectUnitVectorToScreen(m.ux, m.uy, m.uz, cosYaw, sinYaw, cosPitch, sinPitch, focalLength, cx, cy);
         if (!pt || pt.x < -40 || pt.x > w + 40 || pt.y < -40 || pt.y > h + 40) continue;
 
         if (m.isBokeh) {
-          const d = m.size * 20;
+          const d = m.size * 22;
           bgCtx.drawImage(BOKEH_SPRITE, pt.x - d * 0.5, pt.y - d * 0.5, d, d);
         } else {
           bgCtx.fillRect(pt.x - m.size * 0.5, pt.y - m.size * 0.5, m.size, m.size);
