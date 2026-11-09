@@ -511,7 +511,7 @@
 
   <!-- 3. Top Floating Controls (Top Header Title Deleted per User Request) -->
   <header class="dome-hud-header">
-    <a href="index.html#section-work" class="dome-back-btn" title="退出球幕，返回主站摄影板块">
+    <a href="index.html?nointro=1#section-work" class="dome-back-btn" id="dome-back-btn" title="退出球幕，返回主站摄影板块">
       <span>← BACK // 返回摄影</span>
     </a>
 
@@ -1642,6 +1642,21 @@
 
     // --- Boot ---
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        sessionStorage.setItem('shawn_internal_nav', '1');
+        localStorage.setItem('shawn_returning_from_subpage', String(Date.now()));
+      } catch (_) {}
+
+      const backBtn = document.getElementById('dome-back-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          try {
+            sessionStorage.setItem('shawn_internal_nav', '1');
+            localStorage.setItem('shawn_returning_from_subpage', String(Date.now()));
+          } catch (_) {}
+        });
+      }
+
       resizeBgCanvas();
       buildDomePanels();
       setupDomeInteractions();

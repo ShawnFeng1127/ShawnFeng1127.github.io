@@ -68,14 +68,25 @@ function navigateToPage(targetUrl, clickEvent, scrollDirection) {
  *    - Stage 3: Split Liquid-Glass Shutter Curtain Opening & Staggered Page Choreography
  */
 function initSiteEntranceAnimation() {
-  if (window.location.search.includes('nointro')) return;
-  let isInternalNav = false;
-  try {
-    if (sessionStorage.getItem('shawn_internal_nav') === '1') {
-      isInternalNav = true;
-      sessionStorage.removeItem('shawn_internal_nav');
+  // Always ensure bfcache back-navigation never leaves any intro overlay blocking the page
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      const leftover = document.getElementById('site-pixel-preloader') || document.getElementById('site-intro-overlay');
+      if (leftover) leftover.remove();
+      document.body.classList.remove('is-intro-stage-hold');
     }
-  } catch (_) {}
+  });
+
+  // Mark internal navigation when clicking the Enter Dome mode button
+  const domeLaunchBtn = document.getElementById('launch-dome-gallery-btn');
+  if (domeLaunchBtn) {
+    domeLaunchBtn.addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('shawn_internal_nav', '1');
+        localStorage.setItem('shawn_returning_from_subpage', String(Date.now()));
+      } catch (_) {}
+    });
+  }
 
   // Add a subtle "REPLAY INTRO" button in the footer of every page so the user can replay anytime
   const footer = document.querySelector('.page-footer');
@@ -91,7 +102,52 @@ function initSiteEntranceAnimation() {
     footer.appendChild(replayBtn);
   }
 
-  if (isInternalNav) {
+  let isReturningOrSubSection = false;
+
+  // 1. Check URL ?nointro flag (e.g. returning from dome-gallery.html)
+  if (window.location.search.includes('nointro')) {
+    isReturningOrSubSection = true;
+    try {
+      const cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState(null, '', cleanUrl);
+    } catch (_) {}
+  }
+
+  // 2. Check if navigating directly to a non-home section hash (e.g. #section-work, #section-about, #section-help)
+  const currentHash = window.location.hash;
+  if (currentHash && currentHash !== '#' && currentHash !== '#section-home') {
+    isReturningOrSubSection = true;
+  }
+
+  // 3. Check browser Back / Forward navigation type
+  try {
+    const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+    if (navEntries && navEntries.length > 0 && navEntries[0].type === 'back_forward') {
+      isReturningOrSubSection = true;
+    }
+  } catch (_) {}
+
+  // 4. Check referrer from subpages (such as dome-gallery.html)
+  if (document.referrer && document.referrer.toLowerCase().includes('dome-gallery')) {
+    isReturningOrSubSection = true;
+  }
+
+  // 5. Check sessionStorage & localStorage return flags (works across both http:// and local file:///)
+  try {
+    if (sessionStorage.getItem('shawn_internal_nav') === '1') {
+      isReturningOrSubSection = true;
+      sessionStorage.removeItem('shawn_internal_nav');
+    }
+    const returnTs = Number(localStorage.getItem('shawn_returning_from_subpage') || '0');
+    if (returnTs > 0) {
+      localStorage.removeItem('shawn_returning_from_subpage');
+      if (Date.now() - returnTs < 60000) {
+        isReturningOrSubSection = true;
+      }
+    }
+  } catch (_) {}
+
+  if (isReturningOrSubSection) {
     return;
   }
 
