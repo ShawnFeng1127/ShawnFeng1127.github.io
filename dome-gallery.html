@@ -106,13 +106,13 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 300px;
-      height: 196px;
-      border-radius: 12px;
+      width: 400px;
+      height: 262px;
+      border-radius: 14px;
       overflow: hidden;
       background: #05070C;
-      border: 1px solid rgba(165, 195, 238, 0.14);
-      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.88);
+      border: 1px solid rgba(165, 195, 238, 0.16);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.88);
       pointer-events: auto;
       cursor: pointer;
       transform-origin: center center;
@@ -125,13 +125,13 @@
     }
 
     .dome-photo-card.is-horizontal {
-      width: 300px;
-      height: 196px;
+      width: 400px;
+      height: 262px;
     }
 
     .dome-photo-card.is-vertical {
-      width: 204px;
-      height: 298px;
+      width: 272px;
+      height: 396px;
     }
 
     .dome-photo-card:hover,
@@ -485,12 +485,12 @@
       }
       .dome-photo-card,
       .dome-photo-card.is-horizontal {
-        width: 212px;
-        height: 140px;
+        width: 268px;
+        height: 176px;
       }
       .dome-photo-card.is-vertical {
-        width: 146px;
-        height: 214px;
+        width: 186px;
+        height: 270px;
       }
       .dome-hud-bottom {
         left: 14px;
@@ -861,15 +861,15 @@
 
     function getSphereRadius() {
       const w = window.innerWidth;
-      if (w < 600) return 500;
-      if (w < 960) return 620;
-      return 700;
+      if (w < 600) return 480;
+      if (w < 960) return 600;
+      return 680;
     }
 
-    // --- 1. Build 12 Spherical Inner-Wall Panels (True Vertical & Horizontal Aspect Ratios) ---
-    // Interleave vertical (6, 8, 10a, 10b) and horizontal photos across all latitudes of the Fibonacci sphere
-    const SPHERE_ORDER = [0, 6, 2, 8, 4, 10, 1, 5, 7, 11, 3, 9];
-    const TOTAL_PANELS = SPHERE_ORDER.length; // 12 unique works
+    // --- 1. Build 18 Enlarged Spherical Inner-Wall Panels (Richly Filled Dome Space) ---
+    // Interleave vertical (6, 8, 10a, 10b) and horizontal photos; indices 12..17 are offset by 9 steps (~158° opposite azimuth) so duplicates never appear in the same view
+    const SPHERE_ORDER = [0, 6, 2, 8, 4, 10, 1, 5, 7, 11, 3, 9, 8, 4, 10, 1, 5, 7];
+    const TOTAL_PANELS = SPHERE_ORDER.length; // 18 panels for fuller spatial coverage
     const panelNodes = [];
 
     function buildDomePanels() {
@@ -879,9 +879,9 @@
         const catalogIdx = SPHERE_ORDER[i];
         const item = PHOTO_CATALOG[catalogIdx];
 
-        // Distribute y in [-0.58, +0.58] so panels wrap around the horizon & upper/lower vaults without crowding
+        // Distribute y in [-0.66, +0.66] so panels richly fill the horizon & upper/lower vaults
         const t = i / (TOTAL_PANELS - 1);
-        const y = (1 - 2 * t) * 0.58;
+        const y = (1 - 2 * t) * 0.66;
         const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
         const theta = phi * i;
 
